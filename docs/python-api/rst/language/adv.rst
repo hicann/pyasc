@@ -1,0 +1,115 @@
+.. Copyright (c) 2025 Huawei Technologies Co., Ltd.
+.. This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+.. CANN Open Software License Agreement Version 2.0 (the "License").
+.. Please refer to the License for details. You may not use this file except in compliance with the License.
+.. THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+.. INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+.. See LICENSE in the root of the software repository for the full text of the License.
+
+asc.language.adv
+==================================
+
+.. currentmodule:: asc.language.adv
+
+
+Matmul
+------------
+.. autoclass:: Matmul
+.. autosummary::
+    :toctree: generated
+    :nosignatures:
+
+    Matmul.async_get_tensor_c
+    Matmul.disable_bias
+    Matmul.end
+    Matmul.get_batch_tensor_c
+    Matmul.get_offset_c
+    Matmul.get_tensor_c
+    Matmul.init
+    Matmul.iterate
+    Matmul.iterate_all
+    Matmul.iterate_batch
+    Matmul.iterate_n_batch
+    Matmul.set_batch_num
+    Matmul.set_bias
+    Matmul.set_hf32
+    Matmul.set_org_shape
+    Matmul.set_quant_scalar
+    Matmul.set_quant_vector
+    Matmul.set_self_define_data
+    Matmul.set_single_shape
+    Matmul.set_sparse_index
+    Matmul.set_tail
+    Matmul.set_tensor_a
+    Matmul.set_tensor_b
+    Matmul.set_user_def_info
+    Matmul.set_workspace
+    Matmul.wait_get_tensor_c
+    Matmul.wait_iterate_all
+    Matmul.wait_iterate_batch
+    get_basic_config
+    get_ib_share_norm_config
+    get_matmul_api_tiling
+    get_mdl_config
+    get_mm_config
+    get_normal_config
+    get_special_basic_config
+    get_special_mdl_config
+    register_matmul
+
+
+Math Ops
+------------
+.. autosummary::
+    :toctree: generated
+    :nosignatures:
+
+    acos
+    acosh
+    asin
+    asinh
+    atan
+    atanh
+    axpy
+    ceil
+    cos
+    cosh
+    digamma
+    erf
+    erfc
+    exp
+    floor
+    frac
+    lgamma
+    log
+    power
+    round
+    sign
+    sin
+    sinh
+    tan
+    tanh
+    trunc
+    xor
+
+
+Sort Ops
+------------
+
+.. autosummary::
+    :toctree: generated
+    :nosignatures:
+
+    concat
+    extract
+
+
+Activation Ops
+---------------
+
+.. autosummary::
+    :toctree: generated
+    :nosignatures:
+
+    softmax
+

@@ -1,0 +1,10 @@
+@LIT_SITE_CFG_IN_HEADER@
+config.ascir_src_root = path(r"@ASCIR_SOURCE_DIR@")
+config.ascir_tools_dir = path(r"@ASCIR_BINARY_DIR@")
+config.llvm_tools_dir = path(r"@LLVM_PREFIX_PATH@/bin")
+import lit.llvm
+lit.llvm.initialize(lit_config, config)
+
+lit_config.load_config(
+    config, os.path.join(config.ascir_src_root, "test/lit.cfg")
+)

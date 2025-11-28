@@ -1,0 +1,3170 @@
+# Copyright (c) 2025 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+
+from typing import Any, Callable, Dict, Optional, Tuple, TypeVar
+
+from ..._C import ir
+from ..core.dtype import KnownTypes as KT
+from ..core.ir_value import RuntimeInt, RuntimeNumeric, materialize_ir_value as _mat
+from ..core.tensor import LocalTensor
+from ..core.utils import DefaultValued, OverloadDispatcher
+from ..core.types import BinaryRepeatParams, UnaryRepeatParams
+
+T = TypeVar("T", bound=Callable)
+
+
+def print_valid_type(origin):
+    converted = {}
+    for key, types in origin.items():
+        converted[key] = [t.name for t in types]
+    return converted
+
+
+def check_type(callee: str, dst: LocalTensor, src0: LocalTensor, src1: LocalTensor) -> None:
+    valids = {"src": [KT.float16, KT.float32, KT.int16, KT.int32], "dst": [KT.float16, KT.float32, KT.int16, KT.int32]}
+    valids_relu = {"src": [KT.float16, KT.float32, KT.int16], "dst": [KT.float16, KT.float32, KT.int16]}
+    valids_relu_cast = {"src": [KT.float16, KT.float32, KT.int16], "dst": [KT.int8, KT.float16]}
+    valids_int = {"src": [KT.int16, KT.uint16], "dst": [KT.int16, KT.uint16]}
+    valids_float = {"src": [KT.float16, KT.float32], "dst": [KT.float16, KT.float32]}
+
+    valids_map = {
+        "add": valids,
+        "add_deq_relu": {"src": [KT.int32], "dst": [KT.float16]},
+        "add_relu": valids_relu,
+        "add_relu_cast": valids_relu_cast,
+        "bilinear_interpolation": {"src": [KT.float16], "dst": [KT.float16]},
+        "bitwise_and": valids_int,
+        "bitwise_or": valids_int,
+        "div": valids_float,
+        "fused_mul_add": valids_float,
+        "fused_mul_add_relu": valids_float,
+        "max": valids,
+        "min": valids,
+        "mul": valids,
+        "mul_add_dst": valids_float,
+        "mul_cast": {"src": [KT.float16], "dst": [KT.int8, KT.uint8]},
+        "sub": valids,
+        "sub_relu": valids_relu,
+        "sub_relu_cast": valids_relu_cast,
+    }
+
+    check_dst_src = {"add_deq_relu", "add_relu_cast", "bilinear_interpolation", "mul_cast", "sub_relu_cast"}
+
+    if dst.dtype not in valids_map.get(callee).get("dst"):
+        raise TypeError(f"Invalid dst data type, got {dst.dtype}, expect {print_valid_type(valids_map.get(callee))}")
+    if src0.dtype not in valids_map.get(callee).get("src"):
+        raise TypeError(f"Invalid src0 data type, got {dst.dtype}, expect {print_valid_type(valids_map.get(callee))}")
+    if src1.dtype not in valids_map.get(callee).get("src"):
+        raise TypeError(f"Invalid src1 data type, got {dst.dtype}, expect {print_valid_type(valids_map.get(callee))}")
+    if src0.dtype != src1.dtype:
+        raise TypeError("Src0 and src1 must be same type.")
+    if callee not in check_dst_src:
+        if not (dst.dtype == src0.dtype and dst.dtype == src1.dtype):
+            raise TypeError("Src0, src1 and dst must be same type.")
+
+
+def check_type_transpose(callee: str, dst: LocalTensor, src: LocalTensor, *args) -> None:
+    if dst.dtype != src.dtype:
+        raise TypeError(f"For {callee}, dst and src tensor must have the same dtype, "
+                        f"got dst: {dst.dtype}, src: {src.dtype}")
+
+    if args:
+        shared_tmp_buffer = args[0]
+        if not isinstance(shared_tmp_buffer, LocalTensor):
+            raise TypeError("shared_tmp_buffer must be a LocalTensor")
+        if shared_tmp_buffer.dtype != KT.uint8:
+            raise TypeError(f"shared_tmp_buffer must have dtype uint8, got {shared_tmp_buffer.dtype}")
+
+
+def check_type_5hd(callee: str, dst_or_list, src_or_list) -> None:
+    if isinstance(dst_or_list, LocalTensor):
+        if dst_or_list.dtype != KT.uint64 or src_or_list.dtype != KT.uint64:
+            raise TypeError(f"For {callee} with LocalTensor inputs, dtype must be uint64.")
+    elif isinstance(dst_or_list, list):
+        if not dst_or_list or not src_or_list:
+            return
+        
+        if len(dst_or_list) != len(src_or_list):
+            raise ValueError("For {callee}, dst_list and src_list must have the same length.")
+
+        if isinstance(dst_or_list[0], LocalTensor):
+            first_dtype = dst_or_list[0].dtype
+            if any(t.dtype != first_dtype for t in dst_or_list) or \
+               any(t.dtype != first_dtype for t in src_or_list):
+                raise TypeError(f"For {callee}, all tensors in dst_list and src_list must have the same dtype.")
+        else:
+            if not all(isinstance(x, RuntimeInt) for x in dst_or_list) or \
+               not all(isinstance(x, RuntimeInt) for x in src_or_list):
+                raise TypeError(f"For {callee}, address lists must contain only RuntimeInt.")
+    else:
+        raise TypeError(f"Unsupported input types for {callee}: {type(dst_or_list)}")
+
+
+def op_impl(callee: str, dst: LocalTensor, src0: LocalTensor, src1: LocalTensor, args: Tuple[Any],
+            kwargs: Dict[str, Any], build_l0: Callable, build_l1: Callable, build_l2: Callable) -> None:
+    builder = build_l0.__self__
+    if not isinstance(builder, ir.Builder):
+        raise TypeError("Input builder must be ir.Builder")
+    dispatcher = OverloadDispatcher(callee)
+
+    check_type(callee, dst, src0, src1)
+
+    @dispatcher.register(mask=RuntimeInt, repeat_times=RuntimeInt, repeat_params=BinaryRepeatParams, 
+                        is_set_mask=DefaultValued(bool, True))
+    def _(mask: RuntimeInt, repeat_times: RuntimeInt, repeat_params: BinaryRepeatParams, is_set_mask: bool = True):
+        build_l0(dst.to_ir(), src0.to_ir(), src1.to_ir(),
+                 _mat(mask, KT.uint64).to_ir(), _mat(repeat_times, KT.int8).to_ir(), 
+                repeat_params.to_ir(), is_set_mask)
+
+    @dispatcher.register(mask=list, repeat_times=RuntimeInt, repeat_params=BinaryRepeatParams, 
+                        is_set_mask=DefaultValued(bool, True))
+    def _(mask: list, repeat_times: RuntimeInt, repeat_params: BinaryRepeatParams, is_set_mask: bool = True):
+        mask = [_mat(v, KT.uint64).to_ir() for v in mask]
+        build_l1(dst.to_ir(), src0.to_ir(), src1.to_ir(), mask, _mat(repeat_times, KT.int8).to_ir(), 
+                repeat_params.to_ir(), is_set_mask)
+
+    @dispatcher.register(count=RuntimeInt, is_set_mask=DefaultValued(bool, True))
+    def _(count: RuntimeInt, is_set_mask: bool = True):
+        build_l2(dst.to_ir(), src0.to_ir(), src1.to_ir(), _mat(count, KT.int32).to_ir())
+
+    dispatcher(*args, **kwargs)
+
+
+def vec_binary_scalar_op_impl(callee: str, dst: LocalTensor, src: LocalTensor, scalar: RuntimeNumeric, 
+                              args: Tuple[Any], kwargs: Dict[str, Any], build_l0: Callable, 
+                              build_l1: Callable, build_l2: Callable) -> None:
+    builder = build_l0.__self__
+    if not isinstance(builder, ir.Builder):
+        raise TypeError("Input builder must be ir.Builder")
+    scalar = _mat(scalar, src.dtype).to_ir()
+    dispatcher = OverloadDispatcher(callee)
+
+    @dispatcher.register(mask=RuntimeInt, repeat_times=RuntimeInt, repeat_params=UnaryRepeatParams, 
+                        is_set_mask=DefaultValued(bool, True))
+    def _(mask: RuntimeInt, repeat_times: RuntimeInt, repeat_params: UnaryRepeatParams, is_set_mask: bool = True):
+        build_l0(dst.to_ir(), src.to_ir(), scalar,
+                 _mat(mask, KT.uint64).to_ir(),
+                 _mat(repeat_times, KT.int8).to_ir(), repeat_params.to_ir(), is_set_mask)
+    
+    @dispatcher.register(mask=list, repeat_times=RuntimeInt, repeat_params=UnaryRepeatParams, 
+                        is_set_mask=DefaultValued(bool, True))
+    def _(mask: list, repeat_times: RuntimeInt, repeat_params: UnaryRepeatParams, is_set_mask: bool = True):
+        mask = [_mat(v, KT.uint64).to_ir() for v in mask]
+        build_l1(dst.to_ir(), src.to_ir(), scalar, mask, _mat(repeat_times, KT.int8).to_ir(), 
+                repeat_params.to_ir(), is_set_mask)
+
+    @dispatcher.register(count=RuntimeInt, is_set_mask=DefaultValued(bool, True))
+    def _(count: RuntimeInt, is_set_mask: bool = True):
+        build_l2(dst.to_ir(), src.to_ir(), scalar, _mat(count, KT.int32).to_ir(), is_set_mask)
+
+    dispatcher(*args, **kwargs)
+    
+
+def vec_ternary_scalar_op_impl(callee: str, dst: LocalTensor, src: LocalTensor, scalar: RuntimeNumeric, 
+                               args: Tuple[Any], kwargs: Dict[str, Any], build_l0: Callable, 
+                               build_l1: Callable, build_l2: Callable) -> None:
+    builder = build_l0.__self__
+    if not isinstance(builder, ir.Builder):
+        raise TypeError("Input builder must be ir.Builder")
+    scalar = _mat(scalar, src.dtype).to_ir()
+    dispatcher = OverloadDispatcher(callee)
+
+    @dispatcher.register(mask=RuntimeInt, repeat_times=RuntimeInt, repeat_params=UnaryRepeatParams, 
+                        is_set_mask=DefaultValued(bool, True))
+    def _(mask: RuntimeInt, repeat_times: RuntimeInt, repeat_params: UnaryRepeatParams, is_set_mask: bool = True):
+        build_l0(dst.to_ir(), src.to_ir(), scalar,
+                 _mat(mask, KT.uint64).to_ir(),
+                 _mat(repeat_times, KT.int8).to_ir(), repeat_params.to_ir(), is_set_mask)
+    
+    @dispatcher.register(mask=list, repeat_times=RuntimeInt, repeat_params=UnaryRepeatParams, 
+                        is_set_mask=DefaultValued(bool, True))
+    def _(mask: list, repeat_times: RuntimeInt, repeat_params: UnaryRepeatParams, is_set_mask: bool = True):
+        mask = [_mat(v, KT.uint64).to_ir() for v in mask]
+        build_l1(dst.to_ir(), src.to_ir(), scalar, mask, _mat(repeat_times, KT.int8).to_ir(), 
+                repeat_params.to_ir(), is_set_mask)
+
+    @dispatcher.register(count=RuntimeInt)
+    def _(count: RuntimeInt):
+        build_l2(dst.to_ir(), src.to_ir(), scalar, _mat(count, KT.int32).to_ir())
+
+    dispatcher(*args, **kwargs)
+
+
+def copy_docstring():
+    func_introduction = """
+    在 Vector Core 的不同内部存储单元（VECIN, VECCALC, VECOUT）之间进行数据搬运。
+
+    这是一个矢量指令，支持通过掩码（mask）进行灵活的数据块选择，并通过重复参数（repeat parameters）
+    实现高效的间隔操作和高维数据处理。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    该接口支持两种掩码（mask）模式，以进行高维切分计算。
+
+    1. **mask 为逐 bit 模式**
+
+       .. code-block:: c++
+
+        template <typename T, bool isSetMask = true>
+        __aicore__ inline void Copy(const LocalTensor<T>& dst, const LocalTensor<T>& src, 
+                                    const uint64_t mask[], const uint8_t repeatTime, 
+                                    const CopyRepeatParams& repeatParams)
+    
+    2. **mask 为连续模式**
+
+       .. code-block:: c++
+        
+        template <typename T, bool isSetMask = true>
+        __aicore__ inline void Copy(const LocalTensor<T>& dst, const LocalTensor<T>& src, 
+                                    const uint64_t mask, const uint8_t repeatTime, 
+                                    const CopyRepeatParams& repeatParams)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst (asc.LocalTensor): 目标操作数。
+
+      - 必须是 `LocalTensor`。
+      - 支持的 TPosition 为 `asc.Position.VECIN`, `asc.Position.VECCALC`, `asc.Position.VECOUT`。
+      - 起始地址需要 32 字节对齐。
+
+    - src (asc.LocalTensor): 源操作数。
+
+      - 必须是 `LocalTensor`，且数据类型与 `dst` 保持一致。
+      - 支持的 TPosition 为 `asc.Position.VECIN`, `asc.Position.VECCALC`, `asc.Position.VECOUT`。
+      - 起始地址需要 32 字节对齐。
+
+    - mask (Union[int, List[int]]): 掩码，用于控制在单次迭代中哪些元素参与搬运。
+
+      - **连续模式** (当 `mask` 为 `int`): 表示从起始位置开始，连续搬运多少个元素。
+
+        - 当数据类型为 16-bit (如 `fp16`) 时，取值范围是 [1, 128]。
+        - 当数据类型为 32-bit (如 `fp32`) 时，取值范围是 [1, 64]。
+
+      - **逐 bit 模式** (当 `mask` 为 `List[int]`): 掩码数组中的每个 bit 对应一个元素，bit 为 1 表示搬运，0 表示跳过。
+
+        - 当数据类型为 16-bit 时，`mask` 是一个长度为 2 的列表，例如 `mask=[mask0, mask1]`。
+        - 当数据类型为 32-bit 时，`mask` 是一个长度为 1 的列表，例如 `mask=[mask0]`。
+
+    - repeat_time (int): 重复迭代次数。矢量计算单元每次处理一个数据块（256字节），此参数指定了处理整个 Tensor 需要重复迭代的次数。
+    - repeat_params (asc.CopyRepeatParams): 控制地址步长的数据结构，用于处理高维或非连续数据。
+
+      - `dstStride`, `srcStride`: 设置同一次迭代内，不同数据块（DataBlock）之间的地址步长。
+      - `dstRepeatSize`, `srcRepeatSize`: 设置相邻两次迭代之间的地址步长。
+
+    - is_set_mask (bool, 可选): 模板参数，默认为 `True`。
+
+      - `True`: 在接口内部设置 `mask` 值。
+      - `False`: 在接口外部通过 `asc.set_vector_mask` 接口设置 `mask`，此时 `mask` 参数必须为占位符 `asc.MASK_PLACEHOLDER`。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 源操作数和目的操作数的起始地址需要保证32字节对齐。
+    - Copy和矢量计算API一样，支持和掩码操作API配合使用。但Counter模式配合高维切分计算API时，和通用的Counter模式有一定差异。具体差异如下：
+      - 通用的Counter模式：Mask代表整个矢量计算参与计算的元素个数，迭代次数不生效。
+      - Counter模式配合Copy高维切分计算API，Mask代表每次Repeat中处理的元素个数，迭代次数生效。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        TILE_LENGTH = 1024
+        # 1. 定义源和目标 LocalTensor
+        src_tensor = asc.LocalTensor(asc.fp16, asc.Position.VECIN, size=TILE_LENGTH)
+        dst_tensor = asc.LocalTensor(asc.fp16, asc.Position.VECOUT, size=TILE_LENGTH)
+            
+        ...
+
+        # 2. 定义地址步长参数
+        # 示例：实现一个交错拷贝，源地址每次迭代跳 256 字节，目标地址连续
+        params = asc.CopyRepeatParams(
+            dstStride=1,       # 迭代内，目标 datablock 连续
+            srcStride=2,       # 迭代内，源 datablock 间隔为 1 个 datablock
+            dstRepeatSize=8,   # 迭代间，目标地址步长为 8 个元素
+            srcRepeatSize=16   # 迭代间，源地址步长为 16 个元素
+        )
+            
+        # 3. 使用连续模式调用 Copy
+        # 每次迭代处理 128 个元素（一个 256 字节的 block），重复 4 次
+        asc.copy(dst_tensor, src_tensor, mask=128, repeat_time=4, repeat_params=params)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def set_wait_flag_docstring():
+    func_introduction = """
+    同一核内不同流水线之间的同步指令，具有数据依赖的不同流水指令之间需要插此同步。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void SetFlag(TEventID id)
+        __aicore__ inline void WaitFlag(TEventID id)
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    - id: 事件ID，由用户自己指定。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - set_flag/wait_flag必须成对出现。
+    - 禁止用户在使用set_flag和wait_flag时，自行指定event_id，容易与框架同步事件冲突，导致卡死问题。event_id需要通过alloc_event_id或者fetch_event_id来获取。
+    """
+    
+    py_example = """
+    **调用示例**
+
+    如data_copy需要等待set_value执行完成后才能执行，需要插入PIPE_S到PIPE_MTE3的同步。
+
+    .. code-block:: python
+
+        dst = asc.GlobalTensor()
+        src = asc.LocalTensor()
+        src.set_value(0, 0)
+        data_size = 512
+        event_id = global_pipe.fetch_event_id(event=asc.HardEvent.S_MTE3)
+        asc.set_flag(event=asc.HardEvent.S_MTE3, event_id=event_id)
+        asc.wait_flag(event=asc.HardEvent.S_MTE3, event_id=event_id)
+        asc.data_copy(dst, src, data_size)
+                
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def pipe_barrier_docstring():
+    func_introduction = """
+    阻塞相同流水，具有数据依赖的相同流水之间需要插入此同步。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <pipe_t pipe>
+        __aicore__ inline void PipeBarrier()
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    - pipe: 模板参数，表示阻塞的流水类别。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    Scalar流水之间的同步由硬件自动保证，调用pipe_barrier(PIPE_S)会引发硬件错误。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.add(dst0, src0, src1, 512)
+        asc.pipe_barrier(asc.PipeID.PIPE_V)
+        asc.mul(dst1, dst0, src2, 512)
+                
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def data_cache_clean_and_invalid_docstring():
+    func_introduction = """
+    用来刷新Cache，保证Cache与Global Memory之间的数据一致性。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T, CacheLine entireType, DcciDst dcciDst>
+        __aicore__ inline void DataCacheCleanAndInvalid(const GlobalTensor<T>& dst)
+
+    .. code-block:: c++
+
+        template <typename T, CacheLine entireType, DcciDst dcciDst>
+        __aicore__ inline void DataCacheCleanAndInvalid(const LocalTensor<T>& dst)
+
+    .. code-block:: c++
+
+        template <typename T, CacheLine entireType>
+        __aicore__ inline void DataCacheCleanAndInvalid(const GlobalTensor<T>& dst)
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    - entire_type：指令操作模式，类型为CacheLine枚举值：
+      - SINGLE_CACHE_LINE：只刷新传入地址所在的Cache Line（若非64B对齐，仅操作对齐范围内部分）。
+      - ENTIRE_DATA_CACHE：刷新整个Data Cache（耗时较大，性能敏感场景慎用）。
+    - dcci_dst：指定Data Cache与哪种存储保持一致性，类型为DcciDst枚举类：
+      - CACHELINE_ALL：与CACHELINE_OUT效果一致。
+      - CACHELINE_UB：预留参数，暂未支持。
+      - CACHELINE_OUT：保证Data Cache与Global Memory一致。
+      - CACHELINE_ATOMIC：部分Atlas产品上为预留参数，暂未支持。
+    - dst：	需要刷新Cache的Tensor。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - 支持通过配置dcciDst确保Data Cache与GM存储的一致性
+
+      .. code-block:: python
+
+          asc.data_cache_clean_and_invalid(entire_type=asc.CacheLine.SINGLE_CACHE_LINE,
+                                          dcci_dst=asc.DcciDst.CACHELINE_OUT, dst=dst)
+
+    - 不支持配置dcciDst，仅支持保证Data Cache与GM的一致性
+
+      .. code-block:: python
+
+          asc.data_cache_clean_and_invalid(entire_type=asc.CacheLine.SINGLE_CACHE_LINE, dst=dst)
+
+    """
+
+    return func_introduction, cpp_signature, param_list, "", "", py_example
+
+
+def data_copy_docstring():
+    func_introduction = """
+    DataCopy系列接口提供全面的数据搬运功能，支持多种数据搬运场景，并可在搬运过程中实现随路格式转换和量化激活等操作。
+    该接口支持Local Memory与Global Memory之间的数据搬运，以及Local Memory内部的数据搬运。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DataCopy(const LocalTensor<T>& dst, const GlobalTensor<T>& src, 
+                                        const uint32_t count)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DataCopy(const LocalTensor<T>& dst, const GlobalTensor<T>& src, 
+                                            const DataCopyParams& repeatParams)
+        
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DataCopy(const LocalTensor<T>& dst, const LocalTensor<T>& src, 
+                                        const uint32_t count)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DataCopy(const LocalTensor<T>& dst, const LocalTensor<T>& src, 
+                                        const DataCopyParams& repeatParams)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DataCopy(const GlobalTensor<T>& dst, const LocalTensor<T>& src, 
+                                        const uint32_t count)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DataCopy(const GlobalTensor<T>& dst, const LocalTensor<T>& src, 
+                                        const DataCopyParams& repeatParams)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DataCopy(const LocalTensor<T>& dst, const GlobalTensor<T>& src, 
+                                        const DataCopyParams& intriParams, 
+                                        const DataCopyEnhancedParams& enhancedParams)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DataCopy(const LocalTensor<T>& dst, const LocalTensor<T>& src, 
+                                        const DataCopyParams& intriParams, 
+                                        const DataCopyEnhancedParams& enhancedParams)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DataCopy(const GlobalTensor<T>& dst, const LocalTensor<T>& src, 
+                                        const DataCopyParams& intriParams, 
+                                        const DataCopyEnhancedParams& enhancedParams)
+
+    .. code-block:: c++
+
+        template <typename T, typename U>
+        __aicore__ inline void DataCopy(const LocalTensor<T>& dst, const LocalTensor<U>& src, 
+                                        const DataCopyParams& intriParams, 
+                                        const DataCopyEnhancedParams& enhancedParams)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DataCopy(const LocalTensor<T>& dst, const GlobalTensor<T>& src, 
+                                        const SliceInfo dstSliceInfo[], const SliceInfo srcSliceInfo[], 
+                                        const uint32_t dimValue = 1)
+        
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DataCopy(const GlobalTensor<T> &dst, const LocalTensor<T> &src, 
+                                        const SliceInfo dstSliceInfo[], const SliceInfo srcSliceInfo[], 
+                                        const uint32_t dimValue = 1)
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst: 目的操作数，类型为LocalTensor或GlobalTensor。
+    - src：源操作数，类型为LocalTensor或GlobalTensor。
+    - params：搬运参数，DataCopyParams类型。
+    - count：参与搬运的元素个数。
+    - enhanced_params：增强信息参数。
+    - slice_list1/slice_list2：目的操作数/源操作数切片信息，SliceInfo类型。
+    - dim_value：操作数维度信息，默认值为1。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 如果需要执行多个data_copy指令，且data_copy的目的地址存在重叠，需要通过调用pipe_barrier(ISASI)来插入同步指令，保证多个data_copy指令的串行化，防止出现异常数据。
+    - 在跨卡通信算子开发场景，data_copy类接口支持跨卡数据搬运，仅支持HCCS物理链路，不支持其他通路；开发者开发过程中，需要关注涉及卡间通信的物理通路，可通过npu-smi info -t topo命令查询HCCS物理链路。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - 基础数据搬运
+
+      .. code-block:: python
+
+          pipe = asc.Tpipe()
+          in_queue_src = asc.TQue(asc.TPosition.VECIN, 1)
+          out_queue_dst = asc.TQue(asc.TPosition.VECOUT, 1)
+          src_global = asc.GlobalTensor()
+          dst_global = asc.GlobalTensor()
+          pipe.init_buffer(que=in_queue_src, num=1, len=512 * asc.half.sizeof())
+          pipe.init_buffer(que=out_queue_dst, num=1,len=512 * asc.half.sizeof())
+          src_local = in_queue_src.alloc_tensor(asc.half)
+          dst_local = out_queue_dst.alloc_tensor(asc.half)
+          # 使用传入count参数的搬运接口，完成连续搬运
+          asc.data_copy(src_local, src_global, count=512)
+          asc.data_copy(dst_local, src_local, count=512)
+          asc.data_copy(dst_global, dst_local, count=512)
+          # 使用传入DataCopyParams参数的搬运接口，支持连续和非连续搬运
+          intri_params = asc.DataCopyParams()
+          asc.data_copy(src_local, src_global, params=intri_params)
+          asc.data_copy(dst_local, src_local, params=intri_params)
+          asc.data_copy(dst_global, dst_local, params=intri_params)
+    
+    - 增强数据搬运
+
+      .. code-block:: python
+
+          pipe = asc.Tpipe()
+          in_queue_src = asc.TQue(asc.TPosition.CO1, 1)
+          out_queue_dst = asc.TQue(asc.TPosition.CO2, 1)
+          ...
+          src_local = in_queue_src.alloc_tensor(asc.half)
+          dst_local = out_queue_dst.alloc_tensor(asc.half)
+          intri_params = asc.DataCopyParams()
+          enhanced_params = asc.DataCopyEnhancedParams()
+          asc.data_copy(dst_local, src_local, params=intri_params, enhanced_params=enhanced_params)
+
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def data_copy_pad_docstring():
+    func_introduction = """
+    DataCopyPad接口提供数据非对齐搬运的功能，其中从Global Memory搬运数据至Local Memory时，可以根据开发者的需要自行填充数据。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    通路：Global Memory->Local Memory
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DataCopyPad(const LocalTensor<T> &dst, const GlobalTensor<T> &src,
+                                            const DataCopyExtParams &dataCopyParams, const DataCopyPadExtParams<T> &padParams)
+
+    通路：Local Memory->Global Memory
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DataCopyPad(const GlobalTensor<T> &dst, const LocalTensor<T> &src,
+                                            const DataCopyExtParams &dataCopyParams)
+
+    通路：Local Memory->Local Memory，实际搬运过程是VECIN/VECOUT->GM->TSCM
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DataCopyPad(const LocalTensor<T> &dst, const LocalTensor<T> &src,
+                                            const DataCopyExtParams &dataCopyParams, const Nd2NzParams &nd2nzParams)
+
+    通路：Global Memory->Local Memory (DataCopyParams版本)
+
+    .. code-block:: c++
+
+        template<typename T>
+        __aicore__ inline void DataCopyPad(const LocalTensor<T>& dst, const GlobalTensor<T>& src,
+                                            const DataCopyParams& dataCopyParams, const DataCopyPadParams& padParams)
+
+    通路：Local Memory->Global Memory (DataCopyParams版本)
+
+    .. code-block:: c++
+
+        template<typename T>
+        __aicore__ inline void DataCopyPad(const GlobalTensor<T>& dst, const LocalTensor<T>& src,
+                                            const DataCopyParams& dataCopyParams)
+
+    通路：Local Memory->Local Memory，实际搬运过程是VECIN/VECOUT->GM->TSCM (DataCopyParams版本)
+
+    .. code-block:: c++
+
+        template<typename T>
+        __aicore__ inline void DataCopyPad(const LocalTensor<T>& dst, const LocalTensor<T>& src,
+                                            const DataCopyParams& dataCopyParams, const Nd2NzParams& nd2nzParams)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst: 目的操作数，类型为LocalTensor或GlobalTensor。
+      LocalTensor的起始地址需要保证32字节对齐。
+      GlobalTensor的起始地址无地址对齐约束。
+
+    - src: 源操作数，类型为LocalTensor或GlobalTensor。
+      LocalTensor的起始地址需要保证32字节对齐。
+      GlobalTensor的起始地址无地址对齐约束。
+
+    - dataCopyParams: 搬运参数。
+      DataCopyExtParams类型：支持更大的操作数步长等参数取值范围
+      DataCopyParams类型：标准搬运参数
+
+    - padParams: 从Global Memory搬运数据至Local Memory时，用于控制数据填充过程的参数。
+      DataCopyPadExtParams<T>类型：支持泛型填充值
+      DataCopyPadParams类型：仅支持uint64_t数据类型且填充值只能为0
+
+    - nd2nzParams: 从VECIN/VECOUT->TSCM进行数据搬运时，用于控制数据格式转换的参数。
+      Nd2NzParams类型，ndNum仅支持设置为1。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - leftPadding、rightPadding的字节数均不能超过32Bytes。
+    - 当数据类型长度为64位时，paddingValue只能设置为0。
+    - 不同产品型号对函数原型的支持存在差异，请参考官方文档选择产品型号支持的函数原型进行开发。
+    """
+
+    py_example = """
+    **调用示例**
+
+    GM->VECIN搬运数据并填充：
+
+    .. code-block:: python
+
+        # 从GM->VECIN搬运，使用DataCopyParams和DataCopyPadParams
+        src_local = in_queue_src.alloc_tensor(asc.half)
+        copy_params = asc.DataCopyParams(1, 20 * asc.half.sizeof(), 0, 0)
+        pad_params = asc.DataCopyPadParams(True, 0, 2, 0)
+        asc.data_copy_pad(src_local, src_global, copy_params, pad_params)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def dump_tensor_docstring_docstring():
+    func_introduction = """
+    基于算子工程开发的算子，可以使用该接口Dump指定Tensor的内容。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DumpTensor(const LocalTensor<T> &tensor, uint32_t desc, uint32_t dumpSize)
+        template <typename T>
+        __aicore__ inline void DumpTensor(const GlobalTensor<T>& tensor, uint32_t desc, uint32_t dumpSize)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DumpTensor(const LocalTensor<T>& tensor, uint32_t desc, 
+        uint32_t dumpSize, const ShapeInfo& shapeInfo)
+        template <typename T>
+        __aicore__ inline void DumpTensor(const GlobalTensor<T>& tensor, uint32_t desc, 
+        uint32_t dumpSize, const ShapeInfo& shapeInfo)
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    - tensor：需要dump的Tensor。
+    - desc：用户自定义附加信息（行号或其他自定义数字）。
+    - dump_size：需要dump的元素个数。
+    - shape_info：传入Tensor的shape信息，可按照shape信息进行打印。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 该功能仅用于NPU上板调试，且仅在如下场景支持：
+      - 通过Kernel直调方式调用算子。
+      - 通过单算子API调用方式调用算子。
+      - 间接调用单算子API(aclnnxxx)接口：Pytorch框架单算子直调的场景。
+    - 当前仅支持打印存储位置为Unified Buffer/L1 Buffer/L0C Buffer/Global Memory的Tensor信息。
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 该接口使用Dump功能，所有使用Dump功能的接口在每个核上Dump的数据总量（包括信息头）不可超过1M。请开发者自行控制待打印的内容数据量，超出则不会打印。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - 无Tensor shape的打印
+
+      .. code-block:: python
+
+          asc.dump_tensor(src_local, 5, date_len)
+
+    - 带Tensor shape的打印
+
+      .. code-block:: python
+
+          shape_info = asc.ShapeInfo()
+          asc.dump_tensor(x, 2, 64, shape_info)
+
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def printf_docstring():
+    func_introduction = """
+    该接口提供CPU域/NPU域调试场景下的格式化输出功能。
+    在算子kernel侧实现代码中需要输出日志信息的地方调用printf接口打印相关内容。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        void printf(__gm__ const char* fmt, Args&&... args)
+        void PRINTF(__gm__ const char* fmt, Args&&... args)
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    - fmt：格式控制字符串，包含两种类型的对象：普通字符和转换说明。
+    - args：附加参数，个数和类型可变的参数列表。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 本接口不支持打印除换行符之外的其他转义字符。
+    - 该接口使用Dump功能，所有使用Dump功能的接口在每个核上Dump的数据总量不可超过1M。请开发者自行控制待打印的内容数据量，超出则不会打印。
+    - 算子入图场景，若一个动态Shape模型中有可下沉的部分，框架内部会将模型拆分为动态调度和下沉调度（静态子图）两部分，静态子图中的算子不支持该printf特性。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        #整型打印
+        x = 10
+        asc.printf("%d", x)
+        #浮点型打印
+        x = 3.14
+        asc.printf("%f", x)
+
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def get_block_num_docstring():
+    func_introduction = """
+    获取当前任务配置的核数，用于代码内部的多核逻辑控制等。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline int64_t GetBlockNum()
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    无。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        loop_size = total_size // asc.get_block_num()
+
+    """
+
+    return func_introduction, cpp_signature, param_list, "", "", py_example
+
+
+def get_block_idx_docstring():
+    func_introduction = """
+    获取当前核的index，用于代码内部的多核逻辑控制及多核偏移量计算等。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline int64_t GetBlockIdx()
+
+    """
+    
+    param_list = """
+    **参数说明**
+
+    无。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    GetBlockIdx为一个系统内置函数，返回当前核的index。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        src0_global.set_global_buffer(src0_gm + asc.get_block_idx() * single_core_offset)
+        src1_global.set_global_buffer(src1_gm + asc.get_block_idx() * single_core_offset)
+        dst_global.set_global_buffer(dst_gm + asc.get_block_idx() * single_core_offset)
+        pipe.init_buffer(que=in_queue_src0, num=1, len=256*asc.float.sizeof())
+        pipe.init_buffer(que=in_queue_src1, num=1, len=256*asc.float.sizeof())
+        pipe.init_buffer(que=sel_mask, num=1, len=256)
+        pipe.init_buffer(que=out_queue_dst, num=1, len=256*asc.float.sizeof())
+
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def get_data_block_size_in_bytes_docstring():
+    func_introduction = """
+    获取当前芯片版本一个datablock的大小，单位为byte。
+    开发者可以根据datablock的大小来计算API指令中待传入的repeatTime、
+    DataBlock Stride、Repeat Stride等参数值。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline constexpr int16_t GetDataBlockSizeInBytes()
+    """
+    
+    param_list = """
+    **参数说明**
+
+    无。
+    """
+
+    return_list = """
+    **返回值说明**
+
+    当前芯片版本一个datablock的大小，单位为byte。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        size = asc.get_data_block_size_in_bytes()
+
+    """
+
+    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+
+
+def get_icache_preload_status_docstring():
+    func_introduction = """
+    获取ICACHE的PreLoad的状态。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline int64_t GetICachePreloadStatus();
+    """
+    
+    param_list = """
+    **参数说明**
+
+    无。
+    """
+
+    return_list = """
+    **返回值说明**
+
+    int64_t类型，0表示空闲，1表示忙。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        cache_preload_status = asc.get_icache_preload_status()
+    """
+
+    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+
+
+def get_program_counter_docstring():
+    func_introduction = """
+    获取程序计数器的指针，程序计数器用于记录当前程序执行的位置。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+         __aicore__ inline int64_t GetProgramCounter()
+
+    """
+    
+    param_list = """
+    **参数说明**
+
+    无。
+    """
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        pc = asc.get_program_counter()
+
+    """
+
+    return func_introduction, cpp_signature, param_list, "", "", py_example
+
+
+def get_system_cycle_docstring():
+    func_introduction = """
+    获取当前系统cycle数，若换算成时间需要按照50MHz的频率，时间单位为us，换算公式为：time = (cycle数/50) us 。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline int64_t GetSystemCycle()
+
+    """
+    
+    param_list = """
+    **参数说明**
+
+    无。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    该接口是PIPE_S流水，若需要测试其他流水的指令时间，需要在调用该接口前通过pipe_barrier插入对应流水的同步
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        cycle = asc.get_system_cycle()
+
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def icache_preload_docstring():
+    func_introduction = """
+    从指令所在DDR地址预加载指令到ICache中。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void ICachePreLoad(const int64_t preFetchLen);
+    """
+
+    param_list = """
+    **参数说明**
+
+    - pre_fetch_len：预取长度。
+    """
+
+    return_list = """
+    **返回值说明**
+
+    无。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+            
+        pre_fetch_len = 2
+        asc.icache_preload(pre_fetch_len)
+    """
+
+    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+
+
+def proposal_concat_docstring():
+    func_introduction = """
+    将连续元素合入Region Proposal内对应位置，每次迭代会将16个连续元素合入到16个Region Proposals的对应位置里。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void ProposalConcat(const LocalTensor<T>& dst, const LocalTensor<T>& src, const int32_t repeatTime, const int32_t modeNumber)
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：目的操作数。
+    - src：源操作数。数据类型需要与dst保持一致。
+    - repeat_time：重复迭代次数。每次迭代完成16个元素合入到16个Region Proposals里，下次迭代跳至相邻的下一组16个Region Proposals和下一组16个元素。取值范围：repeatTime∈[0,255]。
+
+    - mode_number：合入位置参数，取值范围：modeNumber∈[0, 5]
+      - 0：合入x1
+      - 1：合入y1
+      - 2：合入x2
+      - 3：合入y2
+      - 4：合入score
+      - 5：合入label
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 用户需保证dst中存储的proposal数目大于等于实际所需数目，否则会存在tensor越界错误。
+    - 用户需保证src中存储的元素大于等于实际所需数目，否则会存在tensor越界错误。
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.proposal_concat(dst, src, repeat_time=2, mode_number=4)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def proposal_extract_docstring():
+    func_introduction = """
+    与ProposalConcat功能相反，从Region Proposals内将相应位置的单个元素抽取后重排，每次迭代处理16个Region Proposals，抽取16个元素后连续排列。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void ProposalExtract(const LocalTensor<T>& dst, const LocalTensor<T>& src, const int32_t repeatTime, const int32_t modeNumber)
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：目的操作数。 
+    - src：源操作数，数据类型需与dst一致。  
+    - repeat_time：重复迭代次数。每次迭代处理16个Region Proposals的元素抽取并重排，下次迭代跳至相邻的下一组16个Region Proposals。取值范围：repeatTime∈[0,255]。  
+    - mode_number：抽取位置参数，取值范围：modeNumber∈[0,5]  
+      - 0：抽取x1
+      - 1：抽取y1
+      - 2：抽取x2
+      - 3：抽取y2
+      - 4：抽取score
+      - 5：抽取label
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 用户需保证src中存储的proposal数量不小于实际所需数量，否则可能发生tensor越界。  
+    - 用户需保证dst中可容纳的元素数量不小于实际抽取数量。  
+    - 操作数地址需满足通用对齐约束（32字节对齐）。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.proposal_extract(dst, src, repeat_time=2, mode_number=4)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def trap_docstring():
+    func_introduction = """
+    在Kernel侧调用，NPU模式下会中断AI Core的运行，CPU模式下等同于assert。可用于Kernel侧异常场景的调试。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void Trap()
+
+    """
+    
+    param_list = """
+    **参数说明**
+
+    无。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.trap()
+
+    """
+
+    return func_introduction, cpp_signature, param_list, "", "", py_example
+
+
+def duplicate_docstring():
+    func_introduction = """
+    将一个变量或立即数复制多次并填充到向量中。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        void Duplicate(const LocalTensor<T>& dst, const T& scalarValue, const int32_t& count)
+
+        template <typename T, bool isSetMask = true>
+        void Duplicate(const LocalTensor<T>& dst, const T& scalarValue, uint64_t mask[], const uint8_t repeatTime, const uint16_t dstBlockStride, const uint8_t dstRepeatStride)
+
+        template <typename T, bool isSetMask = true>
+        void Duplicate(const LocalTensor<T>& dst, const T& scalarValue, uint64_t mask, const uint8_t repeatTime, const uint16_t dstBlockStride, const uint8_t dstRepeatStride)
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：目的操作数。
+    - scalar：被复制的源操作数，支持输入变量和立即数，数据类型需与dst中元素的数据类型保持一致。
+    - count：参与计算的元素个数。
+    - mask：mask用于控制每次迭代内参与计算的元素。
+    - repeat_time：矢量计算单元，每次读取连续的8个datablock（每个block32Bytes，共256Bytes）数据进行计算，为完成对输入数据的处理，必须通过多次迭代（repeat）才能完成所有数据的读取与计算。repeat_time表示迭代的次数。
+    - dst_block_stride：单次迭代内，矢量目的操作数不同datablock间地址步长。
+    - dst_repeat_stride：相邻迭代间，矢量目的操作数相同datablock地址步长。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - tensor高维切分计算样例-mask连续模式
+
+      .. code-block:: python
+
+          mask = 128
+          scalar = 18.0
+          asc.duplicate(dst_local, scalar, mask=mask, repeat_times=2, dst_block_stride=1, dst_repeat_stride=8)
+
+    - tensor高维切分计算样例-mask逐bit模式
+
+      .. code-block:: python
+
+          mask = [uint64_max, uint64_max]
+          scalar = 18.0
+          asc.duplicate(dst_local, scalar, mask=mask, repeat_times=2, dst_block_stride=1, dst_repeat_stride=8)
+        
+    - tensor前n个数据计算样例，源操作数为标量
+    
+      .. code-block:: python
+
+          scalar = 18.0
+          asc.duplicate(dst_local, scalar, count=src_data_size)
+
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def pair_reduce_sum_docstring():
+    func_introduction = """
+    PairReduceSum：相邻两个（奇偶）元素求和。例如，对于序列 (a1, a2, a3, a4, a5, a6, ...)，
+    相邻两个数据求和为 (a1+a2, a3+a4, a5+a6, ...)。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        // mask 逐bit模式
+        template <typename T, bool isSetMask = true>
+        __aicore__ inline void PairReduceSum(const LocalTensor<T>& dst, const LocalTensor<T>& src, const int32_t repeatTime, const uint64_t mask[],
+                                            const int32_t dstRepStride, const int32_t srcBlkStride, const int32_t srcRepStride);
+                                                
+    .. code-block:: c++
+
+        // mask 连续模式
+        template <typename T, bool isSetMask = true>
+        __aicore__ inline void PairReduceSum(const LocalTensor<T>& dst, const LocalTensor<T>& src, const int32_t repeatTime, const int32_t mask,
+                                            const int32_t dstRepStride, const int32_t srcBlkStride, const int32_t srcRepStride);
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：输出操作数，类型为 LocalTensor，支持 TPosition 为 VECIN/VECCALC/VECOUT。LocalTensor 的起始地址需要 32 字节对齐。
+
+    - src：输入操作数，类型为 LocalTensor，支持 TPosition 为 VECIN/VECCALC/VECOUT。LocalTensor 的起始地址需要 32 字节对齐。
+
+    - repeat_time：迭代次数，取值范围 [0, 255]。关于该参数的具体描述请参考如何使用 Tensor 高维切分计算 API。
+
+    - mask：控制每次迭代内参与计算的元素。
+
+      **逐比特模式**
+      数组形式，按位控制哪些元素参与计算，bit位的值为1表示参与计算，0表示不参与。
+      - 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
+      - 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
+      - 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
+
+      **连续模式**
+      整数形式，表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+      - 16 位：mask ∈ [1, 128]
+      - 32 位：mask ∈ [1, 64]
+      - 64 位：mask ∈ [1, 32]
+
+    - dst_rep_stride：
+      目的操作数相邻迭代间的地址步长，以一个 repeat 归约后的长度为单位。
+      - PairReduce 完成后，一个 repeat 的长度减半。
+      - 注意：Atlas 训练系列产品不支持配置 0。
+
+    - src_blk_stride：单次迭代内数据 block 的地址步长，详细说明请参考 dataBlockStride。
+
+    - src_rep_stride：源操作数相邻迭代间的地址步长，即每次迭代跳过的 data block 数目。详细说明请参考 repeatStride。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 如果两两相加的两个元素mask位未配置（即当前两个元素不参与运算）。
+
+      - 对于 Atlas 200I/500 A2 推理产品 ，对应的目的操作数中的值会置为0。
+      - 对于其他产品型号，对应的目的操作数中的值不会变化。
+
+    - 比如float场景下对64个数使用当前指令，mask配置为62，表示最后两个元素不参与运算。
+
+      - 对于 Atlas 200I/500 A2 推理产品 ，目的操作数中最后一个值会返回0。
+      - 对于其他产品型号，目的操作数中最后一个值不会变化。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - mask 连续模式
+
+      .. code-block:: python
+
+          x_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+          z_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
+          asc.pair_reduce_sum(z_local, x_local, repeat_time=2, mask=128,
+                              dst_rep_stride=1, src_blk_stride=1, src_rep_stride=8)
+
+    - mask 逐bit模式
+
+      .. code-block:: python
+
+          x_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+          z_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
+          uint64_max = 2**64 - 1
+          mask = [uint64_max, uint64_max]
+          asc.pair_reduce_sum(z_local, x_local, repeat_time=2, mask=mask,
+                              dst_rep_stride=1, src_blk_stride=1, src_rep_stride=8)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def repeat_reduce_sum_docstring():
+    func_introduction = """
+    对每个 repeat 内的所有数据进行求和。
+    与 WholeReduceSum 接口相比，不支持 mask 逐比特模式。
+    建议使用功能更全面的 WholeReduceSum 接口。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T, bool isSetMask = true>
+        __aicore__ inline void RepeatReduceSum(const LocalTensor<T>& dst, const LocalTensor<T>& src, const int32_t repeatTime, const int32_t mask,
+                                                const int32_t dstBlkStride, const int32_t srcBlkStride, const int32_t dstRepStride, const int32_t srcRepStride);
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：
+      输出操作数，类型为 LocalTensor，支持 TPosition 为 VECIN/VECCALC/VECOUT。
+      - LocalTensor 起始地址需保证 2 字节对齐（half 数据类型）或 4 字节对齐（float 数据类型）。
+      - 数据类型根据产品支持情况：half / float。
+
+    - src：
+      输入操作数，类型为 LocalTensor，支持 TPosition 为 VECIN/VECCALC/VECOUT。
+      - LocalTensor 起始地址需 32 字节对齐。
+      - 数据类型需与 dst 保持一致。
+
+    - repeat_time：
+      重复迭代次数，取值范围 [0, 255]。
+      - 矢量计算单元，每次读取连续的256Bytes数据进行计算，为完成对输入数据的处理，必须通过多次迭代才能完成所有数据的读取与计算。repeatTime表示迭代的次数。
+      - 具体描述请参考 Tensor 高维切分计算 API。
+
+    - mask：
+      控制每次迭代内连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+      - 操作数为 16 位：mask ∈ [1, 128]
+      - 操作数为 32 位：mask ∈ [1, 64]
+
+    - dst_blk_stride：此参数无效，可配置任意值。
+
+    - src_blk_stride：单次迭代内数据 datablock 的地址步长。详细说明请参考 dataBlockStride。
+
+    - dst_rep_stride：
+      目的操作数相邻迭代间的地址步长，以一个 repeat 归约后的长度为单位。
+      - 单位为 dst 数据类型所占字节长度。比如当dst为half时，单位为2Bytes。
+      - 注意：Atlas 训练系列产品不支持配置 0。
+
+    - src_rep_stride：源操作数相邻迭代间的地址步长，即源操作数每次迭代跳过的datablock数目。详细说明请参考 repeatStride。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 操作数地址重叠约束请参考通用地址重叠约束。
+    - 对于RepeatReduceSum，其内部的相加方式采用二叉树方式，两两相加
+      假设源操作数为128个half类型的数据[data0,data1,data2...data127]，一个repeat可以计算完，计算过程如下。
+      1. data0和data1相加得到data00，data2和data3相加得到data01...data124和data125相加得到data62，data126和data127相加得到data63；
+      2. data00和data01相加得到data000，data02和data03相加得到data001...data62和data63相加得到data031；
+      3. 以此类推，得到目的操作数为1个half类型的数据[data]。
+      4. 需要注意的是两两相加的计算过程中，计算结果大于65504时结果保存为65504。例如源操作数为[60000,60000,-30000,100]，首先60000+60000溢出，结果为65504，第二步计算-30000+100=-29900，第四步计算65504-29900=35604。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        x_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+        z_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
+        asc.repeat_reduce_sum(z_local, x_local, repeat_time=4, mask=128,
+                              dst_blk_stride=0, src_blk_stride=1, dst_rep_stride=8, src_rep_stride=8)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def whole_reduce_max_docstring():
+    func_introduction = """
+    每个repeat内所有数据求最大值以及其索引index，返回的索引值为每个repeat内部索引。  
+    归约指令的总体介绍请参考如何使用归约指令。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        // mask 逐bit模式
+        template <typename T, bool isSetMask = true>
+         __aicore__ inline void WholeReduceMax(const LocalTensor<T>& dst, const LocalTensor<T>& src, const uint64_t mask[], const int32_t repeatTime,
+                                                const int32_t dstRepStride, const int32_t srcBlkStride, const int32_t srcRepStride, 
+                                                ReduceOrder order = ReduceOrder::ORDER_VALUE_INDEX);
+                                                  
+
+    .. code-block:: c++
+
+        // mask 连续模式
+        template <typename T, bool isSetMask = true>
+        __aicore__ inline void WholeReduceMax(const LocalTensor<T>& dst, const LocalTensor<T>& src, const int32_t mask, const int32_t repeatTime,
+                                                const int32_t dstRepStride, const int32_t srcBlkStride, const int32_t srcRepStride,
+                                                ReduceOrder order = ReduceOrder::ORDER_VALUE_INDEX);                                                
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：
+      输出，目的操作数，类型为 LocalTensor，支持 TPosition 为 VECIN/VECCALC/VECOUT。
+      - LocalTensor 的起始地址需 4 字节对齐（half 数据类型）或 8 字节对齐（float 数据类型）。
+      - 数据类型根据产品支持情况：half / float。
+
+    - src：
+      输入，源操作数，类型为 LocalTensor，支持 TPosition 为 VECIN/VECCALC/VECOUT。
+      - LocalTensor 起始地址需 32 字节对齐。
+      - 源操作数的数据类型需要与目的操作数保持一致。
+
+    - mask：
+      控制每次迭代内参与计算的元素。
+
+      - **逐bit模式**：mask为数组形式。数组长度和数组元素的取值范围和操作数的数据类型有关。可以按位控制哪些元素参与计算，bit位的值为1表示参与计算，0表示不参与。
+
+        - 操作数 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
+        - 操作数 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
+
+          - 操作数 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
+          - 例如：mask = [8, 0]，表示仅第 4 个元素参与计算
+
+      - **连续模式**：mask为整数形式。表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+
+        - 操作数 16 位：mask ∈ [1, 128]
+        - 操作数 32 位：mask ∈ [1, 64]
+        - 操作数 64 位：mask ∈ [1, 32]
+
+    - repeat_time：迭代次数，取值范围 [0, 255]。具体描述请参考 如何使用Tensor 高维切分计算API。
+
+    - dst_rep_stride：
+      目的操作数相邻迭代间地址步长。
+      - 以一个 repeat 归约后的长度为单位。
+      - 返回索引和最值时，单位为 dst 数据类型所占字节长度的两倍，比如当dst为half时，单位为4Bytes。
+      - 仅返回最值时，单位为 dst 数据类型所占字节长度。
+      - 仅返回索引时，单位为 uint32_t 类型所占字节长度。
+      - 注意：Atlas 训练系列产品不支持配置 0。
+
+    - src_blk_stride：单次迭代内数据 block 的地址步长。详细说明请参考 dataBlockStride。
+
+    - src_rep_stride：源操作数相邻迭代间地址步长，即每次迭代跳过的 datablock 数目。详细说明请参考 repeatStride。
+
+    - order
+      可选参数，指定 dst 中 index 与 value 的相对位置以及返回结果行为，类型为 ReduceOrder。
+      - 默认值为 asc.ReduceOrder.ORDER_VALUE_INDEX。
+      - asc.ReduceOrder.ORDER_VALUE_INDEX：value 位于低半部，返回顺序 [value, index]。
+      - asc.ReduceOrder.ORDER_INDEX_VALUE：index 位于低半部，返回顺序 [index, value]。
+      - asc.ReduceOrder.ORDER_ONLY_VALUE：只返回最值，顺序 [value]。
+      - asc.ReduceOrder.ORDER_ONLY_INDEX：只返回索引，顺序 [index]。
+      - 910B，支持ORDER_VALUE_INDEX、ORDER_INDEX_VALUE、ORDER_ONLY_VALUE、ORDER_ONLY_INDEX。
+      - 910C，支持ORDER_VALUE_INDEX、ORDER_INDEX_VALUE、ORDER_ONLY_VALUE、ORDER_ONLY_INDEX。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 操作数地址重叠约束请参考通用地址重叠约束。
+    - dst结果存储顺序由order决定，默认为最值、最值索引。返回结果中索引index数据按照dst的数据类型进行存储，比如dst使用half类型时，index按照half类型进行存储，读取时需要使用reinterpret_cast方法转换到整数类型。若输入数据类型是half，需要使用reinterpret_cast<uint16_t*>，若输入是float，需要使用reinterpret_cast<uint32_t*>。比如完整样例中，前两个计算结果为[9.980e-01 5.364e-06]，5.364e-06需要使用reinterpret_cast方法转换得到索引值90。
+    - 针对不同场景合理使用归约指令可以带来性能提升，相关介绍请参考选择低延迟指令，优化归约操作性能，具体样例请参考ReduceCustom。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - mask 连续模式，默认 ORDER_VALUE_INDEX
+
+      .. code-block:: python
+
+          x_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+          z_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
+          asc.whole_reduce_max(z_local, x_local, mask=128, repeat_time=4,
+                               dst_rep_stride=1, src_blk_stride=1, src_rep_stride=8)
+
+    - mask 连续模式，ORDER_INDEX_VALUE
+
+      .. code-block:: python
+
+          x_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+          z_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
+          asc.whole_reduce_max(z_local, x_local, mask=128, repeat_time=4,
+                               dst_rep_stride=1, src_blk_stride=1, src_rep_stride=8,
+                               order=asc.ReduceOrder.ORDER_INDEX_VALUE)
+
+    - mask 逐bit模式
+
+      .. code-block:: python
+
+          uint64_max = 2**64 - 1
+          mask = [uint64_max, uint64_max]
+          asc.whole_reduce_max(z_local, x_local, mask=mask, repeat_time=4,
+                               dst_rep_stride=1, src_blk_stride=1, src_rep_stride=8)
+
+    - mask 逐bit模式，ORDER_INDEX_VALUE
+
+      .. code-block:: python
+
+          uint64_max = 2**64 - 1
+          mask = [uint64_max, uint64_max]
+          asc.whole_reduce_max(z_local, x_local, mask=mask, repeat_time=4,
+                               dst_rep_stride=1, src_blk_stride=1, src_rep_stride=8,
+                               order=asc.ReduceOrder.ORDER_INDEX_VALUE)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def whole_reduce_min_docstring():
+    func_introduction = """
+    每个repeat内所有数据求最小值以及其索引index，返回的索引值为每个repeat内部索引。  
+    归约指令的总体介绍请参考如何使用归约指令。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        // mask 逐bit模式
+        template <typename T, bool isSetMask = true>
+        __aicore__ inline void WholeReduceMin(const LocalTensor<T>& dst, const LocalTensor<T>& src, const uint64_t mask[], const int32_t repeatTime,
+                                            const int32_t dstRepStride, const int32_t srcBlkStride, const int32_t srcRepStride,
+                                            ReduceOrder order = ReduceOrder::ORDER_VALUE_INDEX);
+
+    .. code-block:: c++
+
+        // mask 连续模式
+        template <typename T, bool isSetMask = true>
+        __aicore__ inline void WholeReduceMin(const LocalTensor<T>& dst, const LocalTensor<T>& src, const int32_t mask, const int32_t repeatTime,
+                                            const int32_t dstRepStride, const int32_t srcBlkStride, const int32_t srcRepStride,
+                                            ReduceOrder order = ReduceOrder::ORDER_VALUE_INDEX);
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：
+      输出，目的操作数，类型为 LocalTensor，支持 TPosition 为 VECIN/VECCALC/VECOUT。
+      - LocalTensor 的起始地址需 4 字节对齐（half 数据类型）或 8 字节对齐（float 数据类型）。
+      - 数据类型根据产品支持情况：half / float。
+
+    - src：
+      输入，源操作数，类型为 LocalTensor，支持 TPosition 为 VECIN/VECCALC/VECOUT。
+      - LocalTensor 起始地址需 32 字节对齐。
+      - 源操作数的数据类型需要与目的操作数保持一致。
+
+    - mask：
+      控制每次迭代内参与计算的元素。
+
+      - **逐bit模式**：mask为数组形式。数组长度和数组元素的取值范围和操作数的数据类型有关。可以按位控制哪些元素参与计算，bit位的值为1表示参与计算，0表示不参与。
+
+        - 操作数 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
+        - 操作数 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
+        - 操作数 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
+        - 例如：mask = [8, 0]，表示仅第 4 个元素参与计算
+
+      - **连续模式**
+
+        mask为整数形式。表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+
+        - 操作数 16 位：mask ∈ [1, 128]
+        - 操作数 32 位：mask ∈ [1, 64]
+        - 操作数 64 位：mask ∈ [1, 32]
+
+    - repeat_time：迭代次数，取值范围 [0, 255]。具体描述请参考 如何使用Tensor 高维切分计算API。
+
+    - dst_rep_stride：
+      目的操作数相邻迭代间地址步长。
+      - 以一个 repeat 归约后的长度为单位。
+      - 返回索引和最值时，单位为 dst 数据类型所占字节长度的两倍，比如当dst为half时，单位为4Bytes。
+      - 仅返回最值时，单位为 dst 数据类型所占字节长度。
+      - 仅返回索引时，单位为 uint32_t 类型所占字节长度。
+      - 注意：Atlas 训练系列产品不支持配置 0。
+
+    - src_blk_stride：单次迭代内数据 block 的地址步长。详细说明请参考 dataBlockStride。
+
+    - src_rep_stride：源操作数相邻迭代间地址步长，即每次迭代跳过的 datablock 数目。详细说明请参考 repeatStride。
+
+    - order
+      可选参数，指定 dst 中 index 与 value 的相对位置以及返回结果行为，类型为 ReduceOrder。
+      - 默认值为 asc.ReduceOrder.ORDER_VALUE_INDEX。
+      - asc.ReduceOrder.ORDER_VALUE_INDEX：value 位于低半部，返回顺序 [value, index]。
+      - asc.ReduceOrder.ORDER_INDEX_VALUE：index 位于低半部，返回顺序 [index, value]。
+      - asc.ReduceOrder.ORDER_ONLY_VALUE：只返回最值，顺序 [value]。
+      - asc.ReduceOrder.ORDER_ONLY_INDEX：只返回索引，顺序 [index]。
+      - 910B，支持ORDER_VALUE_INDEX、ORDER_INDEX_VALUE、ORDER_ONLY_VALUE、ORDER_ONLY_INDEX。
+      - 910C，支持ORDER_VALUE_INDEX、ORDER_INDEX_VALUE、ORDER_ONLY_VALUE、ORDER_ONLY_INDEX。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 操作数地址重叠约束请参考通用地址重叠约束。
+    - dst结果存储顺序由order决定，默认为最值、最值索引。返回结果中索引index数据按照dst的数据类型进行存储，比如dst使用half类型时，index按照half类型进行存储，读取时需要使用reinterpret_cast方法转换到整数类型。若输入数据类型是half，需要使用reinterpret_cast<uint16_t*>，若输入是float，需要使用reinterpret_cast<uint32_t*>。比如完整样例中，前两个计算结果为[9.980e-01 5.364e-06]，5.364e-06需要使用reinterpret_cast方法转换得到索引值90。
+    - 针对不同场景合理使用归约指令可以带来性能提升，相关介绍请参考选择低延迟指令，优化归约操作性能，具体样例请参考ReduceCustom。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - mask 连续模式，默认 ORDER_VALUE_INDEX
+
+      .. code-block:: python
+
+          x_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+          z_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
+          asc.whole_reduce_min(z_local, x_local, mask=128, repeat_time=4,
+                               dst_rep_stride=1, src_blk_stride=1, src_rep_stride=8)
+
+    - mask 连续模式，ORDER_INDEX_VALUE
+
+      .. code-block:: python
+
+          x_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+          z_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
+          asc.whole_reduce_min(z_local, x_local, mask=128, repeat_time=4,
+                               dst_rep_stride=1, src_blk_stride=1, src_rep_stride=8,
+                               order=asc.ReduceOrder.ORDER_INDEX_VALUE)
+
+    - mask 逐bit模式
+
+      .. code-block:: python
+
+          uint64_max = 2**64 - 1
+          mask = [uint64_max, uint64_max]
+          asc.whole_reduce_min(z_local, x_local, mask=mask, repeat_time=4,
+                               dst_rep_stride=1, src_blk_stride=1, src_rep_stride=8)
+
+    - mask 逐bit模式，ORDER_INDEX_VALUE
+
+      .. code-block:: python
+
+          uint64_max = 2**64 - 1
+          mask = [uint64_max, uint64_max]
+          asc.whole_reduce_min(z_local, x_local, mask=mask, repeat_time=4,
+                               dst_rep_stride=1, src_blk_stride=1, src_rep_stride=8,
+                               order=asc.ReduceOrder.ORDER_INDEX_VALUE)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def whole_reduce_sum_docstring():
+    func_introduction = """
+    每个迭代内所有数据求和。归约指令的总体介绍请参考如何使用归约指令。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        // mask 逐比特模式
+        template <typename T, bool isSetMask = true>
+        __aicore__ inline void WholeReduceSum(const LocalTensor<T>& dst, const LocalTensor<T>& src, const int32_t repeatTime, const uint64_t mask[],
+                                              const int32_t dstRepStride, const int32_t srcBlkStride, const int32_t srcRepStride);  
+
+    .. code-block:: c++
+
+        // mask 连续模式
+        template <typename T, bool isSetMask = true>
+        __aicore__ inline void WholeReduceSum(const LocalTensor<T>& dst, const LocalTensor<T>& src, const int32_t repeatTime, const int32_t mask,
+                                              const int32_t dstRepStride, const int32_t srcBlkStride, const int32_t srcRepStride);                  
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：
+      输出，目的操作数，类型为 LocalTensor，支持 TPosition 为 VECIN/VECCALC/VECOUT。
+      - LocalTensor 的起始地址需保证 2 字节对齐（half 数据类型）或 4 字节对齐（float 数据类型）。
+      - 数据类型根据产品支持情况：half / float。
+
+    - src：
+      输入，源操作数，类型为 LocalTensor，支持 TPosition 为 VECIN/VECCALC/VECOUT。
+      - LocalTensor 起始地址需 32 字节对齐。
+      - 源操作数的数据类型需要与目的操作数保持一致。
+
+    - mask：
+      控制每次迭代内参与计算的元素。
+
+      - **逐bit模式**：mask为数组形式。数组长度和数组元素的取值范围和操作数的数据类型有关。可以按位控制哪些元素参与计算，bit位的值为1表示参与计算，0表示不参与。
+
+          - 操作数 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
+          - 操作数 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
+          - 操作数 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
+          - 例如：mask = [8, 0]，表示仅第 4 个元素参与计算
+
+        - **连续模式**
+
+          mask为整数形式。表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+          - 操作数 16 位：mask ∈ [1, 128]
+          - 操作数 32 位：mask ∈ [1, 64]
+          - 操作数 64 位：mask ∈ [1, 32]
+
+    - repeat_time：迭代次数，取值范围 [0, 255]。具体描述请参考 如何使用Tensor 高维切分计算API。
+
+    - dst_rep_stride：
+      目的操作数相邻迭代间地址步长，以一个 repeat 归约后的长度为单位。
+      - 单位为 dst 数据类型所占字节长度。比如当dst为half时，单位为2Bytes。
+      - 注意：Atlas 训练系列产品不支持配置 0。
+
+    - src_blk_stride：单次迭代内datablock的地址步长。详细说明请参考dataBlockStride。
+
+    - src_rep_stride：源操作数相邻迭代间的地址步长，即源操作数每次迭代跳过的DataBlock数目。详细说明请参考repeatStride。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 操作数地址重叠约束请参考通用地址重叠约束。
+    - 对于WholeReduceSum，其内部的相加方式采用二叉树方式，两两相加
+      假设源操作数为128个half类型的数据[data0,data1,data2...data127]，一个repeat可以计算完，计算过程如下。
+      1. data0和data1相加得到data00，data2和data3相加得到data01...data124和data125相加得到data62，data126和data127相加得到data63；
+      2. data00和data01相加得到data000，data02和data03相加得到data001...data62和data63相加得到data031；
+      3. 以此类推，得到目的操作数为1个half类型的数据[data]。
+      4. 需要注意的是两两相加的计算过程中，计算结果大于65504时结果保存为65504。例如源操作数为[60000,60000,-30000,100]，首先60000+60000溢出，结果为65504，第二步计算-30000+100=-29900，第四步计算65504-29900=35604。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - mask 连续模式
+
+      .. code-block:: python
+
+          x_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+          z_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
+          asc.whole_reduce_sum(z_local, x_local, mask=128, repeat_time=4,
+                               dst_rep_stride=1, src_blk_stride=1, src_rep_stride=8)
+
+    - mask 逐bit模式
+
+      .. code-block:: python
+
+          uint64_max = 2**64 - 1
+          mask = [uint64_max, uint64_max]
+          asc.whole_reduce_sum(z_local, x_local, mask=mask, repeat_time=4,
+                               dst_rep_stride=1, src_blk_stride=1, src_rep_stride=8)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def scatter_docstring():
+    func_introduction = """
+    给定一个连续的输入张量和一个目的地址偏移张量，scatter指令根据偏移地址生成新的结果张量后将输入张量分散到结果张量中。
+    将源操作数src中的元素按照指定的位置（由dst_offset和dst_base共同作用）分散到目的操作数dst中。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void Scatter(const LocalTensor<T>& dst, const LocalTensor<T>& src,
+                                      const LocalTensor<uint32_t>& dstOffset,
+                                      const uint32_t dstBaseAddr, const uint32_t count)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void Scatter(const LocalTensor<T>& dst, const LocalTensor<T>& src,
+                                        const LocalTensor<uint32_t>& dstOffset,
+                                        const uint32_t dstBaseAddr, const uint64_t mask[],
+                                        const uint8_t repeatTime, const uint8_t srcRepStride)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void Scatter(const LocalTensor<T>& dst, const LocalTensor<T>& src,
+                                        const LocalTensor<uint32_t>& dstOffset,
+                                        const uint32_t dstBaseAddr, const uint64_t mask,
+                                        const uint8_t repeatTime, const uint8_t srcRepStride)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：目的操作数。
+    - src：源操作数，数据类型需与dst保持一致。
+    - dst_offset：用于存储源操作数的每个元素在dst中对应的地址偏移,以字节为单位。
+      偏移基于dst的基地址dst_base计算，以字节为单位，取值应保证按dst数据类型位宽对齐。
+    - dst_base：dst的起始偏移地址，单位是字节。取值应保证按dst数据类型位宽对齐。
+    - count：执行处理的数据个数。
+    - mask：控制每次迭代内参与计算的元素，支持连续模式或逐bit模式。
+    - repeat_times：指令迭代次数，每次迭代完成8个datablock的数据收集。
+    - src_rep_stride：相邻迭代间的地址步长，单位是datablock。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - tensor高维切分计算样例-mask连续模式
+
+      .. code-block:: python
+
+          asc.scatter(dst, src, dst_offset, dst_base=0, mask=128, repeat_times=1, src_rep_stride=8)
+
+    - tensor高维切分计算样例-mask逐bit模式
+
+      .. code-block:: python
+
+          mask_bits = [uint64_max, uint64_max]
+          asc.scatter(dst, src, dst_offset, dst_base=0, mask=mask_bits, repeat_times=1, src_rep_stride=8)
+
+    - tensor前n个数据计算样例，源操作数为标量
+    
+      .. code-block:: python
+
+          asc.scatter(dst, src, dst_offset, dst_base=0, count=128)
+
+    """
+
+    return func_introduction, cpp_signature, param_list, "", "", py_example
+
+
+def set_deq_scale_docstring():
+    func_introduction = """
+    设置DEQSCALE寄存器的值。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void SetDeqScale(half scale)
+
+        __aicore__ inline void SetDeqScale(float scale, int16_t offset, bool signMode)
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    - scale(half)：scale量化参数，half类型。
+    - scale(float)：scale量化参数，float类型。
+    - offset：offset量化参数，int16_t类型，只有前9位有效。
+    - sign_mode：bool类型，表示量化结果是否带符号。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        # Cast
+        scale = 1.0
+        asc.set_deq_scale(scale)
+        asc.cast(cast_dst_local, cast_dsrc_local, asc.RoundMode.CAST_NONE, src_size)
+        # CastDeq
+        scale = 1.0
+        offset = 0
+        sign_mode = True
+        asc.set_deq_scale(scale, offset, sign_mode)
+        asc.cast_deq(dst_local, src_local, count=src_size, is_vec_deq=False, half_block=False)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", "", py_example
+
+
+def set_vector_mask_docstring():
+    func_introduction = """
+    用于在矢量计算时设置mask。使用前需要先调用 SetMaskCount/SetMaskNorm 设置 mask 模式。
+    在不同模式下，mask的含义不同：
+
+    - **Normal 模式**
+
+      mask参数用来控制单次迭代内参与计算的元素个数。此时又可以划分为如下两种模式：
+
+      - **连续模式（len）**：表示单次迭代中前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+
+        - 操作数为16位时：mask ∈ [1, 128]
+        - 操作数为32位时：mask ∈ [1, 64]
+        - 操作数为64位时：mask ∈ [1, 32]
+
+      - **逐比特模式（mask_high / mask_low）**：按位控制参与计算的元素，bit位的值为1表示参与计算，0表示不参与。
+
+        分为mask_high（高位mask）和mask_low（低位mask）。参数取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+
+        - 操作数为16位时：mask_low、mask_high ∈ [0, 2⁶⁴-1]，并且不同时为 0
+        - 操作数为32位时：mask_high = 0，mask_low ∈ (0, 2⁶⁴-1]
+        - 操作数为64位时：mask_high = 0，mask_low ∈ (0, 2³²-1]
+
+    - **Counter 模式**
+
+      mask参数表示整个矢量计算参与计算的元素个数。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T, MaskMode mode = MaskMode::NORMAL>
+        __aicore__ static inline void SetVectorMask(const uint64_t maskHigh, const uint64_t maskLow);
+
+    .. code-block:: c++
+
+        template <typename T, MaskMode mode = MaskMode::NORMAL>
+        __aicore__ static inline void SetVectorMask(int32_t len);
+    """
+
+    param_list = """
+    **参数说明**
+
+    - mask_high
+
+      - Normal模式：对应Normal模式下的逐比特模式，可以按位控制哪些元素参与计算。传入高位mask值。 
+      - Counter模式：需要置0，本入参不生效。  
+
+    - mask_low
+
+      - Normal模式：对应Normal模式下的逐比特模式，可以按位控制哪些元素参与计算。传入低位mask值。  
+      - Counter模式：整个矢量计算过程中，参与计算的元素个数。 
+
+    - len
+
+      - Normal模式：对应Normal模式下的mask连续模式，表示单次迭代内表示前面连续的多少个元素参与计算。 
+      - Counter模式：整个矢量计算过程中，参与计算的元素个数。  
+
+    - dtype：矢量计算操作数的数据类型，由 Python 前端显式指定，用于推导 C++ 模板参数 T。  
+
+    - mode：
+      mask 模式，类型为 MaskMode 枚举值  
+      - asc.MaskMode.NORMAL：Normal 模式，支持连续模式与逐比特模式。  
+      - asc.MaskMode.COUNTER：Counter 模式，mask 参数表示整个矢量计算参与的总元素个数。  
+
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    该接口仅在矢量计算API的isSetMask模板参数为false时生效，使用完成后需要使用ResetMask将mask恢复为默认值。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - Counter 模式：整个计算中参与 128 个元素
+
+      .. code-block:: python
+
+          len = 128
+          asc.set_mask_count()
+          asc.set_vector_mask(len, dtype=asc.float16, mode=asc.MaskMode.COUNTER)
+          asc.reset_mask()
+
+    - Normal 模式（逐bit模式）：使用 bitmask 控制参与计算的元素
+
+      .. code-block:: python
+
+          mask_high = 2**64 - 1
+          mask_low = 2**64 - 1
+          asc.set_mask_norm()
+          asc.set_vector_mask(mask_high, mask_low, dtype=asc.float16, mode=asc.MaskMode.NORMAL)
+          asc.reset_mask()
+
+    - Normal 模式（连续模式）：前 64 个元素参与每次迭代计算
+
+      .. code-block:: python
+
+          len = 64
+          asc.set_mask_norm()
+          asc.set_vector_mask(len, dtype=asc.float32, mode=asc.MaskMode.NORMAL)
+          asc.reset_mask()
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def get_sys_workspace_docstring():
+    func_introduction = """
+    获取系统workspace指针。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline __gm__ uint8_t* __gm__ GetSysWorkSpacePtr()
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    无。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        workspace = asc.get_sys_workspace()
+
+    """
+
+    return func_introduction, cpp_signature, param_list, "", "", py_example
+
+
+def transpose_docstring():
+    func_introduction = """
+    用于实现16 * 16的二维矩阵数据块转置或者[N,C,H,W]与[N,H,W,C]数据格式互相转换。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        // 普通转置，支持16 * 16的二维矩阵数据块进行转置
+        template <typename T>
+        __aicore__ inline void Transpose(const LocalTensor<T>& dst, const LocalTensor<T>& src)
+            
+        // 增强转置，支持16 * 16的二维矩阵数据块转置，支持[N,C,H,W]与[N,H,W,C]互相转换
+        template <typename T>
+        __aicore__ inline void Transpose(const LocalTensor<T>& dst, const LocalTensor<T> &src, 
+                                        const LocalTensor<uint8_t> &sharedTmpBuffer, 
+                                        const TransposeParamsExt &transposeParams)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst: 目的操作数，类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT，起始地址需要32字节对齐
+    - src: 源操作数，类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT，起始地址需要32字节对齐，数据类型需要与dst保持一致
+    - shared_tmp_buffer: 共享的临时Buffer，大小根据transposeType确定
+    - params: 控制Transpose的数据结构，包含输入的shape信息和transposeType参数
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 普通转置接口支持src和dst复用。
+    - 增强转置接口，transposeType为TRANSPOSE_ND2ND_B16时支持src和dst复用，transposeType为TRANSPOSE_NCHW2NHWC、TRANSPOSE_NHWC2NCHW时不支持src和dst复用。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - 基础转置样例
+
+      .. code-block:: python
+
+          pipe = asc.TPipe()
+          in_queue_x = asc.TQue(asc.TPosition.VECIN, buffer_num)
+          out_queue_z = asc.TQue(asc.TPosition.VECOUT, buffer_num)
+          ...
+          x_local = in_queue_x.alloc_tensor(asc.float16)
+          z_local = out_queue_z.alloc_tensor(asc.float16)
+          asc.transpose(z_local, x_local)
+
+    - 增强转置样例
+
+      .. code-block:: python
+
+        pipe = asc.TPipe()
+        in_queue_x = asc.TQue(asc.TPosition.VECIN, buffer_num)
+        out_queue_z = asc.TQue(asc.TPosition.VECOUT, buffer_num)
+        in_queue_tmp = asc.TQue(asc.TPosition.VECIN, buffer_num)
+        ...
+        x_local = in_queue_x.alloc_tensor(asc.float16)
+        z_local = out_queue_z.alloc_tensor(asc.float16)
+        tmp_buffer = in_queue_tmp.alloc_tensor(asc.uint8)
+        
+        params = asc.TransposeParamsExt(
+            n_size=1, 
+            c_size=16, 
+            h_size=4, 
+            w_size=4,
+            transpose_type=asc.TransposeType.TRANSPOSE_NCHW2NHWC
+        )
+        
+        asc.transpose(z_local, x_local, tmp_buffer, params)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def trans_data_to_5hd_docstring():
+    func_introduction = """
+    数据格式转换，一般用于将NCHW格式转换成NC1HWC0格式，也可用于二维矩阵数据块的转置。
+    相比于Transpose接口，本接口单次repeat内可处理512Byte的数据（16个datablock），
+    支持不同shape的矩阵转置，还可以支持多次repeat操作。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        // 使用LocalTensor数组版本
+        template <typename T>
+        __aicore__ inline void TransDataTo5HD(const LocalTensor<T> (&dstList)[NCHW_CONV_ADDR_LIST_SIZE], 
+                                            const LocalTensor<T> (&srcList)[NCHW_CONV_ADDR_LIST_SIZE], 
+                                            const TransDataTo5HDParams& nchwconvParams)
+            
+        // 使用地址值数组版本（性能更优）
+        template<typename T>
+        __aicore__ inline void TransDataTo5HD(uint64_t dstList[NCHW_CONV_ADDR_LIST_SIZE], 
+                                            uint64_t srcList[NCHW_CONV_ADDR_LIST_SIZE], 
+                                            const TransDataTo5HDParams& nchwconvParams)
+            
+        // 使用连续存储地址值版本
+        template <typename T>
+        __aicore__ inline void TransDataTo5HD(const LocalTensor<uint64_t>& dst, 
+                                            const LocalTensor<uint64_t>& src, 
+                                            const TransDataTo5HDParams& nchwconvParams)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst_or_list：目的操作数地址序列，类型为LocalTensor数组、地址值数组或连续存储地址值的LocalTensor
+    - src_or_list：源操作数地址序列，类型与dst_or_list对应，数据类型需要与目的操作数保持一致
+    - params：控制参数结构体，包含读取写入位置控制、迭代次数、地址步长等参数
+      - dst_high_half：指定数据存储到datablock的高半部还是低半部（仅支持int8_t/uint8_t）
+      - src_high_half：指定数据从datablock的高半部还是低半部读取（仅支持int8_t/uint8_t）
+      - repeat_times：重复迭代次数，取值范围[0,255]
+      - dst_rep_stride：相邻迭代间目的操作数相同datablock地址步长
+      - src_rep_stride：相邻迭代间源操作数相同datablock地址步长
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 普通转置接口支持src和dst复用。
+    - 增强转置接口，transposeType为TRANSPOSE_ND2ND_B16时支持src和dst复用，transposeType为TRANSPOSE_NCHW2NHWC、TRANSPOSE_NHWC2NCHW时不支持src和dst复用。
+    """
+
+    py_example = """
+    **调用示例**
+
+    此接口通过不同的方式构造源和目的操作数序列，以实现灵活的数据重组。
+
+    - `dst_list`, `src_list`：定义了源数据块和目标数据块。它们可以是包含 `LocalTensor` 物理地址的 `list`/`tuple`，
+      也可以是包含 `LocalTensor` 视图对象的 `list`/`tuple`，或者是将地址值连续存储的 `LocalTensor<uint64_t>`。
+
+      .. code-block:: python
+
+          params = asc.TransDataTo5HDParams(
+              dst_high_half=False,
+              src_high_half=False,
+              repeat_times=4,
+              dst_rep_stride=8,
+              src_rep_stride=8
+          )
+
+          asc.trans_data_to_5hd(dst_list, src_list, params)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+NAME_TRANS = {
+    "Add": "add",
+    "AddDeqRelu": "add_deq_relu",
+    "AddRelu": "add_relu",
+    "AddReluCast": "add_relu_cast",
+    "And": "bitwise_and",
+    "Or": "bitwise_or",
+    "Div": "div",
+    "FusedMulAdd": "fused_mul_add",
+    "FusedMulAddRelu": "fused_mul_add_relu",
+    "Max": "max",
+    "Min": "min",
+    "Mul": "mul",
+    "MulAddDst": "mul_add_dst",
+    "MulCast": "mul_cast",
+    "Sub": "sub",
+    "SubRelu": "sub_relu",
+    "SubReluCast": "sub_relu_cast",
+    "Adds": "adds",
+    "LeakyRelu": "leaky_relu",
+    "Maxs": "maxs",
+    "Mins": "mins",
+    "Muls": "muls",
+    "ShiftLeft": "shift_left",
+    "ShiftRight": "shift_right",
+    "Abs": "abs",
+    "Exp": "exp",
+    "Ln": "ln",
+    "Not": "bitwise_not",
+    "Reciprocal": "reciprocal",
+    "Relu": "relu",
+    "Rsqrt": "rsqrt",
+    "Sqrt": "sqrt",
+}
+
+
+def set_aipp_functions_docstring():
+    func_introduction = """
+    设置图片预处理（AIPP，AI core pre-process）相关参数。和LoadImageToLocal(ISASI)接口配合使用。
+    设置后，调用LoadImageToLocal(ISASI)接口可在搬运过程中完成图像预处理操作。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    输入图片格式为YUV400、RGB888、XRGB8888:
+
+    .. code-block:: c++
+
+        template<typename T, typename U>
+        void SetAippFunctions(const GlobalTensor<T>& src0, AippInputFormat format, AippParams<U> config)
+    
+    输入图片格式为YUV420 Semi-Planar:
+
+    .. code-block:: c++
+
+        template<typename T, typename U>
+        void SetAippFunctions(const GlobalTensor<T>& src0, const GlobalTensor<T>& src1, AippInputFormat format, AippParams<U> config)
+    """
+
+    param_list = """
+    **参数说明**
+    
+    - src0：源图片在Global Memory上的矩阵
+    - src1：源图片格式为YUV420SP时，表示UV维度在Global Memory上的矩阵
+    - input_format：源图片的图片格式
+    - config：图片预处理的相关参数，类型为AippParams
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - src0、src1在Global Memory上的地址对齐要求如下：
+      - YUV420SP：src0必须2Bytes对齐，src1必须2Bytes对齐
+      - XRGB8888：src0必须4Bytes对齐
+      - RGB888：src0无对齐要求
+      - YUV400：src0无对齐要求
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        swap_settings = asc.AippSwapParams(is_swap_rb=True)
+        cpad_settings = asc.AippChannelPaddingParams(c_padding_mode=0, c_padding_value=-1)
+
+        aipp_config_int8 = asc.AippParams(
+            dtype=asc.int8,
+            swap_params=swap_settings,
+            c_padding_params=cpad_settings
+        )
+
+        asc.set_aipp_functions(rgb_gm, asc.AippInputFormat.RGB888_U8, aipp_config_int8)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def set_binary_docstring(cpp_name: Optional[str] = None, append_text: str = "") -> Callable[[T], T]:
+    func_introduction = f"""
+    {append_text}
+    """
+
+    cpp_signature = f"""
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void {cpp_name}(const LocalTensor<T>& dst, const LocalTensor<T>& src0,
+                                            const LocalTensor<T>& src1, const int32_t& count);
+
+    .. code-block:: c++
+
+        template <typename T, bool isSetMask = true>
+         __aicore__ inline void {cpp_name}(const LocalTensor<T>& dst, const LocalTensor<T>& src0,
+                                            const LocalTensor<T>& src1, uint64_t mask[], const uint8_t repeatTimes,
+                                            const BinaryRepeatParams& repeatParams);
+
+    .. code-block:: c++
+
+        template <typename T, bool isSetMask = true>
+        __aicore__ inline void {cpp_name}(const LocalTensor<T>& dst, const LocalTensor<T>& src0,
+                                            const LocalTensor<T>& src1, uint64_t mask, const uint8_t repeatTimes,
+                                            const BinaryRepeatParams& repeatParams);
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。
+    - src0, src1：源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。
+    - count：参与计算的元素个数。
+    - mask：用于控制每次迭代内参与计算的元素。
+    - repeat_times：重复迭代次数。
+    - params：控制操作数地址步长的参数。
+    """
+
+    set_mask_param = ""
+    if cpp_name != 'MulCast':
+        set_mask_param = """
+    - is_set_mask: 是否在接口内部设置mask。
+        """
+    api_name = NAME_TRANS[cpp_name]
+    py_example = f"""
+    **调用示例**
+
+    - tensor高维切分计算样例-mask连续模式
+
+      .. code-block:: python
+
+          mask = 128
+          # repeat_times = 4，一次迭代计算128个数，共计算512个数
+          # dst_blk_stride, src0_blk_stride, src1_blk_stride = 1，单次迭代内数据连续读取和写入
+          # dst_rep_stride, src0_rep_stride, src1_rep_stride = 8，相邻迭代间数据连续读取和写入
+          params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
+          asc.{api_name}(dst, src0, src1, mask=mask, repeat_times=4, params=params)
+
+    - tensor高维切分计算样例-mask逐bit模式
+
+      .. code-block:: python
+
+          mask = [uint64_max, uint64_max]
+          # repeat_times = 4，一次迭代计算128个数，共计算512个数
+          # dst_blk_stride, src0_blk_stride, src1_blk_stride = 1，单次迭代内数据连续读取和写入
+          # dst_rep_stride, src0_rep_stride, src1_rep_stride = 8，相邻迭代间数据连续读取和写入
+          params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
+          asc.{api_name}(dst, src0, src1, mask=mask, repeat_times=4, params=params)
+
+    - tensor前n个数据计算样例
+
+      .. code-block:: python
+
+          asc.{api_name}(dst, src0, src1, count=512)
+
+    """
+
+    if api_name == 'add_deq_relu':
+        py_example = f"""
+    **调用示例**
+
+    - tensor高维切分计算样例-mask连续模式
+
+      .. code-block:: python
+
+          mask = 128
+          # repeat_times = 4，一次迭代计算128个数，共计算512个数
+          # dst_blk_stride, src0_blk_stride, src1_blk_stride = 1，单次迭代内数据连续读取和写入
+          # dst_rep_stride, src0_rep_stride, src1_rep_stride = 8，相邻迭代间数据连续读取和写入
+          params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
+          scale = 0.1
+          asc.set_deq_scale(scale)
+          asc.{api_name}(dst, src0, src1, mask=mask, repeat_times=4, params=params)
+
+    - tensor高维切分计算样例-mask逐bit模式
+
+      .. code-block:: python
+
+          mask = [uint64_max, uint64_max]
+          # repeat_times = 4，一次迭代计算128个数，共计算512个数
+          # dst_blk_stride, src0_blk_stride, src1_blk_stride = 1，单次迭代内数据连续读取和写入
+          # dst_rep_stride, src0_rep_stride, src1_rep_stride = 8，相邻迭代间数据连续读取和写入
+          params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
+          scale = 0.1
+          asc.set_deq_scale(scale)
+          asc.{api_name}(dst, src0, src1, mask=mask, repeat_times=4, params=params)
+
+    - tensor前n个数据计算样例
+
+      .. code-block:: python
+
+          scale = 0.1
+          asc.set_deq_scale(scale)
+          asc.{api_name}(dst, src0, src1, count=512)
+
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 操作数地址重叠约束请参考通用地址重叠约束。
+    - 使用整个tensor参与计算接口符号重载时，运算量为目的LocalTensor的总长度。
+    """
+    docstr = f"""
+    {func_introduction}
+    {cpp_signature}
+    {param_list}
+    {set_mask_param}
+    {constraint_list}
+    {py_example}
+    """
+
+
+    def decorator(fn: T) -> T:
+        fn.__doc__ = docstr
+        return fn
+
+    return decorator
+
+
+def set_binary_scalar_docstring(cpp_name: Optional[str] = None, append_text: str = "") -> Callable[[T], T]:
+    func_introduction = f"""
+    {append_text}
+    """
+
+    cpp_signature = f"""
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T, bool isSetMask = true>
+        __aicore__ inline void {cpp_name}(const LocalTensor<T>& dstLocal, const LocalTensor<T>& srcLocal, 
+                                            const T& scalarValue, const int32_t& calCount)
+
+    .. code-block:: c++
+
+        template <typename T, bool isSetMask = true>
+        __aicore__ inline void {cpp_name}(const LocalTensor<T>& dstLocal, const LocalTensor<T>& srcLocal, 
+                                            const T& scalarValue, uint64_t mask[], const uint8_t repeatTimes, 
+                                            const UnaryRepeatParams& repeatParams)
+
+    .. code-block:: c++
+
+        template <typename T, bool isSetMask = true>
+        __aicore__ inline void {cpp_name}(const LocalTensor<T>& dstLocal, const LocalTensor<T>& srcLocal, 
+                                            const T& scalarValue, uint64_t mask, const uint8_t repeatTimes, 
+                                            const UnaryRepeatParams& repeatParams)
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    - is_set_mask：是否在接口内部设置mask模式和mask值。
+    - dst：目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。
+    - src：源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。
+    - scalar：源操作数，数据类型需要与目的操作数中的元素类型保持一致。
+    - count：参与计算的元素个数。
+    - mask：用于控制每次迭代内参与计算的元素。
+    - repeat_times：重复迭代次数。
+    - params：元素操作控制结构信息。
+    """
+    api_name = NAME_TRANS[cpp_name]
+    py_example = f"""
+    **调用示例**
+
+    - tensor高维切分计算样例-mask连续模式
+
+      .. code-block:: python
+
+          mask = 128
+          scalar = 2
+          # repeat_times = 4，一次迭代计算128个数，共计算512个数
+          # dst_blk_stride, src_blk_stride = 1，单次迭代内数据连续读取和写入
+          # dst_rep_stride, src_rep_stride = 8，相邻迭代间数据连续读取和写入
+          params = asc.UnaryRepeatParams(1, 1, 8, 8)
+          asc.{api_name}(dst, src, scalar, mask=mask, repeat_times=4, params=params)
+
+    - tensor高维切分计算样例-mask逐bit模式
+
+      .. code-block:: python
+
+          mask = [uint64_max, uint64_max]
+          scalar = 2
+          # repeat_times = 4，一次迭代计算128个数，共计算512个数
+          # dst_blk_stride, src_blk_stride = 1，单次迭代内数据连续读取和写入
+          # dst_rep_stride, src_rep_stride = 8，相邻迭代间数据连续读取和写入
+          params = asc.UnaryRepeatParams(1, 1, 8, 8)
+          asc.{api_name}(dst, src, scalar, mask=mask, repeat_times=4, params=params)
+
+    - tensor前n个数据计算样例
+
+      .. code-block:: python
+
+          asc.{api_name}(dst, src, scalar, count=512)
+
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 操作数地址重叠约束请参考通用地址重叠约束。
+    """
+
+    docstr = f"""
+    {func_introduction}
+    {cpp_signature}
+    {param_list}
+    {constraint_list}
+    {py_example}
+    """
+
+    def decorator(fn: T) -> T:
+        fn.__doc__ = docstr
+        return fn
+
+    return decorator
+
+
+def set_unary_docstring(cpp_name: Optional[str] = None, append_text: str = "") -> Callable[[T], T]:
+    func_introduction = f"""
+    {append_text}
+    """
+
+    cpp_signature = f"""
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void {cpp_name}(const LocalTensor<T>& dstLocal, const LocalTensor<T>& srcLocal,
+                                            const int32_t& calCount)
+
+    .. code-block:: c++
+
+        template <typename T, bool isSetMask = true>
+        __aicore__ inline void {cpp_name}(const LocalTensor<T>& dstLocal, const LocalTensor<T>& srcLocal,
+                                            uint64_t mask[], const uint8_t repeatTimes,
+                                            const UnaryRepeatParams& repeatParams)
+
+    .. code-block:: c++
+
+        template <typename T, bool isSetMask = true>
+        __aicore__ inline void {cpp_name}(const LocalTensor<T>& dstLocal, const LocalTensor<T>& srcLocal,
+                                            uint64_t mask, const uint8_t repeatTimes,
+                                            const UnaryRepeatParams& repeatParams)
+
+        """
+
+    param_list = """
+    **参数说明**
+
+    - is_set_mask：是否在接口内部设置mask。
+    - dst: 目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。
+    - src: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。
+    - count: 参与计算的元素个数。
+    - mask: 用于控制每次迭代内参与计算的元素。
+    - repeat_times: 重复迭代次数。
+    - params: 控制操作数地址步长的参数。
+    """
+    api_name = NAME_TRANS[cpp_name]
+    py_example = f"""
+    **调用示例**
+
+    - tensor高维切分计算样例-mask连续模式
+
+      .. code-block:: python
+
+          mask = 256 // asc.half.sizeof()
+          # repeat_times = 4，一次迭代计算128个数，共计算512个数
+          # dst_blk_stride, src_blk_stride = 1，单次迭代内数据连续读取和写入
+          # dst_rep_stride, src_rep_stride = 8，相邻迭代间数据连续读取和写入
+          params = asc.UnaryRepeatParams(1, 1, 8, 8)
+          asc.{api_name}(dst, src, mask=mask, repeat_times=4, params=params)
+
+    - tensor高维切分计算样例-mask逐bit模式
+
+      .. code-block:: python
+
+          mask = [uint64_max, uint64_max]
+          # repeat_times = 4，一次迭代计算128个数，共计算512个数
+          # dst_blk_stride, src_blk_stride = 1，单次迭代内数据连续读取和写入
+          # dst_rep_stride, src_rep_stride = 8，相邻迭代间数据连续读取和写入
+          params = asc.UnaryRepeatParams(1, 1, 8, 8)
+          asc.{api_name}(dst, src, mask=mask, repeat_times=4, params=params)
+
+    - tensor前n个数据计算样例
+
+      .. code-block:: python
+
+          asc.{api_name}(dst, src, count=512)
+
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 操作数地址重叠约束请参考通用地址重叠约束。
+    """
+
+    docstr = f"""
+    {func_introduction}
+    {cpp_signature}
+    {param_list}
+    {constraint_list}
+    {py_example}
+    """
+
+    def decorator(fn: T) -> T:
+        fn.__doc__ = docstr
+        return fn
+
+    return decorator
+
+
+def gather_mask_docstring():
+    func_introduction = """
+    以内置固定模式对应的二进制或者用户自定义输入的Tensor数值对应的二进制为gather mask（数据收集的掩码），从源操作数中选取元素写入目的操作数中。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T, typename U, GatherMaskMode mode = defaultGatherMaskMode>
+        __aicore__ inline void GatherMask(const LocalTensor<T>& dst, const LocalTensor<T>& src0,
+                                          const LocalTensor<U>& src1Pattern, const bool reduceMode,
+                                          const uint32_t mask, const GatherMaskParams& gatherMaskParams,
+                                          uint64_t& rsvdCnt)
+
+    .. code-block:: c++
+
+        template <typename T, GatherMaskMode mode = defaultGatherMaskMode>
+        __aicore__ inline void GatherMask(const LocalTensor<T>& dst, const LocalTensor<T>& src0,
+                                          const uint8_t src1Pattern, const bool reduceMode,
+                                          const uint32_t mask, const GatherMaskParams& gatherMaskParams,
+                                          uint64_t& rsvdCnt)
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst: 目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。
+    - src0: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。数据类型需要与目的操作数保持一致。
+    - src1Pattern: gather mask（数据收集的掩码），分为内置固定模式和用户自定义模式两种：
+
+      - 内置固定模式：src1Pattern数据类型为uint8_t，取值范围为[1,7]，所有repeat迭代使用相同的gather mask。不支持配置src1RepeatStride。
+
+        1：01010101…0101 # 每个repeat取偶数索引元素
+        2：10101010…1010 # 每个repeat取奇数索引元素
+        3：00010001…0001 # 每个repeat内每四个元素取第一个元素
+        4：00100010…0010 # 每个repeat内每四个元素取第二个元素
+        5：01000100…0100 # 每个repeat内每四个元素取第三个元素
+        6：10001000…1000 # 每个repeat内每四个元素取第四个元素
+        7：11111111...1111 # 每个repeat内取全部元素
+
+      - 用户自定义模式：src1Pattern数据类型为LocalTensor，迭代间间隔由src1RepeatStride决定，迭代内src1Pattern连续消耗。
+
+    - reduceMode: 用于选择mask参数模式，数据类型为bool，支持如下取值：
+
+      - false：Normal模式。该模式下，每次repeat操作256Bytes数据，总的数据计算量为repeatTimes * 256Bytes。mask参数无效，建议设置为0。按需配置repeatTimes、src0BlockStride、src0RepeatStride参数。支持src1Pattern配置为内置固定模式或用户自定义模式。用户自定义模式下可根据实际情况配置src1RepeatStride。
+      - true：Counter模式。根据mask等参数含义的不同，该模式有以下两种配置方式：
+
+        配置方式一：每次repeat操作mask个元素，总的数据计算量为repeatTimes * mask个元素。mask值配置为每一次repeat计算的元素个数。按需配置repeatTimes、src0BlockStride、src0RepeatStride参数。支持src1Pattern配置为内置固定模式或用户自定义模式。用户自定义模式下可根据实际情况配置src1RepeatStride。
+        配置方式二：总的数据计算量为mask个元素。mask配置为总的数据计算量。repeatTimes值不生效，指令的迭代次数由源操作数和mask共同决定。按需配置src0BlockStride、src0RepeatStride参数。支持src1Pattern配置为内置固定模式或用户自定义模式。用户自定义模式下可根据实际情况配置src1RepeatStride。
+
+    - mask: 用于控制每次迭代内参与计算的元素。根据reduceMode，分为两种模式：
+      - Normal模式：mask无效，建议设置为0。
+      - Counter模式：取值范围[1, 232 – 1]。不同的版本型号Counter模式下，mask参数表示含义不同。具体配置规则参考上文reduceMode参数描述。
+    - gatherMaskParams: 控制操作数地址步长的数据结构，GatherMaskParams类型。具体参数包括：
+      - src0BlockStride: 用于设置src0同一迭代不同DataBlock间的地址步长。
+      - repeatTimes: 迭代次数。
+      - src0RepeatStride: 用于设置src0相邻迭代间的地址步长。
+      - src1RepeatStride: 用于设置src1相邻迭代间的地址步长。
+    - mode: 模板参数，用于指定GatherMask的模式，当前仅支持默认模式GatherMaskMode.DEFAULT，为后续功能做预留。
+    - rsvdCnt: 该条指令筛选后保留下来的元素计数，对应dstLocal中有效元素个数，数据类型为uint64_t。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 操作数地址重叠约束请参考通用地址重叠约束。
+    - 若调用该接口前为Counter模式，在调用该接口后需要显式设置回Counter模式（接口内部执行结束后会设置为Normal模式）。
+    """
+
+    py_example = """
+    **调用示例**
+    
+    .. code-block:: python
+
+        src0_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+        dst_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
+        pattern_value = 2
+        reduce_mode = False
+        gather_mask_mode = asc.GatherMaskMode.DEFAULT
+        mask = 0
+        params = asc.GatherMaskParams(src0_block_stride=1, repeat_times=1, src0_repeat_stride=0, src1_repeat_stride=0)
+        rsvd_cnt = 0
+        asc.gather_mask(dst_local, src0_local, pattern_value, reduce_mode, mask, params, rsvd_cnt, gather_mask_mode)
+
+    """
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def scalar_cast_docstring():
+    func_introduction = """
+    对标量的数据类型进行转换。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T, typename U, RoundMode roundMode>
+        __aicore__ inline U ScalarCast(T valueIn);
+    """
+
+    param_list = """
+    **参数说明**
+
+    - value_in：被转换数据类型的标量。
+    - dtypeL：
+      目标数据类型，由Python前端指定。
+      - 支持：asc.half、asc.float16、asc.int32。
+    - round_mode：
+      精度转换处理模式，类型为RoundMode枚举值。
+      - asc.RoundMode.CAST_NONE：在转换有精度损失时表示CAST_RINT模式，不涉及精度损失时表示不取整。
+      - asc.RoundMode.CAST_RINT：rint，四舍六入五成双取整。
+      - asc.RoundMode.CAST_FLOOR：floor，向负无穷取整。
+      - asc.RoundMode.CAST_CEIL：ceil，向正无穷取整。
+      - asc.RoundMode.CAST_ROUND：round，四舍五入取整。
+      - asc.RoundMode.CAST_ODD：Von Neumann rounding，最近邻奇数舍入。
+      
+      - 对应支持关系
+
+        - float -> half(f322f16)：asc.RoundMode.CAST_ODD
+        - float -> int32(f322s32)：asc.RoundMode.CAST_ROUND、asc.RoundMode.CAST_CEIL、asc.RoundMode.CAST_FLOOR、asc.RoundMode.CAST_RINT
+
+      - ScalarCast的精度转换规则与Cast保持一致
+    """
+
+    return_list = """
+    **返回值说明**
+
+    返回值为转换后的标量，类型与dtype一致。
+
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        value_in = 2.5
+        dtype = asc.int32
+        round_mode = asc.RoundMode.CAST_ROUND
+        value_out = asc.scalar_cast(value_in, dtype, round_mode)
+    """
+
+    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+
+
+def scalar_get_sff_value_docstring():
+    func_introduction = """
+    获取一个 uint64_t 类型数字的二进制表示中，从最低有效位（LSB）开始第一个 0 或 1 出现的位置。
+    如果未找到指定值，则返回 -1。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        template <int countValue>
+        __aicore__ inline int64_t ScalarGetSFFValue(uint64_t valueIn);
+    """
+
+    param_list = """
+    **参数说明**
+
+    - value_in：
+      输入数据，类型为 uint64_t。
+      - 表示待查找的无符号整数。
+
+    - count_value：
+      指定要查找的值，类型为 int。
+      - 取值为 0 或 1。
+      - 0 表示查找从最低有效位开始的第一个 0 出现的位置；
+      - 1 表示查找从最低有效位开始的第一个 1 出现的位置。
+    """
+
+    return_list = """
+    **返回值说明**
+
+    - 返回 int64 类型的数：
+      表示 value_in 的二进制表示中，第一个匹配值（0 或 1）出现的位置。
+      - 如果未找到，则返回 -1。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        value_in = 28
+        count_value = 1
+        one_count = asc.scalar_get_sff_value(value_in, count_value)
+    """
+
+    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+
+
+def set_atomic_add_docstring():
+    func_introduction = """
+    调用该接口后，可对后续的从VECOUT/L0C/L1到GM的数据传输开启原子累加，
+    通过dtype参数设定不同类型的数据。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void SetAtomicAdd();
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dtype：
+      原子加操作的数据类型，由 Python 前端指定。
+      - 支持类型：asc.float16、asc.float32、asc.int32、asc.half。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 累加操作完成后，建议通过set_atomic_none关闭原子累加，以免影响后续相关指令功能。
+    - 该指令执行前不会对GM的数据做清零操作，开发者根据实际的算子逻辑判断是否需要清零，如果需要自行进行清零操作。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        dtype = asc.float32
+        asc.set_atomic_add(dtype)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def set_atomic_max_docstring():
+    func_introduction = """
+    原子操作函数，设置后续从VECOUT传输到GM的数据是否执行原子比较：
+    将待拷贝的内容和GM已有内容进行比较，将最大值写入GM。
+    可通过设置模板参数来设定不同的数据类型。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void SetAtomicMax();
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dtype：
+      原子 max 操作的数据类型，由 Python 前端指定。
+      - 支持类型：asc.float16、asc.float32、asc.int32、asc.half。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 使用完后，建议通过set_atomic_none关闭原子累加，以免影响后续相关指令功能。
+    - 对于910B，目前无法对bfloat16_t类型设置inf/nan模式。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        dtype = asc.int32
+        asc.set_atomic_max(dtype)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def set_atomic_min_docstring():
+    func_introduction = """
+    原子操作函数，设置后续从VECOUT传输到GM的数据是否执行原子比较，
+    将待拷贝的内容和GM已有内容进行比较，将最小值写入GM。
+    可通过设置模板参数来设定不同的数据类型。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void SetAtomicMin();
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dtype：
+      原子 min 操作的数据类型，由 Python 前端指定。
+      - 支持类型：asc.float16、asc.float32、asc.int32、asc.half。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    使用完后，建议通过set_atomic_none关闭原子累加，以免影响后续相关指令功能。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        dtype = asc.float16
+        asc.set_atomic_min(dtype)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def set_atomic_none_docstring():
+    func_introduction = """
+    清空原子操作的状态。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void SetAtomicNone();
+    """
+
+    param_list = """
+    **参数说明**
+
+    无。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.set_atomic_none()
+    """
+
+    return func_introduction, cpp_signature, param_list, "", "", py_example
+
+
+def set_atomic_type_docstring():
+    func_introduction = """
+    通过设置模板参数来设定原子操作不同的数据类型。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void SetAtomicType();
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dtype：
+      原子操作使用的数据类型，由 Python 前端指定。
+      - 支持类型：asc.float16、asc.float32、asc.int32、asc.half。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 需要和set_atomic_add、set_atomic_max、set_atomic_min配合使用。
+    - 使用完成后，建议清空原子操作的状态（详见set_atomic_none），以免影响后续相关指令功能。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        dtype = asc.float16
+        asc.set_atomic_type(dtype)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+
+DOC_HANDLES = {
+    "copy": copy_docstring,
+    "set_flag": set_wait_flag_docstring,
+    "get_block_num": get_block_num_docstring,
+    "get_block_idx": get_block_idx_docstring,
+    "get_data_block_size_in_bytes": get_data_block_size_in_bytes_docstring,
+    "get_program_counter": get_program_counter_docstring,
+    "get_system_cycle": get_system_cycle_docstring,
+    "trap": trap_docstring,
+    "data_cache_clean_and_invalid": data_cache_clean_and_invalid_docstring,
+    "data_copy": data_copy_docstring,
+    "data_copy_pad": data_copy_pad_docstring,
+    "duplicate": duplicate_docstring,
+    "get_icache_preload_status": get_icache_preload_status_docstring,
+    "get_sys_workspace": get_sys_workspace_docstring,
+    "icache_preload": icache_preload_docstring,
+    "pipe_barrier": pipe_barrier_docstring,
+    "wait_flag": set_wait_flag_docstring,
+    "printf": printf_docstring,
+    "scalar_cast": scalar_cast_docstring,
+    "scalar_get_sff_value": scalar_get_sff_value_docstring,
+    "dump_tensor": dump_tensor_docstring_docstring,
+    "gather_mask": gather_mask_docstring,
+    "set_vector_mask": set_vector_mask_docstring,
+    "pair_reduce_sum": pair_reduce_sum_docstring,
+    "repeat_reduce_sum": repeat_reduce_sum_docstring,
+    "whole_reduce_max": whole_reduce_max_docstring,
+    "whole_reduce_min": whole_reduce_min_docstring,
+    "whole_reduce_sum": whole_reduce_sum_docstring, 
+    "scatter": scatter_docstring,
+    "set_aipp_functions": set_aipp_functions_docstring,
+    "set_deq_scale": set_deq_scale_docstring,
+    "transpose": transpose_docstring,
+    "trans_data_to_5hd": trans_data_to_5hd_docstring,
+    "proposal_concat": proposal_concat_docstring,
+    "proposal_extract": proposal_extract_docstring,
+    "set_atomic_add": set_atomic_add_docstring,
+    "set_atomic_max": set_atomic_max_docstring,
+    "set_atomic_min": set_atomic_min_docstring,
+    "set_atomic_none": set_atomic_none_docstring,
+    "set_atomic_type": set_atomic_type_docstring,
+}
+
+
+def set_common_docstring(api_name: Optional[str] = None) -> Callable[[T], T]:
+    func_introduction = ""
+    cpp_signature = ""
+    param_list = ""
+    return_list = ""
+    constraint_list = ""
+    py_example = ""
+
+    if DOC_HANDLES.get(api_name) is None:
+        raise RuntimeError(f"Invalid api name {api_name}")
+
+    handler = DOC_HANDLES.get(api_name)
+    func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example = handler()
+    
+    docstr = f"""
+    {func_introduction}
+    {cpp_signature}
+    {param_list}
+    {return_list}
+    {constraint_list}
+    {py_example}
+    """
+
+    def decorator(fn: T) -> T:
+        fn.__doc__ = docstr
+        return fn
+
+    return decorator
