@@ -51,6 +51,9 @@ pyasc编程接口与Ascend C类库接口一一对应，旨在提供与Ascend C�
 - [Ascend C Python编程接口开发指南](docs/developer_guide.md)：介绍如何开发Ascend C API的Python编程接口。
 - [API文档自动生成工具使用指南](docs/API_docstring_generation_tool_guide.md)：介绍本项目接口文档的生成方法。
 
+## 👥 合作贡献者
+
+- 哈尔滨工业大学苏统华老师团队、王甜甜老师团队
 
 ## 📝相关信息
 
