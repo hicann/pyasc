@@ -419,7 +419,7 @@ void pyasc_bind_inline_block(py::module &m)
 {
     m.def("inline_block_at_end", [](Block *src, Block *dst, const std::optional<std::vector<Value>> &args) {
         // See RewriterBase::inlineBlockBefore()
-        ValueRange argValues(std::nullopt);
+        ValueRange argValues({});
         if (args)
             argValues = *args;
         auto before = dst->end();

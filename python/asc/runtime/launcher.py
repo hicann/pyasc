@@ -91,6 +91,7 @@ class Launcher:
         for arg in kernel_args:
             if isinstance(arg, np.generic):
                 input_blobs.append(arg.tobytes())
+                input_blobs.append(b"\0" * (8 - arg.itemsize))
             elif isinstance(arg, MemoryHandle):
                 if blobs_size(input_blobs) % 8 != 0:
                     input_blobs.append(b"\0" * 4)
