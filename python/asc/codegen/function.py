@@ -102,7 +102,7 @@ class Function(Generic[P, T]):
     @staticmethod
     def get_location(fn: Callable) -> FunctionLocation:
         code = fn.__code__
-        return FunctionLocation(code.co_filename, code.co_firstlineno - 1)
+        return FunctionLocation(code.co_filename, code.co_firstlineno)
 
     @staticmethod
     def get_source_lines(fn: Callable) -> Optional[Tuple[List[str], int]]:
