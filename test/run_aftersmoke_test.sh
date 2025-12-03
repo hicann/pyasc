@@ -59,15 +59,14 @@ for test in "${passed_examples[@]}"; do
     echo " ${test##*/}"
 done
 
-echo "[INFO] Failed tests list:"
-for test in "${failed_examples[@]}"; do
-    echo " ${test##*/}"
-done
-
 if [ ${#failed_examples[@]} -eq 0 ]; then
     echo "[INFO] All ${#test_npu_examples[@]} tests passed!"
     exit 0
 else
     echo "[ERROR] ${#failed_examples[@]} / ${#test_npu_examples[@]} tests failed!"
+    echo "[INFO] Failed tests list:"
+    for test in "${failed_examples[@]}"; do
+        echo " ${test##*/}"
+    done
     exit 1
 fi
