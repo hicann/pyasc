@@ -49,6 +49,7 @@ pyasc编程接口与Ascend C类库接口一一对应，旨在提供与Ascend C�
 - [调试调优](docs/op_debug_prof.md)：介绍常见的算子调试和调优方法。
 - [pyasc模块与架构](docs/architecture_introduction.md)：介绍pyasc的模块与架构。
 - [Ascend C Python编程接口开发指南](docs/developer_guide.md)：介绍如何开发Ascend C API的Python编程接口。
+- [pyasc的python语法支持情况说明](docs/python_syntax_support.md)：介绍pyasc项目支持和不支持的python语法。
 - [API文档自动生成工具使用指南](docs/API_docstring_generation_tool_guide.md)：介绍本项目接口文档的生成方法。
 
 ## 👥 合作贡献者
