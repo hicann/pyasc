@@ -27,7 +27,7 @@ def vadd_kernel(x: asc.GlobalAddress, y: asc.GlobalAddress, z: asc.GlobalAddress
 ```
 opType=v, DumpHead: AIV-0, CoreType=AIV, block dim=16, total_block_num=16, block_remain_len=1048024, block_initial_space=1048576, rsv=0, magic=5aa5bccd
 CANN Version: XX.XX, TimeStamp: XXXXXXXXXXXXXXXXX
-Before calculatiing.
+Before calculating.
 current index is 0.
 current index is 1.
 current index is 2.

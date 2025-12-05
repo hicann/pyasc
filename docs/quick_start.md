@@ -205,7 +205,7 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
 
      ```bash
      source /usr/local/Ascend/set_env.sh
-     # 若使用仿真器运行，需设置以下环境变量，NPU环境上板运行无需设置
+     # 若采用仿真器模式运行，需设置以下环境变量；若采用NPU上板模式运行则无需设置
      export LD_LIBRARY_PATH=$ASCEND_HOME_PATH/tools/simulator/Ascend910B1/lib:$LD_LIBRARY_PATH
      ```
 
@@ -213,7 +213,7 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
 
      ```bash
      source $HOME/Ascend/set_env.sh
-     # 若使用仿真器运行，需设置以下环境变量，NPU环境上板运行无需设置
+     # 若采用仿真器模式运行，需设置以下环境变量；若采用NPU上板模式运行则无需设置
      export LD_LIBRARY_PATH=$ASCEND_HOME_PATH/tools/simulator/Ascend910B1/lib:$LD_LIBRARY_PATH
      ```
 
@@ -221,7 +221,7 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
 
      ```bash
      source ${cann_install_path}/set_env.sh
-     # 若使用仿真器运行，需设置以下环境变量，NPU环境上板运行无需设置
+     # 若采用仿真器模式运行，需设置以下环境变量；若采用NPU上板模式运行则无需设置
      export LD_LIBRARY_PATH=$ASCEND_HOME_PATH/tools/simulator/Ascend910B1/lib:$LD_LIBRARY_PATH
      ```
 
@@ -258,6 +258,13 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
 ```bash
 cd pyasc
 python3 ./python/tutorials/01_add/add.py
+```
+注：如下所示，样例代码中默认是以仿真器模式运行，请确保已完成[运行环境准备](#运行环境准备)中的[配置环境变量](#envset)步骤。
+```python
+if __name__ == "__main__":
+    logging.info("[INFO] start process sample add.")
+    vadd_custom(config.Backend.Model) # 配置仿真器模式
+    logging.info("[INFO] Sample add run success.")
 ```
 
 ## UT测试（可选）
