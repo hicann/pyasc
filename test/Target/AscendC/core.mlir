@@ -81,7 +81,7 @@ func.func @emit_global_tensor(%alloc_0 : memref<1024xf32, 22>, %arg0 : i32, %arg
   %5 = ascendc.global_tensor.get_value %global_tensor, %arg2 : !ascendc.global_tensor<i32>, ui64, f32
   ascendc.global_tensor.set_l2_cache_hint %global_tensor{mode = 0 : i32, rwMode = 3 : i32} : !ascendc.global_tensor<i32>
   ascendc.global_tensor.set_shape_info %global_tensor, %3 : !ascendc.global_tensor<i32>, !ascendc.shape_info
-  ascendc.global_tensor.set_value %global_tensor, %arg2, %arg0, : !ascendc.global_tensor<i32>, ui64, i32
+  ascendc.global_tensor.set_value %global_tensor, %arg2, %arg0 : !ascendc.global_tensor<i32>, ui64, i32
   %bracket3 = ascendc.global_tensor.bracket %global_tensor(%arg1) : !ascendc.global_tensor<i32>, index, !ascendc.global_tensor<i32>
   return
 }

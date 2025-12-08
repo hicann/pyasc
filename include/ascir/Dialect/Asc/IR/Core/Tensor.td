@@ -114,7 +114,7 @@ def AscendC_GlobalTensorSetValueOp : APIOp<"global_tensor.set_value", "SetValue"
   let summary = "Call `AscendC::GlobalTensor::SetValue` method";
   let arguments = (ins AscendC_GlobalTensor:$tensor, UI64:$offset, AnyType:$value);
   let assemblyFormat = [{
-    $tensor `,` $offset `,` $value `,` attr-dict `:` qualified(type($tensor)) `,`
+    $tensor `,` $offset `,` $value attr-dict `:` qualified(type($tensor)) `,`
     qualified(type($offset)) `,` qualified(type($value))
   }];
 }
