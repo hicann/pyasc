@@ -138,4 +138,13 @@ def AscendC_DataCopyPadNd2NzOp : DataCopyOp<"data_copy_pad_nd2nz", "DataCopyPad"
                        AscendC_DataCopyParams:$dataCopyParams,
                        AscendC_Nd2NzParams:$nd2nzParams);
 }
+
+def AscendC_LoadImageToLocalOp : APIOp<"load_image_to_local", "LoadImageToLocal", [AscFunc]> {
+  let description = "Load image data from Global Memory to LocalTensor (supports TPosition A1/B1). ";
+  let arguments = (ins 
+    AscendC_LocalTensor:$dst,  
+    AscendC_LoadImageToLocalParams:$loadDataParams 
+  );
+}
+
 #endif // ASC_BASIC_OP_DATACOPY_TD

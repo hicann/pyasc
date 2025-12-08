@@ -12,7 +12,8 @@ from ..core.dtype import KnownTypes
 from ..core.ir_value import RuntimeInt, materialize_ir_value as _mat
 from ..core.tensor import BaseTensor, GlobalTensor, LocalTensor
 from ..core.types import (CopyRepeatParams, DataCopyEnhancedParams, DataCopyParams, DataCopyCO12DstParams,
-                          DataCopyExtParams, DataCopyPadExtParams, DataCopyPadParams, Nd2NzParams, Nz2NdParamsFull)
+                          DataCopyExtParams, DataCopyPadExtParams, DataCopyPadParams, 
+                          LoadImageToLocalParams, Nd2NzParams, Nz2NdParamsFull)
 from ..core.utils import OverloadDispatcher, require_jit, global_builder
 from .utils import set_common_docstring
 
@@ -265,3 +266,18 @@ def data_copy_pad(dst: BaseTensor, src: BaseTensor, *args, **kwargs) -> None:
                                              data_copy_params.to_ir(), nd2nz_params.to_ir())
 
     dispatcher(*args, **kwargs)
+
+
+@overload
+def load_image_to_local(dst: LocalTensor, load_data_params: LoadImageToLocalParams) -> None:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="load_image_to_local")
+def load_image_to_local(dst: LocalTensor, load_data_params: LoadImageToLocalParams) -> None:
+    builder = global_builder.get_ir_builder()
+    builder.create_asc_LoadImageToLocalOp(
+        dst.to_ir(),  
+        load_data_params.to_ir() 
+    )

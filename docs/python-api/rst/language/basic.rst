@@ -33,6 +33,7 @@ Common operations
     get_system_cycle
     get_sys_workspace
     icache_preload
+    load_image_to_local
     pipe_barrier
     printf
     proposal_concat
