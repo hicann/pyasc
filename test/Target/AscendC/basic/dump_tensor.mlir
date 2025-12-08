@@ -61,3 +61,21 @@ func.func @emit_dump_acc_chk_point(%arg0: !ascendc.global_tensor<*xf32>, %c1_ui3
   ascendc.dump_acc_chk_point %arg0, %c1_ui32, %c2_ui32, %c3_ui32 : !ascendc.global_tensor<*xf32>, ui32, ui32, ui32
   return
 }
+
+// CHECK-LABEL:void emit_metrics_prof_start() {
+// CHECK-NEXT:  AscendC::MetricsProfStart(); 
+// CHECK-NEXT:  return; 
+// CHECK-NEXT: }
+func.func @emit_metrics_prof_start() {
+  ascendc.metrics_prof_start
+  return
+}
+
+// CHECK-LABEL:void emit_metrics_prof_stop() {
+// CHECK-NEXT:  AscendC::MetricsProfStop(); 
+// CHECK-NEXT:  return; 
+// CHECK-NEXT: }
+func.func @emit_metrics_prof_stop() {
+  ascendc.metrics_prof_stop
+  return
+}

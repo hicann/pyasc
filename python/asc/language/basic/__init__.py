@@ -37,7 +37,14 @@ from .common import (
 from .data_cache import data_cache_clean_and_invalid, get_icache_preload_status, icache_preload
 from .data_conversion import transpose, trans_data_to_5hd
 from .data_copy import copy, data_copy, data_copy_pad, load_image_to_local
-from .dump_tensor import dump_tensor, printf, print_time_stamp, dump_acc_chk_point
+from .dump_tensor import (
+    dump_tensor, 
+    printf, 
+    print_time_stamp, 
+    dump_acc_chk_point, 
+    metrics_prof_start, 
+    metrics_prof_stop,
+)
 from .scalar import scalar_cast, scalar_get_sff_value
 from .sys_var import (
     get_arch_version,
@@ -162,6 +169,8 @@ __all__ = [
     "printf",
     "print_time_stamp",
     "dump_acc_chk_point",
+    "metrics_prof_start",
+    "metrics_prof_stop",
     # .scalar
     "scalar_cast",
     "scalar_get_sff_value",

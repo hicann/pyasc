@@ -34,6 +34,8 @@ Common operations
     get_sys_workspace
     icache_preload
     load_image_to_local
+    metrics_prof_start
+    metrics_prof_stop
     pipe_barrier
     printf
     proposal_concat

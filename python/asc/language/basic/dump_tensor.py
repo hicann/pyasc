@@ -96,3 +96,27 @@ def dump_acc_chk_point(tensor: BaseTensor, index: RuntimeInt, count_off: Runtime
         _mat(count_off, KnownTypes.uint32).to_ir(),
         _mat(dump_size, KnownTypes.uint32).to_ir(),
     )
+
+
+@overload
+def metrics_prof_start() -> None:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="metrics_prof_start")
+def metrics_prof_start() -> None:
+    builder = global_builder.get_ir_builder()
+    builder.create_asc_MetricsProfStartOp()
+
+
+@overload
+def metrics_prof_stop() -> None:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="metrics_prof_stop")
+def metrics_prof_stop() -> None:
+    builder = global_builder.get_ir_builder()
+    builder.create_asc_MetricsProfStopOp()

@@ -780,6 +780,88 @@ def dump_tensor_docstring_docstring():
     return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
 
 
+def metrics_prof_start_docstring():
+    func_introduction = """
+    用于设置性能数据采集信号启动，和asc.metrics_prof_stop()配合使用。
+    使用msProf工具进行算子上板调优时，可在kernel侧代码段前后分别调用asc.metrics_prof_start()和asc.metrics_prof_stop()来指定需要调优的代码段范围。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void MetricsProfStart()
+    
+    """
+
+    param_list = """
+    **参数说明**
+
+    无。
+    """
+
+    return_list = """
+    **返回值说明**
+
+    无。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        import asc
+
+        asc.metrics_prof_start()
+
+    """
+
+    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+
+
+def metrics_prof_stop_docstring():
+    func_introduction = """
+    设置性能数据采集信号停止，和asc.metrics_prof_start()配合使用。
+    使用msProf工具进行算子上板调优时，可在kernel侧代码段前后分别调用asc.metrics_prof_start()和asc.metrics_prof_stop()来指定需要调优的代码段范围。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void MetricsProfStop()
+    
+    """
+
+    param_list = """
+    **参数说明**
+
+    无。
+    """
+
+    return_list = """
+    **返回值说明**
+
+    无。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        import asc
+        
+        asc.metrics_prof_stop()
+
+    """
+
+    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+
+
 def printf_docstring():
     func_introduction = """
     该接口提供CPU域/NPU域调试场景下的格式化输出功能。
@@ -3176,6 +3258,8 @@ DOC_HANDLES = {
     "load_image_to_local": load_image_to_local_docstring,
     "pipe_barrier": pipe_barrier_docstring,
     "wait_flag": set_wait_flag_docstring,
+    "metrics_prof_start": metrics_prof_start_docstring,
+    "metrics_prof_stop": metrics_prof_stop_docstring,
     "printf": printf_docstring,
     "scalar_cast": scalar_cast_docstring,
     "scalar_get_sff_value": scalar_get_sff_value_docstring,

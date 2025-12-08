@@ -47,7 +47,14 @@ from .basic.common import (
 from .basic.data_cache import data_cache_clean_and_invalid, get_icache_preload_status, icache_preload
 from .basic.data_copy import copy, data_copy, data_copy_pad, load_image_to_local
 from .basic.data_conversion import transpose, trans_data_to_5hd
-from .basic.dump_tensor import dump_tensor, printf, print_time_stamp, dump_acc_chk_point
+from .basic.dump_tensor import (
+    dump_tensor, 
+    printf, 
+    print_time_stamp, 
+    dump_acc_chk_point, 
+    metrics_prof_start, 
+    metrics_prof_stop,
+)
 from .basic.scalar import scalar_cast, scalar_get_sff_value
 from .basic.sys_var import (
     get_arch_version,
