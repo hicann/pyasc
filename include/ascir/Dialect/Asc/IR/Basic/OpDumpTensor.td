@@ -42,4 +42,13 @@ def AscendC_DumpAccChkPointOp : APIOp<"dump_acc_chk_point", "DumpAccChkPoint", [
     AnyType:$countOff, AnyType:$dumpSize);
 }
 
+def AscendC_MetricsProfStartOp : APIOp<"metrics_prof_start","MetricsProfStart", [AscFunc]> {
+  let description = "Start performance metrics collection for a code region; pair with MetricsProfStop.";
+  let assemblyFormat = "attr-dict";
+}
+
+def AscendC_MetricsProfStopOp : APIOp<"metrics_prof_stop","MetricsProfStop", [AscFunc]> {
+  let description = "Stop performance metrics collection started by MetricsProfStart.";
+  let assemblyFormat = "attr-dict";
+}
 #endif // ASC_BASIC_OP_DUMPTNESOR_TD

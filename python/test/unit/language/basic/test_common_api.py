@@ -448,6 +448,26 @@ def test_dump_tensor(mock_launcher_run):
     assert mock_launcher_run.call_count == 1
 
 
+def test_metrics_prof_start(mock_launcher_run):
+
+    @asc.jit
+    def kernel_metrics_prof_start() -> None:
+        asc.metrics_prof_start()
+
+    kernel_metrics_prof_start[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_metrics_prof_stop(mock_launcher_run):
+
+    @asc.jit
+    def kernel_metrics_prof_stop() -> None:
+        asc.metrics_prof_stop()
+
+    kernel_metrics_prof_stop[1]()
+    assert mock_launcher_run.call_count == 1
+
+
 def test_print_time_stamp(mock_launcher_run):
 
     @asc.jit
