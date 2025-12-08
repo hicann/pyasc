@@ -299,6 +299,17 @@ def test_data_copy_pad(mock_launcher_run):
     assert mock_launcher_run.call_count == 1
 
 
+def test_load_image_to_local(mock_launcher_run):
+    
+    @asc.jit
+    def kernel_load_image_to_local() -> None:
+        dst = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.A1, addr=0, tile_size=128)
+        load_data_params = asc.LoadImageToLocalParams(2, 2, 0, 0, 2, 0, 0, 0, 0)
+        asc.load_image_to_local(dst, load_data_params)
+    kernel_load_image_to_local[1]()
+    assert mock_launcher_run.call_count == 1
+
+
 def test_get_block_idx(mock_launcher_run):
 
     @asc.jit

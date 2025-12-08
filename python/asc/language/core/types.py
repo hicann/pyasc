@@ -704,6 +704,55 @@ class GatherMaskParams(IRValue):
         return self.handle
 
 
+class LoadImageToLocalParams(IRValue):
+
+    @overload
+    def __init__(self, horiz_size: int = 2, vert_size: int = 2, horiz_start_pos: int = 0, 
+                 vert_start_pos: int = 0, src_horiz_size: int = 2, top_pad_size: int = 0, 
+                 bot_pad_size: int = 0, left_pad_size: int = 0, right_pad_size: int = 0, 
+                 sid: int = 0) -> None:
+        ...
+
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+        ...
+
+    @require_jit
+    def __init__(self, horiz_size: RuntimeInt = 2, vert_size: RuntimeInt = 2, 
+                 horiz_start_pos: RuntimeInt = 0, vert_start_pos: RuntimeInt = 0, 
+                 src_horiz_size: RuntimeInt = 2, top_pad_size: RuntimeInt = 0, 
+                 bot_pad_size: RuntimeInt = 0, left_pad_size: RuntimeInt = 0, 
+                 right_pad_size: RuntimeInt = 0,
+                 handle: Optional[IRHandle] = None) -> None:
+        if handle is not None:
+            self.handle = handle
+            return
+        builder = global_builder.get_ir_builder()
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_LoadImageToLocalParamsType(),
+            [
+                _mat(horiz_size).to_ir(),
+                _mat(vert_size).to_ir(),
+                _mat(horiz_start_pos).to_ir(),
+                _mat(vert_start_pos).to_ir(),
+                _mat(src_horiz_size).to_ir(),
+                _mat(top_pad_size).to_ir(),
+                _mat(bot_pad_size).to_ir(),
+                _mat(left_pad_size).to_ir(),
+                _mat(right_pad_size).to_ir(),
+                
+            ],
+            builder.get_type_array_attr([builder.get_ui16_type()] * 9),
+        )
+
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> LoadImageToLocalParams:
+        return cls(handle=handle)
+
+    def to_ir(self) -> IRHandle:
+        return self.handle
+
+
 class Nd2NzParams(IRValue):
 
     @overload

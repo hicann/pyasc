@@ -232,6 +232,11 @@ def LoadDataRepeatParam : APIType<"LoadDataRepeatParam"> {
   let apiName = "AscendC::LoadDataRepeatParam";
 }
 
+def LoadImageToLocalParams : APIType<"LoadImageToLocalParams"> {
+  let mnemonic = "load_image_to_local_params";
+  let apiName = "AscendC::LoadImageToLocalParams";
+}
+
 def LocalTensor : APIType {
   let mnemonic = "local_tensor";
   let apiName = "AscendC::LocalTensor";

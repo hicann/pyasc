@@ -100,3 +100,26 @@ func.func @emit_data_copy_slice(%arg0 : !ascendc.global_tensor<i32>, %arg1 : !as
   ascendc.data_copy_slice %arg1, %arg0, %14 ,%15, %14 ,%15,  %arg4 {operandSegmentSizes = array<i32: 1, 1, 2, 2, 1>} : !ascendc.local_tensor<i32>, !ascendc.global_tensor<i32>, !ascendc.slice_info, !ascendc.slice_info, !ascendc.slice_info, !ascendc.slice_info, ui32
   return
 }
+
+// CHECK-LABEL:void emit_load_image_to_local(__gm__ uint64_t* v1) {
+// CHECK-NEXT:  set_ffts_base_addr(*v1);
+// CHECK-NEXT:  constexpr uint32_t v2 = 128;
+// CHECK-NEXT:  constexpr uint32_t v3 = 0;
+// CHECK-NEXT:  constexpr int32_t c2_i32 = 2;
+// CHECK-NEXT:  constexpr int32_t c0_i32 = 0;
+// CHECK-NEXT:  AscendC::LocalTensor<half> v4 = AscendC::LocalTensor<half>(AscendC::TPosition::A1, v3, v2);
+// CHECK-NEXT:  AscendC::LoadImageToLocalParams v5{static_cast<uint16_t>(c2_i32), static_cast<uint16_t>(c2_i32), static_cast<uint16_t>(c0_i32), static_cast<uint16_t>(c0_i32), static_cast<uint16_t>(c2_i32), static_cast<uint16_t>(c0_i32), static_cast<uint16_t>(c0_i32), static_cast<uint16_t>(c0_i32), static_cast<uint16_t>(c0_i32)};
+// CHECK-NEXT:  AscendC::LoadImageToLocal(v4, v5);
+// CHECK-NEXT:  return;
+// CHECK-NEXT:}
+func.func @emit_load_image_to_local(%arg0: memref<?xui64, 22>) {
+  ascendc.set_ffts_base_addr %arg0 : memref<?xui64, 22> 
+  %0 = "emitc.constant"() <{value = 128 : ui32}> : () -> ui32 
+  %1 = "emitc.constant"() <{value = 0 : ui32}> : () -> ui32 
+  %c2_i32 = arith.constant 2 : i32 
+  %c0_i32 = arith.constant 0 : i32 
+  %2 = ascendc.local_tensor_v2 a1, %1, %0 : !ascendc.local_tensor<*xf16> 
+  %3 = ascendc.construct !ascendc.load_image_to_local_params(%c2_i32, %c2_i32, %c0_i32, %c0_i32, %c2_i32, %c0_i32, %c0_i32, %c0_i32, %c0_i32) [ui16, ui16, ui16, ui16, ui16, ui16, ui16, ui16, ui16] : i32, i32, i32, i32, i32, i32, i32, i32, i32 
+  ascendc.load_image_to_local %2, %3 : !ascendc.local_tensor<*xf16>, !ascendc.load_image_to_local_params 
+  return 
+}
