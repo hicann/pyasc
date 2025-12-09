@@ -33,6 +33,35 @@ func.func @get_set_value(%arg0: !ascendc.local_tensor<64xf32>, %arg1: ui32) {
     return
 }
 
+// CHECK-LABEL: func.func @get_set_value_for
+// CHECK:         %0 = ascendc.pipe
+// CHECK-NEXT:    %1 = ascendc.pipe.fetch_event_id %0, v_s : i8
+// CHECK-NEXT:    ascendc.set_flag v_s, %1 : i8
+// CHECK-NEXT:    ascendc.wait_flag v_s, %1 : i8
+// CHECK-NEXT:    %2 = ascendc.global_tensor.get_value %arg0, %arg2 : !ascendc.global_tensor<64xf32>, i32, f32
+// CHECK-NEXT:    %3 = ascendc.pipe
+// CHECK-NEXT:    %4 = ascendc.pipe.fetch_event_id %3, s_v : i8
+// CHECK-NEXT:    ascendc.set_flag s_v, %4 : i8
+// CHECK-NEXT:    ascendc.wait_flag s_v, %4 : i8
+// CHECK-NEXT:    %5 = ascendc.pipe
+// CHECK-NEXT:    %6 = ascendc.pipe.fetch_event_id %5, v_s : i8
+// CHECK-NEXT:    ascendc.set_flag v_s, %6 : i8
+// CHECK-NEXT:    ascendc.wait_flag v_s, %6 : i8
+// CHECK-NEXT:    scf.for %arg5 = %arg2 to %arg3 step %arg2  : i32 {
+// CHECK-NEXT:      ascendc.global_tensor.set_value %arg0, %arg4, %2 : !ascendc.global_tensor<64xf32>, ui64, f32
+// CHECK-NEXT:    }
+// CHECK-NEXT:    %7 = ascendc.pipe
+// CHECK-NEXT:    %8 = ascendc.pipe.fetch_event_id %7, s_v : i8
+// CHECK-NEXT:    ascendc.set_flag s_v, %8 : i8
+// CHECK-NEXT:    ascendc.wait_flag s_v, %8 : i8
+func.func @get_set_value_for(%arg0: !ascendc.global_tensor<64xf32>, %arg1: ui32, %arg2: i32, %arg3: i32, %arg4: ui64) {
+    %0 = ascendc.global_tensor.get_value %arg0, %arg2 : !ascendc.global_tensor<64xf32>, i32, f32
+    scf.for %arg5 = %arg2 to %arg3 step %arg2 : i32 {
+        ascendc.global_tensor.set_value %arg0, %arg4, %0 : !ascendc.global_tensor<64xf32>, ui64, f32
+    }
+    return
+}
+
 // CHECK-LABEL: func.func @insert_pipe_v_pipe_all
 // CHECK:       ascendc.duplicate_l2 %arg0, %arg1, %arg2 : !ascendc.local_tensor<64xf32>, f32, i32
 // CHECK-NEXT:  ascendc.pipe_barrier pipe_v

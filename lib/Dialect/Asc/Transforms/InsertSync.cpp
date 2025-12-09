@@ -70,33 +70,37 @@ void createSetGetValueSync(bool isBefore, OpBuilder &builder, Location loc)
 
 void syncGetValueOp(func::FuncOp &funcOp)
 {
-    funcOp.walk([](ascendc::LocalTensorGetValueOp op) {
-        auto loc = op.getLoc();
-        OpBuilder builder(op);
-        createSetGetValueSync(true, builder, loc);
-        builder.setInsertionPointAfter(op);
-        createSetGetValueSync(false, builder, loc);
+    funcOp.walk([](ascendc::APIOp op) {
+        if (isa<ascendc::LocalTensorGetValueOp, ascendc::GlobalTensorGetValueOp>(op)) {
+          auto loc = op.getLoc();
+          OpBuilder builder(op);
+          createSetGetValueSync(true, builder, loc);
+          builder.setInsertionPointAfter(op);
+          createSetGetValueSync(false, builder, loc);
+        }
     });
 }
 
 void syncSetValueOp(func::FuncOp &funcOp)
 {
-    funcOp.walk([](ascendc::LocalTensorSetValueOp op) {
-        auto loc = op.getLoc();
-        OpBuilder builder(op);
-        if (auto forOp = op->getParentOfType<scf::ForOp>()) {
-            constexpr unsigned oneOpOneYield = 2U;
-            if (forOp.getBody()->getOperations().size() == oneOpOneYield) {
-                builder.setInsertionPoint(forOp);
-                createSetGetValueSync(true, builder, loc);
-                builder.setInsertionPointAfter(forOp);
-                createSetGetValueSync(false, builder, loc);
-                return;
+    funcOp.walk([](ascendc::APIOp op) {
+        if (isa<ascendc::LocalTensorSetValueOp, ascendc::GlobalTensorSetValueOp>(op)) {
+            auto loc = op.getLoc();
+            OpBuilder builder(op);
+            if (auto forOp = op->getParentOfType<scf::ForOp>()) {
+                constexpr unsigned oneOpOneYield = 2U;
+                if (forOp.getBody()->getOperations().size() == oneOpOneYield) {
+                    builder.setInsertionPoint(forOp);
+                    createSetGetValueSync(true, builder, loc);
+                    builder.setInsertionPointAfter(forOp);
+                    createSetGetValueSync(false, builder, loc);
+                    return;
+                }
             }
+            createSetGetValueSync(true, builder, loc);
+            builder.setInsertionPointAfter(op);
+            createSetGetValueSync(false, builder, loc);
         }
-        createSetGetValueSync(true, builder, loc);
-        builder.setInsertionPointAfter(op);
-        createSetGetValueSync(false, builder, loc);
     });
 }
 
