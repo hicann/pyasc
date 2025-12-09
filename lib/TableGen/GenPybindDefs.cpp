@@ -25,80 +25,77 @@
 using namespace llvm;
 using mlir::raw_indented_ostream;
 
-cl::opt<std::string> builderClass(
-    "builder-class", cl::init("PyOpBuilder"),
-    cl::desc("Operation builder class name for 'gen-pybind-defs' action"));
+cl::opt<std::string> builderClass("builder-class", cl::init("PyOpBuilder"),
+                                  cl::desc("Operation builder class name for 'gen-pybind-defs' action"));
 
 namespace {
 
 using TypeNamePair = std::pair<std::string, std::string>;
 
-class GenPybindDefs
-{
-  	const RecordKeeper &records;
+class GenPybindDefs {
+    const RecordKeeper &records;
 
-public:
-	explicit GenPybindDefs(const RecordKeeper &records) : records(records) {}
+  public:
+    explicit GenPybindDefs(const RecordKeeper &records) : records(records) {}
 
-	void run(raw_ostream &os);
+    void run(raw_ostream &os);
 };
 
 void printMethod(raw_indented_ostream &os, const Record *def)
 {
-	if (def->getValueAsBit("skipDefaultBuilders")) {
-		return;
-	}
-	auto name = mlir::asc::fetchOpClass(def->getName());
-	std::vector<mlir::asc::VirtualArg> args;
-	mlir::asc::fetchResults(def->getValueAsDag("results"), args);
-	bool retVal = args.size() == 1;
-	mlir::asc::fetchArguments(def->getValueAsDag("arguments"), args);
-	os << ".def(\"create_";
-	auto dialectName = def->getValueAsDef("opDialect")->getValueAsString("name");
-	if (dialectName == "ascendc") {
-		os << "asc";
-	} else {
-		os << dialectName;
-	}
-	os << '_' << name
-		<< "\", [](" << builderClass.getValue() << " &self";
-	for (const auto &arg : args) {
-		os << ", const " << arg.cppType << " &" << arg.name;
-	}
-	os << ") ";
-	if (retVal) {
-		os << "-> Value ";
-	}
-	os << "{\n";
-	os.indent();
-	if (retVal) {
-		os << "return ";
-	}
-	os << "self.create<" << def->getValueAsString("cppNamespace") << "::" << name
-		<< ">(";
-	interleaveComma(args, os, [&os](const auto &arg) { os << arg.substitution; });
-	os << ");\n";
-	os.unindent() << "}";
-	auto lastRequired = std::find_if(args.rbegin(), args.rend(), [](const mlir::asc::VirtualArg &arg) { return !arg.optional; });
-	std::for_each(lastRequired, args.rend(), [](auto &a) { a.optional = false; });
-	for (const auto &arg : args) {
-		os << ", \"" << arg.name << "\"_a";
-		if (arg.optional) {
-			os << " = " << arg.defaultValue;
-		}
-	}
-	os << ")\n";
+    if (def->getValueAsBit("skipDefaultBuilders")) {
+        return;
+    }
+    auto name = mlir::asc::fetchOpClass(def->getName());
+    std::vector<mlir::asc::VirtualArg> args;
+    mlir::asc::fetchResults(def->getValueAsDag("results"), args);
+    bool retVal = args.size() == 1;
+    mlir::asc::fetchArguments(def->getValueAsDag("arguments"), args);
+    os << ".def(\"create_";
+    auto dialectName = def->getValueAsDef("opDialect")->getValueAsString("name");
+    if (dialectName == "ascendc") {
+        os << "asc";
+    } else {
+        os << dialectName;
+    }
+    os << '_' << name << "\", [](" << builderClass.getValue() << " &self";
+    for (const auto &arg : args) {
+        os << ", const " << arg.cppType << " &" << arg.name;
+    }
+    os << ") ";
+    if (retVal) {
+        os << "-> Value ";
+    }
+    os << "{\n";
+    os.indent();
+    if (retVal) {
+        os << "return ";
+    }
+    os << "self.create<" << def->getValueAsString("cppNamespace") << "::" << name << ">(";
+    interleaveComma(args, os, [&os](const auto &arg) { os << arg.substitution; });
+    os << ");\n";
+    os.unindent() << "}";
+    auto lastRequired =
+        std::find_if(args.rbegin(), args.rend(), [](const mlir::asc::VirtualArg &arg) { return !arg.optional; });
+    std::for_each(lastRequired, args.rend(), [](auto &a) { a.optional = false; });
+    for (const auto &arg : args) {
+        os << ", \"" << arg.name << "\"_a";
+        if (arg.optional) {
+            os << " = " << arg.defaultValue;
+        }
+    }
+    os << ")\n";
 }
 
 void GenPybindDefs::run(raw_ostream &os)
 {
-	raw_indented_ostream ios(os);
-	for (const auto *def : records.getAllDerivedDefinitions("Op")) {
-		printMethod(ios, def);
-	}
+    raw_indented_ostream ios(os);
+    for (const auto *def : records.getAllDerivedDefinitions("Op")) {
+        printMethod(ios, def);
+    }
 }
 
-TableGen::Emitter::OptClass<GenPybindDefs>
-    registration("gen-pybind-defs", "Generate PyOpBuilder methods from MLIR operation defs");
+TableGen::Emitter::OptClass<GenPybindDefs> registration("gen-pybind-defs",
+                                                        "Generate PyOpBuilder methods from MLIR operation defs");
 
 } // namespace

@@ -35,62 +35,68 @@ namespace {
 using PyStructVector = SmallVector<emitasc::PyStructType>;
 
 struct PyStructTypeHash {
-  std::hash<const void *> h;
-  size_t operator()(emitasc::PyStructType type) const { return h(type.getAsOpaquePointer()); }
+    std::hash<const void *> h;
+    size_t operator()(emitasc::PyStructType type) const { return h(type.getAsOpaquePointer()); }
 };
 
-PyStructVector deduplicate(ArrayRef<emitasc::PyStructType> pyStructs) {
-  PyStructVector result;
-  std::unordered_set<emitasc::PyStructType, PyStructTypeHash> unique(pyStructs.begin(), pyStructs.end());
-  for (auto pyStruct : pyStructs) {
-    auto it = unique.find(pyStruct);
-    if (it == unique.end())
-      continue;
-    result.push_back(pyStruct);
-    unique.erase(it);
-  }
-  return result;
+PyStructVector deduplicate(ArrayRef<emitasc::PyStructType> pyStructs)
+{
+    PyStructVector result;
+    std::unordered_set<emitasc::PyStructType, PyStructTypeHash> unique(pyStructs.begin(), pyStructs.end());
+    for (auto pyStruct : pyStructs) {
+        auto it = unique.find(pyStruct);
+        if (it == unique.end())
+            continue;
+        result.push_back(pyStruct);
+        unique.erase(it);
+    }
+    return result;
 }
 
-void CollectPyStructTypes(PyStructVector &structs, Value &arg) {
-  arg.getType().walk([&](Type type) {
-    if (auto pyStructType = dyn_cast<emitasc::PyStructType>(type)) {
-      structs.push_back(pyStructType);
-    }
-  });
+void CollectPyStructTypes(PyStructVector &structs, Value &arg)
+{
+    arg.getType().walk([&](Type type) {
+        if (auto pyStructType = dyn_cast<emitasc::PyStructType>(type)) {
+            structs.push_back(pyStructType);
+        }
+    });
 }
 
 class DeclarePyStructPass : public ascendc::impl::DeclarePyStructBase<DeclarePyStructPass> {
-public:
-  void runOnOperation() override {
-    auto mod = getOperation();
-    PyStructVector structs;
-    mod.walk([&](Operation *op) {
-      for (auto &region : op->getRegions()) {
-        for (auto &block : region) {
-          for (auto &arg : block.getArguments()) {
-            CollectPyStructTypes(structs, arg);
-          }
+  public:
+    void runOnOperation() override
+    {
+        auto mod = getOperation();
+        PyStructVector structs;
+        mod.walk([&](Operation *op) {
+            for (auto &region : op->getRegions()) {
+                for (auto &block : region) {
+                    for (auto &arg : block.getArguments()) {
+                        CollectPyStructTypes(structs, arg);
+                    }
+                }
+            }
+
+            for (auto result : op->getResults()) {
+                CollectPyStructTypes(structs, result);
+            }
+        });
+
+        auto pyStructs = deduplicate(structs);
+        auto builder = ImplicitLocOpBuilder::atBlockBegin(mod->getLoc(), mod.getBody());
+        for (auto pyStruct : pyStructs) {
+            builder.create<emitasc::DeclarePyStructOp>(pyStruct);
         }
-      }
-
-      for (auto result : op->getResults()) {
-        CollectPyStructTypes(structs, result);
-      }
-    });
-
-    auto pyStructs = deduplicate(structs);
-    auto builder = ImplicitLocOpBuilder::atBlockBegin(mod->getLoc(), mod.getBody());
-    for (auto pyStruct : pyStructs) {
-      builder.create<emitasc::DeclarePyStructOp>(pyStruct);
     }
-  }
 };
 
 } // namespace
 
 namespace mlir {
 namespace ascendc {
-std::unique_ptr<Pass> createDeclarePyStructPass() { return std::make_unique<DeclarePyStructPass>(); }
+std::unique_ptr<Pass> createDeclarePyStructPass()
+{
+    return std::make_unique<DeclarePyStructPass>();
+}
 } // namespace ascendc
 } // namespace mlir

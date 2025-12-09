@@ -18,17 +18,14 @@ using namespace mlir::ascendc;
 // BlockReduceSum operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::BlockReduceSumL1Op op) {
-    auto& os = emitter.ostream();
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::BlockReduceSumL1Op op)
+{
+    auto &os = emitter.ostream();
     auto maskName = printMask(emitter, op);
-    os << ascNamespace << "::" << op.getAPIName() << "("
-       << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc()) << ", "
-       << emitter.getOrCreateName(op.getRepeatTime()) << ", "
-       << maskName << ", "
-       << emitter.getOrCreateName(op.getDstRepStride()) << ", "
-       << emitter.getOrCreateName(op.getSrcBlkStride()) << ", "
-       << emitter.getOrCreateName(op.getSrcRepStride()) << ")";
+    os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+       << emitter.getOrCreateName(op.getSrc()) << ", " << emitter.getOrCreateName(op.getRepeatTime()) << ", "
+       << maskName << ", " << emitter.getOrCreateName(op.getDstRepStride()) << ", "
+       << emitter.getOrCreateName(op.getSrcBlkStride()) << ", " << emitter.getOrCreateName(op.getSrcRepStride()) << ")";
 
     return success();
 }
@@ -37,19 +34,16 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::Block
 // BlockReduceMax operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::BlockReduceMaxL1Op op) {
-    auto& os = emitter.ostream();
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::BlockReduceMaxL1Op op)
+{
+    auto &os = emitter.ostream();
 
     auto maskName = printMask(emitter, op);
 
-    os << ascNamespace << "::" << op.getAPIName() << "("
-       << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc()) << ", "
-       << emitter.getOrCreateName(op.getRepeatTime()) << ", "
-       << maskName << ", "
-       << emitter.getOrCreateName(op.getDstRepStride()) << ", "
-       << emitter.getOrCreateName(op.getSrcBlkStride()) << ", "
-       << emitter.getOrCreateName(op.getSrcRepStride()) << ")";
+    os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+       << emitter.getOrCreateName(op.getSrc()) << ", " << emitter.getOrCreateName(op.getRepeatTime()) << ", "
+       << maskName << ", " << emitter.getOrCreateName(op.getDstRepStride()) << ", "
+       << emitter.getOrCreateName(op.getSrcBlkStride()) << ", " << emitter.getOrCreateName(op.getSrcRepStride()) << ")";
     return success();
 }
 
@@ -57,19 +51,16 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::Block
 // BlockReduceMin operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::BlockReduceMinL1Op op) {
-    auto& os = emitter.ostream();
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::BlockReduceMinL1Op op)
+{
+    auto &os = emitter.ostream();
 
     auto maskName = printMask(emitter, op);
 
-    os << ascNamespace << "::" << op.getAPIName() << "("
-       << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc()) << ", "
-       << emitter.getOrCreateName(op.getRepeatTime()) << ", "
-       << maskName << ", "
-       << emitter.getOrCreateName(op.getDstRepStride()) << ", "
-       << emitter.getOrCreateName(op.getSrcBlkStride()) << ", "
-       << emitter.getOrCreateName(op.getSrcRepStride()) << ")";
+    os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+       << emitter.getOrCreateName(op.getSrc()) << ", " << emitter.getOrCreateName(op.getRepeatTime()) << ", "
+       << maskName << ", " << emitter.getOrCreateName(op.getDstRepStride()) << ", "
+       << emitter.getOrCreateName(op.getSrcBlkStride()) << ", " << emitter.getOrCreateName(op.getSrcRepStride()) << ")";
     return success();
 }
 
@@ -79,18 +70,15 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::Block
 //===----------------------------------------------------------------------===//
 // PairReduceSum operations
 //===----------------------------------------------------------------------===//
-LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::PairReduceSumL1Op op) {
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::PairReduceSumL1Op op)
+{
     auto &os = emitter.ostream();
     auto maskName = printMask(emitter, op);
-    os << ascNamespace << "::" << op.getAPIName() << "("
-       << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc()) << ", "
-       << emitter.getOrCreateName(op.getRepeatTime()) << ", "
-       << maskName << ", "
-       << emitter.getOrCreateName(op.getDstRepStride()) << ", "
-       << emitter.getOrCreateName(op.getSrcBlkStride()) << ", "
-       << emitter.getOrCreateName(op.getSrcRepStride()) << ")";
-    
+    os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+       << emitter.getOrCreateName(op.getSrc()) << ", " << emitter.getOrCreateName(op.getRepeatTime()) << ", "
+       << maskName << ", " << emitter.getOrCreateName(op.getDstRepStride()) << ", "
+       << emitter.getOrCreateName(op.getSrcBlkStride()) << ", " << emitter.getOrCreateName(op.getSrcRepStride()) << ")";
+
     return success();
 }
 
@@ -98,24 +86,19 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::PairR
 // ReduceMax operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::ReduceMaxL1Op op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::ReduceMaxL1Op op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
 
     auto maskName = (emitter.getOrCreateName(op.getDst()) + "_mask_list").str();
     os << "uint64_t " << maskName << "[] = {";
-    llvm::interleaveComma(op.getMask(), os,
-                          [&](Value operand) { os << emitter.getOrCreateName(operand); });
+    llvm::interleaveComma(op.getMask(), os, [&](Value operand) { os << emitter.getOrCreateName(operand); });
     os << "};\n";
 
-    os << ascNamespace << "::" << op.getAPIName() << "(" 
-       << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc()) << ", "
-       << emitter.getOrCreateName(op.getSharedTmpBuffer()) << ", "       
-       << maskName << ", "
-       << emitter.getOrCreateName(op.getRepeatTime()) << ", "
-       << emitter.getOrCreateName(op.getSrcRepStride()) << ", "
-       << emitter.getOrCreateName(op.getCalIndex()) << ")";
+    os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+       << emitter.getOrCreateName(op.getSrc()) << ", " << emitter.getOrCreateName(op.getSharedTmpBuffer()) << ", "
+       << maskName << ", " << emitter.getOrCreateName(op.getRepeatTime()) << ", "
+       << emitter.getOrCreateName(op.getSrcRepStride()) << ", " << emitter.getOrCreateName(op.getCalIndex()) << ")";
     return success();
 }
 
@@ -123,24 +106,19 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::Reduc
 // ReduceMin operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::ReduceMinL1Op op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::ReduceMinL1Op op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
 
     auto maskName = (emitter.getOrCreateName(op.getDst()) + "_mask_list").str();
     os << "uint64_t " << maskName << "[] = {";
-    llvm::interleaveComma(op.getMask(), os,
-                          [&](Value operand) { os << emitter.getOrCreateName(operand); });
+    llvm::interleaveComma(op.getMask(), os, [&](Value operand) { os << emitter.getOrCreateName(operand); });
     os << "};\n";
 
-    os << ascNamespace << "::" << op.getAPIName() << "(" 
-       << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc()) << ", "
-       << emitter.getOrCreateName(op.getSharedTmpBuffer()) << ", "       
-       << maskName << ", "
-       << emitter.getOrCreateName(op.getRepeatTime()) << ", "
-       << emitter.getOrCreateName(op.getSrcRepStride()) << ", "
-       << emitter.getOrCreateName(op.getCalIndex()) << ")";
+    os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+       << emitter.getOrCreateName(op.getSrc()) << ", " << emitter.getOrCreateName(op.getSharedTmpBuffer()) << ", "
+       << maskName << ", " << emitter.getOrCreateName(op.getRepeatTime()) << ", "
+       << emitter.getOrCreateName(op.getSrcRepStride()) << ", " << emitter.getOrCreateName(op.getCalIndex()) << ")";
     return success();
 }
 
@@ -148,23 +126,19 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::Reduc
 // ReduceSum operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::ReduceSumL1Op op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::ReduceSumL1Op op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
 
     auto maskName = (emitter.getOrCreateName(op.getDst()) + "_mask_list").str();
     os << "uint64_t " << maskName << "[] = {";
-    llvm::interleaveComma(op.getMask(), os,
-                          [&](Value operand) { os << emitter.getOrCreateName(operand); });
+    llvm::interleaveComma(op.getMask(), os, [&](Value operand) { os << emitter.getOrCreateName(operand); });
     os << "};\n";
 
-    os << ascNamespace << "::" << op.getAPIName() << "(" 
-       << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc()) << ", "
-       << emitter.getOrCreateName(op.getSharedTmpBuffer()) << ", "       
-       << maskName << ", "
-       << emitter.getOrCreateName(op.getRepeatTime()) << ", "
-       << emitter.getOrCreateName(op.getSrcRepStride()) << ")";  
+    os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+       << emitter.getOrCreateName(op.getSrc()) << ", " << emitter.getOrCreateName(op.getSharedTmpBuffer()) << ", "
+       << maskName << ", " << emitter.getOrCreateName(op.getRepeatTime()) << ", "
+       << emitter.getOrCreateName(op.getSrcRepStride()) << ")";
     return success();
 }
 
@@ -173,45 +147,40 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::Reduc
 //===----------------------------------------------------------------------===//
 
 namespace {
-template<typename OpType>
-LogicalResult printWholeReduceMaxMinCommon(CodeEmitter &emitter, OpType op) {
+template <typename OpType>
+LogicalResult printWholeReduceMaxMinCommon(CodeEmitter &emitter, OpType op)
+{
     auto &os = emitter.ostream();
     auto maskName = printMask(emitter, op);
-    os << ascNamespace << "::" << op.getAPIName() << "("
-       << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc()) << ", "
-       << maskName << ", "
-       << emitter.getOrCreateName(op.getRepeatTime()) << ", "
-       << emitter.getOrCreateName(op.getDstRepStride()) << ", "
-       << emitter.getOrCreateName(op.getSrcBlkStride()) << ", "
-       << emitter.getOrCreateName(op.getSrcRepStride()) << ", "
-       << ascNamespace << "::ReduceOrder::" << ascendc::stringifyEnum(op.getOrder()).upper()
-       << ")";
+    os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+       << emitter.getOrCreateName(op.getSrc()) << ", " << maskName << ", "
+       << emitter.getOrCreateName(op.getRepeatTime()) << ", " << emitter.getOrCreateName(op.getDstRepStride()) << ", "
+       << emitter.getOrCreateName(op.getSrcBlkStride()) << ", " << emitter.getOrCreateName(op.getSrcRepStride()) << ", "
+       << ascNamespace << "::ReduceOrder::" << ascendc::stringifyEnum(op.getOrder()).upper() << ")";
     return success();
 }
 } // namespace
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::WholeReduceMaxL1Op op) {
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::WholeReduceMaxL1Op op)
+{
     return printWholeReduceMaxMinCommon(emitter, op);
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::WholeReduceMinL1Op op) {
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::WholeReduceMinL1Op op)
+{
     return printWholeReduceMaxMinCommon(emitter, op);
 }
 
 //===----------------------------------------------------------------------===//
 // WholeReduceSum operations
 //===----------------------------------------------------------------------===//
-LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::WholeReduceSumL1Op op) {
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::WholeReduceSumL1Op op)
+{
     auto &os = emitter.ostream();
     auto maskName = printMask(emitter, op);
-    os << ascNamespace << "::" << op.getAPIName() << "("
-       << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc()) << ", "
-       << maskName << ", "
-       << emitter.getOrCreateName(op.getRepeatTime()) << ", "
-       << emitter.getOrCreateName(op.getDstRepStride()) << ", "
-       << emitter.getOrCreateName(op.getSrcBlkStride()) << ", "
-       << emitter.getOrCreateName(op.getSrcRepStride()) << ")";
+    os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+       << emitter.getOrCreateName(op.getSrc()) << ", " << maskName << ", "
+       << emitter.getOrCreateName(op.getRepeatTime()) << ", " << emitter.getOrCreateName(op.getDstRepStride()) << ", "
+       << emitter.getOrCreateName(op.getSrcBlkStride()) << ", " << emitter.getOrCreateName(op.getSrcRepStride()) << ")";
     return success();
 }

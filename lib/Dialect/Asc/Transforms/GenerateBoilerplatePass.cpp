@@ -20,8 +20,8 @@ namespace mlir {
 namespace ascendc {
 #define GEN_PASS_DEF_GENERATEBOILERPLATE
 #include "ascir/Dialect/Asc/Transforms/Passes.h.inc"
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir
 
 using namespace mlir;
 using namespace mlir::ascendc;
@@ -29,23 +29,20 @@ using namespace mlir::ascendc;
 namespace {
 
 class GenerateBoilerplatePass : public ascendc::impl::GenerateBoilerplateBase<GenerateBoilerplatePass> {
-public:
+  public:
     void runOnOperation() override
     {
         auto mod = getOperation();
         auto builder = ImplicitLocOpBuilder::atBlockBegin(mod->getLoc(), mod.getBody());
         builder.create<emitc::IncludeOp>("kernel_operator.h");
-        bool hasMatmul = mod.walk([](ascendc::RegistMatmulObjOp) {
-                                return WalkResult::interrupt();
-                            })
-                            .wasInterrupted();
+        bool hasMatmul = mod.walk([](ascendc::RegistMatmulObjOp) { return WalkResult::interrupt(); }).wasInterrupted();
         if (hasMatmul) {
             builder.create<emitc::IncludeOp>("lib/matmul_intf.h");
         }
     }
 };
 
-}  // namespace
+} // namespace
 
 namespace mlir {
 namespace ascendc {
@@ -53,5 +50,5 @@ std::unique_ptr<Pass> createGenerateBoilerplatePass()
 {
     return std::make_unique<GenerateBoilerplatePass>();
 }
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir

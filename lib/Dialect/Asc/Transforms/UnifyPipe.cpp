@@ -19,40 +19,42 @@ namespace mlir {
 namespace ascendc {
 #define GEN_PASS_DEF_UNIFYPIPE
 #include "ascir/Dialect/Asc/Transforms/Passes.h.inc"
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir
 
 using namespace mlir;
 
 namespace {
 
-void unifyPipe(func::FuncOp root) {
-  SmallVector<ascendc::PipeOp> pipes;
-  root.walk([&pipes](ascendc::PipeOp op) { pipes.push_back(op); });
-  if (pipes.size() <= 1) {
-    return;
-  }
-  auto builder = OpBuilder::atBlockBegin(&root.getBody().front());
-  Value uniPipe = builder.create<ascendc::PipeOp>(builder.getUnknownLoc());
-  for (auto pipe : pipes) {
-      pipe.replaceAllUsesWith(uniPipe);
-      pipe.erase();
-  }
+void unifyPipe(func::FuncOp root)
+{
+    SmallVector<ascendc::PipeOp> pipes;
+    root.walk([&pipes](ascendc::PipeOp op) { pipes.push_back(op); });
+    if (pipes.size() <= 1) {
+        return;
+    }
+    auto builder = OpBuilder::atBlockBegin(&root.getBody().front());
+    Value uniPipe = builder.create<ascendc::PipeOp>(builder.getUnknownLoc());
+    for (auto pipe : pipes) {
+        pipe.replaceAllUsesWith(uniPipe);
+        pipe.erase();
+    }
 }
 
-class UnifyPipePass
-    : public ascendc::impl::UnifyPipeBase<UnifyPipePass> {
-  void runOnOperation() override {
-    unifyPipe(getOperation());
-  }
+class UnifyPipePass : public ascendc::impl::UnifyPipeBase<UnifyPipePass> {
+    void runOnOperation() override
+    {
+        unifyPipe(getOperation());
+    }
 };
 
 } // namespace
 
 namespace mlir {
 namespace ascendc {
-std::unique_ptr<Pass> createUnifyPipePass() {
-  return std::make_unique<UnifyPipePass>();
+std::unique_ptr<Pass> createUnifyPipePass()
+{
+    return std::make_unique<UnifyPipePass>();
 }
 } // namespace ascendc
 } // namespace mlir

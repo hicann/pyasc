@@ -20,8 +20,8 @@ namespace mlir {
 namespace ascendc {
 #define GEN_PASS_DEF_DETECTENABLEDEBUG
 #include "ascir/Dialect/Asc/Transforms/Passes.h.inc"
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir
 
 using namespace mlir;
 using namespace mlir::ascendc;
@@ -29,7 +29,7 @@ using namespace mlir::ascendc;
 namespace {
 
 class DetectEnableDebugPass : public ascendc::impl::DetectEnableDebugBase<DetectEnableDebugPass> {
-public:
+  public:
     void runOnOperation() override
     {
         ModuleOp op = getOperation();
@@ -42,7 +42,7 @@ public:
     }
 };
 
-}  // namespace
+} // namespace
 
 std::unique_ptr<Pass> mlir::ascendc::createDetectEnableDebugPass()
 {

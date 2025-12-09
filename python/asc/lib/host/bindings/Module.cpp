@@ -18,8 +18,8 @@ namespace asc {
 void pyasc_init_enums(py::module &m);
 void pyasc_init_matmul_api_tiling(py::module &m);
 void pyasc_init_platform(py::module &m);
-}
-}
+} // namespace asc
+} // namespace pybind11
 namespace {
 PYBIND11_MODULE(libhost, m)
 {
@@ -28,4 +28,4 @@ PYBIND11_MODULE(libhost, m)
     py::asc::pyasc_init_matmul_api_tiling(m);
     py::asc::pyasc_init_platform(m);
 }
-}   // namespace
+} // namespace

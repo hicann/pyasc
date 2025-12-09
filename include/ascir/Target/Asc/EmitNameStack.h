@@ -33,6 +33,6 @@ struct EmitNameStack {
     std::string getNameForEmission(Value val);
 };
 
-}  // namespace mlir
+} // namespace mlir
 
-#endif  // ASCIR_TARGET_ASC_EMITNAMESTACK_H
+#endif // ASCIR_TARGET_ASC_EMITNAMESTACK_H

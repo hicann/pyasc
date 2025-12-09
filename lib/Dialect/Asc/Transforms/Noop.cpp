@@ -16,8 +16,8 @@ namespace mlir {
 namespace ascendc {
 #define GEN_PASS_DEF_NOOP
 #include "ascir/Dialect/Asc/Transforms/Passes.h.inc"
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir
 
 using namespace mlir;
 
@@ -30,7 +30,7 @@ struct NoopPass : public ascendc::impl::NoopBase<NoopPass> {
     }
 };
 
-}  // namespace
+} // namespace
 
 namespace mlir {
 namespace ascendc {
@@ -38,5 +38,5 @@ std::unique_ptr<Pass> createNoopPass()
 {
     return std::make_unique<NoopPass>();
 }
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir

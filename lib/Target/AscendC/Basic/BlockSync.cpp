@@ -17,16 +17,16 @@ using namespace mlir::ascendc;
 // Synchronization operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::PipeBarrierOp op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::PipeBarrierOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName() << "<" << ascendc::stringifyEnum(op.getPipe()).upper() << ">()";
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::WaitFlagOp op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::WaitFlagOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << ascNamespace << "::WaitFlag<" << ascNamespace
        << "::HardEvent::" << ascendc::stringifyEnum(op.getEvent()).upper() << ">("
        << emitter.getOrCreateName(op.getEventId()) << ")";

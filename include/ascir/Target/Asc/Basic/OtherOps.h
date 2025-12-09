@@ -21,10 +21,10 @@ namespace ascendc {
 //===----------------------------------------------------------------------===//
 
 template <typename CVOp>
-LogicalResultForT<CVOp, ascendc::AscendIsAICOp, ascendc::AscendIsAIVOp> printOperation(CodeEmitter& emitter, CVOp op)
+LogicalResultForT<CVOp, ascendc::AscendIsAICOp, ascendc::AscendIsAIVOp> printOperation(CodeEmitter &emitter, CVOp op)
 {
     FAIL_OR(emitter.emitVariableDeclaration(op->getResult(0), false));
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << " = g_coreType == AscendC::";
     if (isa<ascendc::AscendIsAICOp>(op)) {
         os << "AIC";
@@ -34,19 +34,19 @@ LogicalResultForT<CVOp, ascendc::AscendIsAICOp, ascendc::AscendIsAIVOp> printOpe
     return success();
 }
 
-LogicalResult printOperation(CodeEmitter& emitter, ascendc::ConstructOp op);
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::ConstructOp op);
 
-LogicalResult printOperation(CodeEmitter& emitter, ascendc::FftsCrossCoreSyncOp op);
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::FftsCrossCoreSyncOp op);
 
-LogicalResult printOperation(CodeEmitter& emitter, ascendc::PopStackBufferOp op);
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::PopStackBufferOp op);
 
-LogicalResult printOperation(CodeEmitter& emitter, ascendc::SetFftsBaseAddrOp op);
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::SetFftsBaseAddrOp op);
 
 LogicalResult printOperation(CodeEmitter &emitter, ascendc::ResetMaskOp op);
 
 } // namespace ascendc
 
-LogicalResult printOperation(CodeEmitter& emitter, LLVM::UndefOp op);
+LogicalResult printOperation(CodeEmitter &emitter, LLVM::UndefOp op);
 
 } // namespace mlir
 

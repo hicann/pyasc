@@ -17,20 +17,21 @@ namespace py = pybind11;
 
 namespace pybind11 {
 namespace asc {
-void pyasc_init_platform(py::module &m) {
-  using ret = py::return_value_policy;
-  using namespace platform_ascendc;
+void pyasc_init_platform(py::module &m)
+{
+    using ret = py::return_value_policy;
+    using namespace platform_ascendc;
 
-  py::class_<PlatformAscendC>(m, "PlatformAscendC", py::module_local());
+    py::class_<PlatformAscendC>(m, "PlatformAscendC", py::module_local());
 
-  py::class_<PlatformAscendCManager, std::unique_ptr<PlatformAscendCManager, py::nodelete>>(m, "PlatformAscendCManager",
-                                                                                            py::module_local())
-      .def_static(
-          "get_instance", []() { return PlatformAscendCManager::GetInstance(); }, ret::reference)
-      .def_static(
-          "get_instance",
-          [](const std::string &socVersion) { return PlatformAscendCManager::GetInstance(socVersion.c_str()); },
-          ret::reference, "soc_version"_a);
+    py::class_<PlatformAscendCManager, std::unique_ptr<PlatformAscendCManager, py::nodelete>>(
+        m, "PlatformAscendCManager", py::module_local())
+        .def_static(
+            "get_instance", []() { return PlatformAscendCManager::GetInstance(); }, ret::reference)
+        .def_static(
+            "get_instance",
+            [](const std::string &socVersion) { return PlatformAscendCManager::GetInstance(socVersion.c_str()); },
+            ret::reference, "soc_version"_a);
 }
 } // namespace asc
 } // namespace pybind11

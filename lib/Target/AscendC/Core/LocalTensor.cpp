@@ -17,24 +17,23 @@ using namespace mlir::ascendc;
 // LocalTensor operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::LocalTensorV2Op op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::LocalTensorV2Op op)
 {
     FAIL_OR(emitter.emitVariableDeclaration(op->getResult(0), false));
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     auto resultType = op.getResult().getType().getElementType();
     os << " = " << "AscendC::LocalTensor" << "<";
     FAIL_OR(emitter.emitType(op.getLoc(), resultType));
     os << ">(";
     CodeEmitter::emitTPosition(os, op.getPos());
-    os << ", " << emitter.getOrCreateName(op.getAddr())
-    << ", " << emitter.getOrCreateName(op.getTileSize()) << ")";
+    os << ", " << emitter.getOrCreateName(op.getAddr()) << ", " << emitter.getOrCreateName(op.getTileSize()) << ")";
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::LocalTensorReinterpretCastOp op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::LocalTensorReinterpretCastOp op)
 {
     FAIL_OR(emitter.emitVariableDeclaration(op->getResult(0), false));
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << " = " << emitter.getOrCreateName(op.getIn()) << "." << op.getAPIName() << "<";
     Type elType = op.getOut().getType().getElementType();
     FAIL_OR(emitter.emitType(op.getLoc(), elType));
@@ -42,19 +41,18 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::Local
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::LocalTensorSubIndexOp op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::LocalTensorSubIndexOp op)
 {
     FAIL_OR(emitter.emitVariableDeclaration(op->getResult(0), false));
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << " = " << emitter.getOrCreateName(op.getTensor()) << "[" << emitter.getOrCreateName(op.getIndex()) << "]";
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::LocalTensorBracketOp op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::LocalTensorBracketOp op)
 {
     FAIL_OR(emitter.emitVariableDeclaration(op->getResult(0), false));
-    auto& os = emitter.ostream();
-    os << " = " << emitter.getOrCreateName(op.getTensor())
-       << "(" << emitter.getOrCreateName(op.getIndex()) << ")";
+    auto &os = emitter.ostream();
+    os << " = " << emitter.getOrCreateName(op.getTensor()) << "(" << emitter.getOrCreateName(op.getIndex()) << ")";
     return success();
 }

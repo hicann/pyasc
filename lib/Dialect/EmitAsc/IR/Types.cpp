@@ -25,9 +25,10 @@ using namespace mlir::emitasc;
 // EmitAscDialect
 //===----------------------------------------------------------------------===//
 
-void EmitAscDialect::registerTypes() {
-  addTypes<
+void EmitAscDialect::registerTypes()
+{
+    addTypes<
 #define GET_TYPEDEF_LIST
 #include "ascir/Dialect/EmitAsc/IR/EmitAscTypes.cpp.inc"
-      >();
+        >();
 }

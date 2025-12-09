@@ -22,4 +22,4 @@ PYBIND11_MODULE(libpyasc, m)
     py::asc::pyasc_init_passes(m.def_submodule("passes"));
     py::asc::pyasc_init_translation(m.def_submodule("translation"));
 }
-}   // namespace
+} // namespace

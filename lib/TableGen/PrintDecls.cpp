@@ -15,21 +15,19 @@ using namespace llvm;
 
 namespace {
 
-class PrintDecls
-{
-  	const RecordKeeper &records;
+class PrintDecls {
+    const RecordKeeper &records;
 
-public:
-  	explicit PrintDecls(const RecordKeeper &records) : records(records) {}
+  public:
+    explicit PrintDecls(const RecordKeeper &records) : records(records) {}
 
-	void run(raw_ostream &os)
-	{
-		emitSourceFileHeader("Classes and Defs", os);
-		os << records;
-	}
+    void run(raw_ostream &os)
+    {
+        emitSourceFileHeader("Classes and Defs", os);
+        os << records;
+    }
 };
 
-TableGen::Emitter::OptClass<PrintDecls>
-    registration("print-decls", "Print all declared Classes and Defs");
+TableGen::Emitter::OptClass<PrintDecls> registration("print-decls", "Print all declared Classes and Defs");
 
 } // namespace

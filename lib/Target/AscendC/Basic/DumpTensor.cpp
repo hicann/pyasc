@@ -23,9 +23,7 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::Print
     os << ascNamespace << "::" << op.getAPIName() << "(\"" << op.getDesc() << "\"";
     if (!op.getVars().empty()) {
         os << ", ";
-        llvm::interleaveComma(op.getVars(), os, [&](Value var) {
-        os << emitter.getOrCreateName(var);
-        });
+        llvm::interleaveComma(op.getVars(), os, [&](Value var) { os << emitter.getOrCreateName(var); });
     }
     os << ")";
     return success();

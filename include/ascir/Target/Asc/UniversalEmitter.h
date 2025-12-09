@@ -18,64 +18,65 @@
 namespace mlir {
 namespace ascendc {
 template <typename ConcreteOp>
-LogicalResult emitFunctionParams(CodeEmitter& emitter, ConcreteOp op, size_t startPos = 0) {
-  auto& os = emitter.ostream();
-  bool first = true;
-  for (size_t i = startPos; i < op.getOperation()->getNumOperands(); ++i) {
-    if (!first) {
-      os << ", ";
+LogicalResult emitFunctionParams(CodeEmitter &emitter, ConcreteOp op, size_t startPos = 0)
+{
+    auto &os = emitter.ostream();
+    bool first = true;
+    for (size_t i = startPos; i < op.getOperation()->getNumOperands(); ++i) {
+        if (!first) {
+            os << ", ";
+        }
+        first = false;
+        auto operand = op.getOperation()->getOperand(i);
+        os << emitter.getOrCreateName(operand);
     }
-    first = false;
-    auto operand = op.getOperation()->getOperand(i);
-    os << emitter.getOrCreateName(operand);
-  }
-  return success();
+    return success();
 }
 
-template <typename ConcreteOp>
-LogicalResult autoPrintConstructorOp(CodeEmitter& emitter, ConcreteOp op) {
-  return emitter.emitVariableDeclaration(op->getResult(0), false);
+template <typename ConcreteOp> LogicalResult autoPrintConstructorOp(CodeEmitter &emitter, ConcreteOp op)
+{
+    return emitter.emitVariableDeclaration(op->getResult(0), false);
 }
 
-template <typename ConcreteOp>
-LogicalResult autoPrintMemberFuncOp(CodeEmitter& emitter, ConcreteOp op) {
-  auto resNum = op.getOperation()->getNumResults();
-  auto& os = emitter.ostream();
-  if (resNum == 1) {
-    FAIL_OR(emitter.emitVariableDeclaration(op->getResult(0), false));
-    os << " = ";
-  }
-  os << emitter.getOrCreateName(op.getOperation()->getOperand(0)) << ".";
-  os << op.getAPIName() << "(";
-  FAIL_OR(emitFunctionParams<ConcreteOp>(emitter, op, 1));
-  os << ")";
-  return success();
+template <typename ConcreteOp> LogicalResult autoPrintMemberFuncOp(CodeEmitter &emitter, ConcreteOp op)
+{
+    auto resNum = op.getOperation()->getNumResults();
+    auto &os = emitter.ostream();
+    if (resNum == 1) {
+        FAIL_OR(emitter.emitVariableDeclaration(op->getResult(0), false));
+        os << " = ";
+    }
+    os << emitter.getOrCreateName(op.getOperation()->getOperand(0)) << ".";
+    os << op.getAPIName() << "(";
+    FAIL_OR(emitFunctionParams<ConcreteOp>(emitter, op, 1));
+    os << ")";
+    return success();
 }
 
-template <typename ConcreteOp>
-LogicalResult autoPrintAscFuncOp(CodeEmitter& emitter, ConcreteOp op) {
-  auto resNum = op.getOperation()->getNumResults();
-  auto& os = emitter.ostream();
-  if (resNum == 1) {
-    FAIL_OR(emitter.emitVariableDeclaration(op->getResult(0), false));
-    os << " = ";
-  }
-  os << ascNamespace << "::" << op.getAPIName() << "(";
-  FAIL_OR(emitFunctionParams<ConcreteOp>(emitter, op));
-  os << ")";
-  return success();
+template <typename ConcreteOp> LogicalResult autoPrintAscFuncOp(CodeEmitter &emitter, ConcreteOp op)
+{
+    auto resNum = op.getOperation()->getNumResults();
+    auto &os = emitter.ostream();
+    if (resNum == 1) {
+        FAIL_OR(emitter.emitVariableDeclaration(op->getResult(0), false));
+        os << " = ";
+    }
+    os << ascNamespace << "::" << op.getAPIName() << "(";
+    FAIL_OR(emitFunctionParams<ConcreteOp>(emitter, op));
+    os << ")";
+    return success();
 }
 
-template <typename ConcreteOp>
-LogicalResult autoPrintOp(CodeEmitter& emitter, ConcreteOp op) {
-  if constexpr (ConcreteOp::template hasTrait<mlir::OpTrait::AscConstructorTrait>()) {
-    return autoPrintConstructorOp<ConcreteOp>(emitter, op);
-  } else if constexpr (ConcreteOp::template hasTrait<mlir::OpTrait::AscMemberFuncTrait>()) {
-    return autoPrintMemberFuncOp<ConcreteOp>(emitter, op);
-  } else if constexpr (ConcreteOp::template hasTrait<mlir::OpTrait::AscFuncTrait>()) {
-    return autoPrintAscFuncOp<ConcreteOp>(emitter, op);
-  }
-  return failure();
+template <typename ConcreteOp> LogicalResult autoPrintOp(CodeEmitter &emitter, ConcreteOp op)
+{
+    if constexpr (ConcreteOp::template hasTrait<mlir::OpTrait::AscConstructorTrait>()) {
+        return autoPrintConstructorOp<ConcreteOp>(emitter, op);
+    } else if constexpr (ConcreteOp::template hasTrait<mlir::OpTrait::AscMemberFuncTrait>()) {
+        return autoPrintMemberFuncOp<ConcreteOp>(emitter, op);
+    } else if constexpr (ConcreteOp::template hasTrait<mlir::OpTrait::AscFuncTrait>()) {
+        return autoPrintAscFuncOp<ConcreteOp>(emitter, op);
+    }
+    return failure();
 }
 } // namespace ascendc
 } // namespace mlir

@@ -25,62 +25,51 @@ namespace mlir {
 namespace ascendc {
 #define GEN_PASS_DEF_LEGALIZEKERNELARGS
 #include "ascir/Dialect/Asc/Transforms/Passes.h.inc"
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir
 
 using namespace mlir;
 
 namespace {
 
-BlockArgument appendKernelArgument(func::FuncOp op,
-                                   emitasc::KernelArgument kind, StringRef name,
-                                   Type type) {
-  OpBuilder builder(op.getContext());
-  NamedAttribute kernelArg(builder.getStringAttr(emitasc::attr::kernelArg),
-                           builder.getAttr<emitasc::KernelArgumentAttr>(kind));
-  unsigned idx = op.getNumArguments();
-  op.insertArgument(idx, type, builder.getDictionaryAttr(kernelArg),
-                    NameLoc::get(builder.getStringAttr(name)));
-  return op.getArgument(idx);      
+BlockArgument appendKernelArgument(func::FuncOp op, emitasc::KernelArgument kind, StringRef name, Type type)
+{
+    OpBuilder builder(op.getContext());
+    NamedAttribute kernelArg(builder.getStringAttr(emitasc::attr::kernelArg),
+                             builder.getAttr<emitasc::KernelArgumentAttr>(kind));
+    unsigned idx = op.getNumArguments();
+    op.insertArgument(idx, type, builder.getDictionaryAttr(kernelArg), NameLoc::get(builder.getStringAttr(name)));
+    return op.getArgument(idx);
 }
 
-void processKernel(func::FuncOp op) {
-  auto builder = OpBuilder::atBlockBegin(&op.getFunctionBody().front());
-  for (unsigned i = 0; i < op.getNumArguments(); i++) {
-    op.setArgAttr(i, emitasc::attr::kernelArg,
-                  builder.getAttr<emitasc::KernelArgumentAttr>(
-                      emitasc::KernelArgument::Explicit));
-  }
-  auto as = builder.getI64IntegerAttr(
-    static_cast<int64_t>(ascendc::AddressSpace::gm));
-  auto loc = builder.getUnknownLoc();
-  auto fftsAddr = appendKernelArgument(
-      op, emitasc::KernelArgument::FftsAddr, "ffts_addr",
-      MemRefType::get(ShapedType::kDynamic, builder.getIntegerType(64, false),
-                      AffineMap(), as));
-  builder.create<ascendc::SetFftsBaseAddrOp>(loc, fftsAddr);
-  bool hasMatmul = op.walk([](ascendc::RegistMatmulObjOp) {
-                        return WalkResult::interrupt();
-                    }).wasInterrupted();
-  bool matmulCubeOnly =
-      op->getParentOfType<ModuleOp>()->hasAttrOfType<UnitAttr>(
-          ascendc::attr::matmulCubeOnly);
-  if (hasMatmul && !matmulCubeOnly) {
-    Value cond =
-        builder.create<ascendc::AscendIsAICOp>(loc, builder.getI1Type());
-    auto ifOp = builder.create<scf::IfOp>(loc, cond, false);
-    builder.setInsertionPointToStart(ifOp.thenBlock());
-    Value flag = builder.create<arith::ConstantOp>(
-        loc, builder.getI64IntegerAttr(0xf21));
-    builder.create<ascendc::FftsCrossCoreSyncOp>(loc, ascendc::Pipe::PIPE_MTE3,
-                                                 flag);
-    builder.setInsertionPointAfter(ifOp);
-  }
+void processKernel(func::FuncOp op)
+{
+    auto builder = OpBuilder::atBlockBegin(&op.getFunctionBody().front());
+    for (unsigned i = 0; i < op.getNumArguments(); i++) {
+        op.setArgAttr(i, emitasc::attr::kernelArg,
+                      builder.getAttr<emitasc::KernelArgumentAttr>(emitasc::KernelArgument::Explicit));
+    }
+    auto as = builder.getI64IntegerAttr(static_cast<int64_t>(ascendc::AddressSpace::gm));
+    auto loc = builder.getUnknownLoc();
+    auto fftsAddr =
+        appendKernelArgument(op, emitasc::KernelArgument::FftsAddr, "ffts_addr",
+                             MemRefType::get(ShapedType::kDynamic, builder.getIntegerType(64, false), AffineMap(), as));
+    builder.create<ascendc::SetFftsBaseAddrOp>(loc, fftsAddr);
+    bool hasMatmul = op.walk([](ascendc::RegistMatmulObjOp) { return WalkResult::interrupt(); }).wasInterrupted();
+    bool matmulCubeOnly = op->getParentOfType<ModuleOp>()->hasAttrOfType<UnitAttr>(ascendc::attr::matmulCubeOnly);
+    if (hasMatmul && !matmulCubeOnly) {
+        Value cond = builder.create<ascendc::AscendIsAICOp>(loc, builder.getI1Type());
+        auto ifOp = builder.create<scf::IfOp>(loc, cond, false);
+        builder.setInsertionPointToStart(ifOp.thenBlock());
+        Value flag = builder.create<arith::ConstantOp>(loc, builder.getI64IntegerAttr(0xf21));
+        builder.create<ascendc::FftsCrossCoreSyncOp>(loc, ascendc::Pipe::PIPE_MTE3, flag);
+        builder.setInsertionPointAfter(ifOp);
+    }
 }
 
-struct LegalizeKernelArgsPass
-    : public ascendc::impl::LegalizeKernelArgsBase<LegalizeKernelArgsPass> {
-    void runOnOperation() override {
+struct LegalizeKernelArgsPass : public ascendc::impl::LegalizeKernelArgsBase<LegalizeKernelArgsPass> {
+    void runOnOperation() override
+    {
         auto mod = getOperation();
         mod.walk([](func::FuncOp op) {
             if (op->hasAttrOfType<UnitAttr>(ascendc::attr::global)) {
@@ -94,7 +83,8 @@ struct LegalizeKernelArgsPass
 
 namespace mlir {
 namespace ascendc {
-std::unique_ptr<Pass> createLegalizeKernelArgsPass() {
+std::unique_ptr<Pass> createLegalizeKernelArgsPass()
+{
     return std::make_unique<LegalizeKernelArgsPass>();
 }
 } // namespace ascendc

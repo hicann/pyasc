@@ -8,8 +8,8 @@
  * See LICENSE in the root of the software repository for the full text of the License.
  */
 
-#include "ascir/Target/Asc/Basic/VecUnary.h"
 #include "ascir/Target/Asc/Basic/VecVconv.h"
+#include "ascir/Target/Asc/Basic/VecUnary.h"
 
 using namespace mlir;
 using namespace mlir::ascendc;
@@ -18,9 +18,9 @@ using namespace mlir::ascendc;
 // Type conversion operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::CastL0Op op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CastL0Op op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
        << emitter.getOrCreateName(op.getSrc()) << ", AscendC::RoundMode::" << stringifyRoundMode(op.getRoundMode())
        << ", " << emitter.getOrCreateName(op.getMask()) << ", " << emitter.getOrCreateName(op.getRepeatTimes())
@@ -30,22 +30,22 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::CastL
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::CastL1Op op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CastL1Op op)
 {
     auto maskName = printMask(emitter, op);
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
        << emitter.getOrCreateName(op.getSrc()) << ", AscendC::RoundMode::" << stringifyRoundMode(op.getRoundMode())
-       << ", " << maskName << ", " << emitter.getOrCreateName(op.getRepeatTimes())
-       << ", AscendC::UnaryRepeatParams(" << emitter.getOrCreateName(op.getDstBlkStride()) << ", "
-       << emitter.getOrCreateName(op.getSrcBlkStride()) << ", " << emitter.getOrCreateName(op.getDstRepStride()) << ", "
-       << emitter.getOrCreateName(op.getSrcRepStride()) << "))";
+       << ", " << maskName << ", " << emitter.getOrCreateName(op.getRepeatTimes()) << ", AscendC::UnaryRepeatParams("
+       << emitter.getOrCreateName(op.getDstBlkStride()) << ", " << emitter.getOrCreateName(op.getSrcBlkStride()) << ", "
+       << emitter.getOrCreateName(op.getDstRepStride()) << ", " << emitter.getOrCreateName(op.getSrcRepStride())
+       << "))";
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::CastL2Op op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CastL2Op op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
        << emitter.getOrCreateName(op.getSrc()) << ", "
        << "AscendC::RoundMode::" << stringifyRoundMode(op.getRoundMode()) << ", "
@@ -53,26 +53,26 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::CastL
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::CastDeqL0Op op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CastDeqL0Op op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     FAIL_OR(printCastDeqL01Template(emitter, op));
     printUnaryL0Params(emitter, op);
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::CastDeqL1Op op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CastDeqL1Op op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     auto maskName = printMask(emitter, op);
     FAIL_OR(printCastDeqL01Template(emitter, op));
     printUnaryL1Params(emitter, op, maskName);
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::CastDeqL2Op op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CastDeqL2Op op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     FAIL_OR(printCastDeqL2Template(emitter, op));
     printUnaryL2Params(emitter, op);
     return success();

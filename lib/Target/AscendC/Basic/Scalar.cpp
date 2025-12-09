@@ -17,7 +17,8 @@ using namespace mlir::ascendc;
 // Scalar operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::ScalarCastOp op) {
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::ScalarCastOp op)
+{
     auto &os = emitter.ostream();
     FAIL_OR(emitter.emitType(op.getLoc(), op.getDtype()));
     os << " " << emitter.getOrCreateName(op.getValueOut()) << " = ";
@@ -26,8 +27,7 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::Scala
     os << ", ";
     FAIL_OR(emitter.emitType(op.getLoc(), op.getDtype()));
     os << ", ";
-    os << ascNamespace << "::RoundMode::" 
-       << ascendc::stringifyEnum(op.getRoundMode()).upper();
+    os << ascNamespace << "::RoundMode::" << ascendc::stringifyEnum(op.getRoundMode()).upper();
     os << ">(";
     os << emitter.getOrCreateName(op.getValueIn());
     os << ")";

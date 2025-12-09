@@ -12,40 +12,46 @@
 
 using namespace mlir;
 
-LogicalResult mlir::printOperation(CodeEmitter& emitter, memref::AllocaOp op)
+LogicalResult mlir::printOperation(CodeEmitter &emitter, memref::AllocaOp op)
 {
     auto mrType = op.getMemref().getType();
     FAIL_OR(emitter.emitType(op.getLoc(), mrType.getElementType(), op->hasAttr(ascendc::attr::emitAsUnsigned)));
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << " " << emitter.getOrCreateName(op.getResult());
-    for (int64_t dim : mrType.getShape()) { os << "[" << dim << "]"; }
+    for (int64_t dim : mrType.getShape()) {
+        os << "[" << dim << "]";
+    }
     return success();
 }
 
-LogicalResult mlir::printOperation(CodeEmitter& emitter, memref::LoadOp op)
+LogicalResult mlir::printOperation(CodeEmitter &emitter, memref::LoadOp op)
 {
     if (failed(emitter.emitAssignPrefix(*op))) {
         return failure();
     }
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << emitter.getOrCreateName(op.getMemref());
-    for (Value index : op.getIndices()) { os << "[" << emitter.getOrCreateName(index) << "]"; }
+    for (Value index : op.getIndices()) {
+        os << "[" << emitter.getOrCreateName(index) << "]";
+    }
     return success();
 }
 
-LogicalResult mlir::printOperation(CodeEmitter& emitter, memref::StoreOp op)
+LogicalResult mlir::printOperation(CodeEmitter &emitter, memref::StoreOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << emitter.getOrCreateName(op.getMemref());
-    for (Value index : op.getIndices()) { os << "[" << emitter.getOrCreateName(index) << "]"; }
+    for (Value index : op.getIndices()) {
+        os << "[" << emitter.getOrCreateName(index) << "]";
+    }
     os << " = " << emitter.getOrCreateName(op.getValueToStore());
     return success();
 }
 
-LogicalResult mlir::printOperation(CodeEmitter& emitter, memref::CastOp op)
+LogicalResult mlir::printOperation(CodeEmitter &emitter, memref::CastOp op)
 {
     FAIL_OR(emitter.emitVariableDeclaration(op->getResult(0), false));
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << " = reinterpret_cast<";
     FAIL_OR(emitter.emitType(op.getLoc(), op.getType()));
     os << ">(" << emitter.getOrCreateName(op.getSource()) << ")";

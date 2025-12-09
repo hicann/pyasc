@@ -20,9 +20,9 @@ namespace ascendc {
 // Synchronization operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult printOperation(CodeEmitter& emitter, ascendc::PipeBarrierOp op);
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::PipeBarrierOp op);
 
-LogicalResult printOperation(CodeEmitter& emitter, ascendc::WaitFlagOp op);
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::WaitFlagOp op);
 
 } // namespace ascendc
 } // namespace mlir

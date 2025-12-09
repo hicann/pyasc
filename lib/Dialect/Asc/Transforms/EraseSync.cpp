@@ -18,51 +18,53 @@ namespace mlir {
 namespace ascendc {
 #define GEN_PASS_DEF_ERASESYNC
 #include "ascir/Dialect/Asc/Transforms/Passes.h.inc"
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir
 
 using namespace mlir;
 
 namespace {
 
 template <typename OpT>
-void eraseOps(Operation *root) {
-  root->walk([](OpT op) { op.erase(); });
+void eraseOps(Operation *root)
+{
+    root->walk([](OpT op) { op.erase(); });
 }
 
 struct EraseSyncPass : public ascendc::impl::EraseSyncBase<EraseSyncPass> {
-  void runOnOperation() override {
-    func::FuncOp funcOp = getOperation();
-    if (funcOp.isDeclaration()) {
-      return;
+    void runOnOperation() override
+    {
+        func::FuncOp funcOp = getOperation();
+        if (funcOp.isDeclaration()) {
+            return;
+        }
+        ValueMap<Value> allocTensors; // maps queue to allocated tensor
+        funcOp.walk(
+            [&allocTensors](ascendc::TQueBindAllocTensorOp op) { allocTensors[op.getQueue()] = op.getTensor(); });
+        funcOp.walk([this, &allocTensors](ascendc::TQueBindDequeTensorOp op) {
+            auto it = allocTensors.find(op.getQueue());
+            if (it == allocTensors.end()) {
+                op.emitOpError("doesn't have corresponding alloc_tensor op");
+                signalPassFailure();
+                return;
+            }
+            op.replaceAllUsesWith(it->second);
+            op.erase();
+        });
+        eraseOps<ascendc::TQueBindEnqueTensorOp>(funcOp);
+        eraseOps<ascendc::SetFlagOp>(funcOp);
+        eraseOps<ascendc::WaitFlagOp>(funcOp);
+        eraseOps<ascendc::PipeBarrierOp>(funcOp);
     }
-    ValueMap<Value> allocTensors; // maps queue to allocated tensor
-    funcOp.walk([&allocTensors](ascendc::TQueBindAllocTensorOp op) {
-      allocTensors[op.getQueue()] = op.getTensor();
-    });
-    funcOp.walk([this, &allocTensors](ascendc::TQueBindDequeTensorOp op) {
-      auto it = allocTensors.find(op.getQueue());
-      if (it == allocTensors.end()) {
-        op.emitOpError("doesn't have corresponding alloc_tensor op");
-        signalPassFailure();
-        return;
-      }
-      op.replaceAllUsesWith(it->second);
-      op.erase();
-    });
-    eraseOps<ascendc::TQueBindEnqueTensorOp>(funcOp);
-    eraseOps<ascendc::SetFlagOp>(funcOp);
-    eraseOps<ascendc::WaitFlagOp>(funcOp);
-    eraseOps<ascendc::PipeBarrierOp>(funcOp);
-  }
 };
 
-}  // namespace
+} // namespace
 
 namespace mlir {
 namespace ascendc {
-std::unique_ptr<Pass> createEraseSyncPass() {
-  return std::make_unique<EraseSyncPass>();
+std::unique_ptr<Pass> createEraseSyncPass()
+{
+    return std::make_unique<EraseSyncPass>();
 }
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir

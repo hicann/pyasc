@@ -19,28 +19,28 @@ namespace py = pybind11;
 
 namespace pybind11 {
 namespace asc {
-void pyasc_init_matmul_api_tiling(py::module &m) {
-  using namespace matmul_tiling;
+void pyasc_init_matmul_api_tiling(py::module &m)
+{
+    using namespace matmul_tiling;
 
-  // MatmulConfigParams struct
-  py::class_<MatmulConfigParams>(m, "MatmulConfigParams", py::module_local())
-      .def(py::init<int32_t, bool, ScheduleType, MatrixTraverse, bool>(),
-                    "mm_config_type"_a = 1, "enable_l1_cache_ub"_a = false,
-                    "schedule_type"_a = ScheduleType::INNER_PRODUCT,
-                    "traverse"_a = MatrixTraverse::NOSET, "en_vec_nd2nz"_a = false)
-           .def_readwrite("mm_config_type", &MatmulConfigParams::mmConfigType)
-           .def_readwrite("enable_l1_cache_ub", &MatmulConfigParams::enableL1CacheUB)
-           .def_readwrite("schedule_type", &MatmulConfigParams::scheduleType)
-           .def_readwrite("traverse", &MatmulConfigParams::traverse)
-           .def_readwrite("en_vec_nd2nz", &MatmulConfigParams::enVecND2NZ);
+    // MatmulConfigParams struct
+    py::class_<MatmulConfigParams>(m, "MatmulConfigParams", py::module_local())
+        .def(py::init<int32_t, bool, ScheduleType, MatrixTraverse, bool>(), "mm_config_type"_a = 1,
+             "enable_l1_cache_ub"_a = false, "schedule_type"_a = ScheduleType::INNER_PRODUCT,
+             "traverse"_a = MatrixTraverse::NOSET, "en_vec_nd2nz"_a = false)
+        .def_readwrite("mm_config_type", &MatmulConfigParams::mmConfigType)
+        .def_readwrite("enable_l1_cache_ub", &MatmulConfigParams::enableL1CacheUB)
+        .def_readwrite("schedule_type", &MatmulConfigParams::scheduleType)
+        .def_readwrite("traverse", &MatmulConfigParams::traverse)
+        .def_readwrite("en_vec_nd2nz", &MatmulConfigParams::enVecND2NZ);
 
-  // MatmulApiTilingBase class
-  py::class_<MatmulApiTilingBase>(m, "MatmulApiTilingBase", py::module_local())
-      // Enable methods
-      .def(
-          "enable_bias", [](MatmulApiTilingBase &self, bool isBiasIn) { return self.EnableBias(isBiasIn); },
-          "is_bias_in"_a = false, 
-          R"doc(
+    // MatmulApiTilingBase class
+    py::class_<MatmulApiTilingBase>(m, "MatmulApiTilingBase", py::module_local())
+        // Enable methods
+        .def(
+            "enable_bias", [](MatmulApiTilingBase &self, bool isBiasIn) { return self.EnableBias(isBiasIn); },
+            "is_bias_in"_a = false,
+            R"doc(
           设置Bias是否参与运算，设置的信息必须与Kernel侧保持一致。
 
           **对应的Ascend C函数原型**
@@ -75,9 +75,10 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      // Get methods
-      .def("get_base_k", [](MatmulApiTilingBase &self) { return self.GetBaseK(); }, 
-          R"doc(
+        // Get methods
+        .def(
+            "get_base_k", [](MatmulApiTilingBase &self) { return self.GetBaseK(); },
+            R"doc(
           获取Tiling计算得到的baseK值。
 
           **对应的Ascend C函数原型**
@@ -113,8 +114,9 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               ret = tiling.get_tiling(tiling_data)
               bask_k = tiling.get_base_k()
           )doc")
-      .def("get_base_m", [](MatmulApiTilingBase &self) { return self.GetBaseM(); }, 
-          R"doc(
+        .def(
+            "get_base_m", [](MatmulApiTilingBase &self) { return self.GetBaseM(); },
+            R"doc(
           获取Tiling计算得到的baseM值。
 
           **对应的Ascend C函数原型**
@@ -150,8 +152,9 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               ret = tiling.get_tiling(tiling_data)
               bask_m = tiling.get_base_m()
           )doc")
-      .def("get_base_n", [](MatmulApiTilingBase &self) { return self.GetBaseN(); }, 
-          R"doc(
+        .def(
+            "get_base_n", [](MatmulApiTilingBase &self) { return self.GetBaseN(); },
+            R"doc(
           获取Tiling计算得到的baseN值。
 
           **对应的Ascend C函数原型**
@@ -187,15 +190,17 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               ret = tiling.get_tiling(tiling_data)
               bask_n = tiling.get_bask_n()
           )doc")
-      .def("get_tiling",
-           [](MatmulApiTilingBase &self, py::object &tiling) {
-             py::object method = tiling.attr("addressof");
-             py::object result = method();
-             auto cpp_int = py::cast<size_t>(result);
-             auto *tiling_new = reinterpret_cast<TCubeTiling *>(cpp_int);
-             return self.GetTiling(*tiling_new);
-           }, "tiling"_a, 
-          R"doc(
+        .def(
+            "get_tiling",
+            [](MatmulApiTilingBase &self, py::object &tiling) {
+                py::object method = tiling.attr("addressof");
+                py::object result = method();
+                auto cpp_int = py::cast<size_t>(result);
+                auto *tiling_new = reinterpret_cast<TCubeTiling *>(cpp_int);
+                return self.GetTiling(*tiling_new);
+            },
+            "tiling"_a,
+            R"doc(
           获取Tiling参数。
 
           **对应的Ascend C函数原型**
@@ -235,11 +240,14 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      // Set methods
-      .def("set_a_layout", [](MatmulApiTilingBase &self, int32_t b, int32_t s, int32_t n, int32_t g,
-                              int32_t d) { return self.SetALayout(b, s, n, g, d); },
-                              "b"_a, "s"_a, "n"_a, "g"_a, "d"_a, 
-          R"doc(
+        // Set methods
+        .def(
+            "set_a_layout",
+            [](MatmulApiTilingBase &self, int32_t b, int32_t s, int32_t n, int32_t g, int32_t d) {
+                return self.SetALayout(b, s, n, g, d);
+            },
+            "b"_a, "s"_a, "n"_a, "g"_a, "d"_a,
+            R"doc(
           设置A矩阵的Layout轴信息，包括B、S、N、G、D轴。对于BSNGD、SBNGD、BNGS1S2 Layout格式，调用IterateBatch接口之前，
           需要在Host侧Tiling实现中通过本接口设置A矩阵的Layout轴信息。
 
@@ -305,10 +313,13 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def("set_a_type", [](MatmulApiTilingBase &self, TPosition pos, CubeFormat type, DataType dataType,
-                            bool isTrans) { return self.SetAType(pos, type, dataType, isTrans); },
-                            "pos"_a, "type"_a, "data_type"_a, "is_trans"_a, 
-          R"doc(
+        .def(
+            "set_a_type",
+            [](MatmulApiTilingBase &self, TPosition pos, CubeFormat type, DataType dataType, bool isTrans) {
+                return self.SetAType(pos, type, dataType, isTrans);
+            },
+            "pos"_a, "type"_a, "data_type"_a, "is_trans"_a,
+            R"doc(
           设置A矩阵的位置，数据格式，数据类型，是否转置等信息，这些信息需要和kernel侧的设置保持一致。
 
           **对应的Ascend C函数原型**
@@ -347,10 +358,13 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def("set_b_layout", [](MatmulApiTilingBase &self, int32_t b, int32_t s, int32_t n, int32_t g,
-                              int32_t d) { return self.SetBLayout(b, s, n, g, d); },
-                              "b"_a, "s"_a, "n"_a, "g"_a, "d"_a, 
-          R"doc(
+        .def(
+            "set_b_layout",
+            [](MatmulApiTilingBase &self, int32_t b, int32_t s, int32_t n, int32_t g, int32_t d) {
+                return self.SetBLayout(b, s, n, g, d);
+            },
+            "b"_a, "s"_a, "n"_a, "g"_a, "d"_a,
+            R"doc(
           设置B矩阵的Layout轴信息，包括B、S、N、G、D轴。对于BSNGD、SBNGD、BNGS1S2 Layout格式，调用IterateBatch接口之前，
           需要在Host侧Tiling实现中通过本接口设置B矩阵的Layout轴信息。
 
@@ -416,10 +430,13 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def("set_b_type", [](MatmulApiTilingBase &self, TPosition pos, CubeFormat type, DataType dataType,
-                            bool isTrans) { return self.SetBType(pos, type, dataType, isTrans); },
-                            "pos"_a, "type"_a, "data_type"_a, "is_trans"_a, 
-          R"doc(
+        .def(
+            "set_b_type",
+            [](MatmulApiTilingBase &self, TPosition pos, CubeFormat type, DataType dataType, bool isTrans) {
+                return self.SetBType(pos, type, dataType, isTrans);
+            },
+            "pos"_a, "type"_a, "data_type"_a, "is_trans"_a,
+            R"doc(
           设置B矩阵的位置，数据格式，数据类型，是否转置等信息，这些信息需要和kernel侧的设置保持一致。
 
           **对应的Ascend C函数原型**
@@ -458,11 +475,13 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def("set_batch_info_for_normal",
-           [](MatmulApiTilingBase &self, int32_t batchA, int32_t batchB, int32_t m, int32_t n, int32_t k) {
-             return self.SetBatchInfoForNormal(batchA, batchB, m, n, k);
-           }, "batch_a"_a, "batch_b"_a, "m"_a, "n"_a, "k"_a, 
-          R"doc(
+        .def(
+            "set_batch_info_for_normal",
+            [](MatmulApiTilingBase &self, int32_t batchA, int32_t batchB, int32_t m, int32_t n, int32_t k) {
+                return self.SetBatchInfoForNormal(batchA, batchB, m, n, k);
+            },
+            "batch_a"_a, "batch_b"_a, "m"_a, "n"_a, "k"_a,
+            R"doc(
           设置A/B矩阵的M/N/K轴信息，以及A/B矩阵的Batch数。Layout类型为NORMAL的场景，
           调用IterateBatch或者IterateNBatch接口之前，需要在Host侧Tiling实现中通过本接口设置A/B矩阵的M/N/K轴等信息。
 
@@ -513,9 +532,10 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def("set_batch_num", [](MatmulApiTilingBase &self, int32_t batch) { return self.SetBatchNum(batch); },
-           "batch"_a, 
-          R"doc(
+        .def(
+            "set_batch_num", [](MatmulApiTilingBase &self, int32_t batch) { return self.SetBatchNum(batch); },
+            "batch"_a,
+            R"doc(
           设置多Batch计算的最大Batch数，最大Batch数为A矩阵batchA和B矩阵batchB中的最大值。
           调用IterateBatch接口之前，需要在Host侧Tiling实现中通过本接口设置多Batch计算的Batch数。
 
@@ -577,10 +597,13 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def("set_bias_type", [](MatmulApiTilingBase &self, TPosition pos, CubeFormat type,
-                               DataType dataType) { return self.SetBiasType(pos, type, dataType); },
-                               "pos"_a, "type"_a, "data_type"_a, 
-          R"doc(
+        .def(
+            "set_bias_type",
+            [](MatmulApiTilingBase &self, TPosition pos, CubeFormat type, DataType dataType) {
+                return self.SetBiasType(pos, type, dataType);
+            },
+            "pos"_a, "type"_a, "data_type"_a,
+            R"doc(
           设置Bias的位置，数据格式，数据类型，是否转置等信息，这些信息需要和kernel侧的设置保持一致。
 
           **对应的Ascend C函数原型**
@@ -617,12 +640,13 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def("set_buffer_space",
-          [](MatmulApiTilingBase &self, int32_t l1Size, int32_t l0CSize, int32_t ubSize, int32_t btSize) {
-            return self.SetBufferSpace(l1Size, l0CSize, ubSize, btSize);
-          },
-          "l1_size"_a = -1, "l0_c_size"_a = -1, "ub_size"_a = -1, "bt_size"_a = -1, 
-          R"doc(
+        .def(
+            "set_buffer_space",
+            [](MatmulApiTilingBase &self, int32_t l1Size, int32_t l0CSize, int32_t ubSize, int32_t btSize) {
+                return self.SetBufferSpace(l1Size, l0CSize, ubSize, btSize);
+            },
+            "l1_size"_a = -1, "l0_c_size"_a = -1, "ub_size"_a = -1, "bt_size"_a = -1,
+            R"doc(
           设置Matmul计算时可用的L1 Buffer/L0C Buffer/Unified Buffer/BiasTable Buffer空间大小，单位为字节。
 
           **对应的Ascend C函数原型**
@@ -661,10 +685,13 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def("set_c_layout", [](MatmulApiTilingBase &self, int32_t b, int32_t s, int32_t n, int32_t g,
-                              int32_t d) { return self.SetCLayout(b, s, n, g, d); },
-                              "b"_a, "s"_a, "n"_a, "g"_a, "d"_a, 
-          R"doc(
+        .def(
+            "set_c_layout",
+            [](MatmulApiTilingBase &self, int32_t b, int32_t s, int32_t n, int32_t g, int32_t d) {
+                return self.SetCLayout(b, s, n, g, d);
+            },
+            "b"_a, "s"_a, "n"_a, "g"_a, "d"_a,
+            R"doc(
           设置C矩阵的Layout轴信息，包括B、S、N、G、D轴。对于BSNGD、SBNGD、BNGS1S2 Layout格式，调用IterateBatch接口之前，
           需要在Host侧Tiling实现中通过本接口设置C矩阵的Layout轴信息。
 
@@ -730,10 +757,13 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def("set_c_type", [](MatmulApiTilingBase &self, TPosition pos, CubeFormat type,
-                            DataType dataType) { return self.SetCType(pos, type, dataType); },
-                            "pos"_a, "type"_a, "data_type"_a, 
-          R"doc(
+        .def(
+            "set_c_type",
+            [](MatmulApiTilingBase &self, TPosition pos, CubeFormat type, DataType dataType) {
+                return self.SetCType(pos, type, dataType);
+            },
+            "pos"_a, "type"_a, "data_type"_a,
+            R"doc(
           设置C矩阵的位置，数据格式，数据类型，是否转置等信息，这些信息需要和kernel侧的设置保持一致。
 
           **对应的Ascend C函数原型**
@@ -772,10 +802,11 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def("set_dequant_type",
-           [](MatmulApiTilingBase &self, DequantType dequantType) { return self.SetDequantType(dequantType); },
-           "dequant_type"_a, 
-          R"doc(
+        .def(
+            "set_dequant_type",
+            [](MatmulApiTilingBase &self, DequantType dequantType) { return self.SetDequantType(dequantType); },
+            "dequant_type"_a,
+            R"doc(
           该接口用于设置量化或反量化的模式。
 
           **对应的Ascend C函数原型**
@@ -816,13 +847,13 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def(
-          "set_double_buffer",
-          [](MatmulApiTilingBase &self, bool a, bool b, bool c, bool bias, bool transND2NZ, bool transNZ2ND) {
-            return self.SetDoubleBuffer(a, b, c, bias, transND2NZ, transNZ2ND);
-          },
-          "a"_a, "b"_a, "c"_a, "bias"_a, "trans_nd2nz"_a = true, "trans_nz2nd"_a = true, 
-          R"doc(
+        .def(
+            "set_double_buffer",
+            [](MatmulApiTilingBase &self, bool a, bool b, bool c, bool bias, bool transND2NZ, bool transNZ2ND) {
+                return self.SetDoubleBuffer(a, b, c, bias, transND2NZ, transNZ2ND);
+            },
+            "a"_a, "b"_a, "c"_a, "bias"_a, "trans_nd2nz"_a = true, "trans_nz2nd"_a = true,
+            R"doc(
           设置A/B/C/Bias是否使能double buffer功能，以及是否需要做ND2NZ或者NZ2ND的转换，主要用于Tiling函数内部调优。
 
           **对应的Ascend C函数原型**
@@ -839,13 +870,13 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
           
           -1表示设置失败； 0表示设置成功。
           )doc")
-      .def(
-          "set_fix_split",
-          [](MatmulApiTilingBase &self, int32_t baseMIn, int32_t baseNIn, int32_t baseKIn) {
-            return self.SetFixSplit(baseMIn, baseNIn, baseKIn);
-          },
-          "base_m_in"_a = -1, "base_n_in"_a = -1, "base_k_in"_a = -1, 
-          R"doc(
+        .def(
+            "set_fix_split",
+            [](MatmulApiTilingBase &self, int32_t baseMIn, int32_t baseNIn, int32_t baseKIn) {
+                return self.SetFixSplit(baseMIn, baseNIn, baseKIn);
+            },
+            "base_m_in"_a = -1, "base_n_in"_a = -1, "base_k_in"_a = -1,
+            R"doc(
           设置A/B/C/Bias是否使能double buffer功能，以及是否需要做ND2NZ或者NZ2ND的转换，主要用于Tiling函数内部调优。
 
           **对应的Ascend C函数原型**
@@ -886,9 +917,10 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def("set_mad_type", [](MatmulApiTilingBase &self, MatrixMadType madType) { return self.SetMadType(madType); },
-           "mad_type"_a, 
-          R"doc(
+        .def(
+            "set_mad_type", [](MatmulApiTilingBase &self, MatrixMadType madType) { return self.SetMadType(madType); },
+            "mad_type"_a,
+            R"doc(
           设置是否使能HF32模式。当前版本暂不支持。
 
           **对应的Ascend C函数原型**
@@ -905,15 +937,15 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
           
           -1表示设置失败； 0表示设置成功。
           )doc")
-      .def("set_matmul_config_params",
-          [](MatmulApiTilingBase &self, int32_t mmConfigType, bool enableL1CacheUB, ScheduleType scheduleType,
-             MatrixTraverse traverse, bool enVecND2NZ) {
-            return self.SetMatmulConfigParams(mmConfigType, enableL1CacheUB, scheduleType, traverse,
-                                              enVecND2NZ);
-          },
-          "mm_config_type"_a = 1, "enable_l1_cache_ub"_a = false, "schedule_type"_a = ScheduleType::INNER_PRODUCT,
-          "traverse"_a = MatrixTraverse::NOSET, "en_vec_nd2nz"_a = false, 
-          R"doc(
+        .def(
+            "set_matmul_config_params",
+            [](MatmulApiTilingBase &self, int32_t mmConfigType, bool enableL1CacheUB, ScheduleType scheduleType,
+               MatrixTraverse traverse, bool enVecND2NZ) {
+                return self.SetMatmulConfigParams(mmConfigType, enableL1CacheUB, scheduleType, traverse, enVecND2NZ);
+            },
+            "mm_config_type"_a = 1, "enable_l1_cache_ub"_a = false, "schedule_type"_a = ScheduleType::INNER_PRODUCT,
+            "traverse"_a = MatrixTraverse::NOSET, "en_vec_nd2nz"_a = false,
+            R"doc(
           在计算Tiling时，用于自定义设置MatmulConfig参数。本接口中配置的参数对应的功能在Tiling与Kernel中需要保持一致，
           所以本接口中的参数取值，需要与Kernel侧对应的MatmulConfig参数值保持一致。
 
@@ -963,14 +995,19 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def("set_matmul_config_params",
-           [](MatmulApiTilingBase &self, const MatmulConfigParams &configParams) {
-             return self.SetMatmulConfigParams(configParams);
-           }, "config_params"_a)
-      .def("set_org_shape", [](MatmulApiTilingBase &self, int32_t orgMIn, int32_t orgNIn,
-                               int32_t orgKIn) { return self.SetOrgShape(orgMIn, orgNIn, orgKIn); },
-                               "org_m_in"_a, "org_n_in"_a, "org_k_in"_a, 
-          R"doc(
+        .def(
+            "set_matmul_config_params",
+            [](MatmulApiTilingBase &self, const MatmulConfigParams &configParams) {
+                return self.SetMatmulConfigParams(configParams);
+            },
+            "config_params"_a)
+        .def(
+            "set_org_shape",
+            [](MatmulApiTilingBase &self, int32_t orgMIn, int32_t orgNIn, int32_t orgKIn) {
+                return self.SetOrgShape(orgMIn, orgNIn, orgKIn);
+            },
+            "org_m_in"_a, "org_n_in"_a, "org_k_in"_a,
+            R"doc(
           设置Matmul计算时的原始完整的形状M、N、K或Ka/Kb，单位均为元素个数。
 
           **对应的Ascend C函数原型**
@@ -1014,13 +1051,17 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def("set_org_shape", [](MatmulApiTilingBase &self, int32_t orgMIn, int32_t orgNIn, int32_t orgKaIn,
-                               int32_t orgKbIn) { return self.SetOrgShape(orgMIn, orgNIn, orgKaIn, orgKbIn); },
-                               "org_m_in"_a, "org_n_in"_a, "org_ka_in"_a, "org_kb_in"_a)
-      .def("set_shape",
-           [](MatmulApiTilingBase &self, int32_t m, int32_t n, int32_t k) { return self.SetShape(m, n, k); },
-           "m"_a, "n"_a, "k"_a, 
-          R"doc(
+        .def(
+            "set_org_shape",
+            [](MatmulApiTilingBase &self, int32_t orgMIn, int32_t orgNIn, int32_t orgKaIn, int32_t orgKbIn) {
+                return self.SetOrgShape(orgMIn, orgNIn, orgKaIn, orgKbIn);
+            },
+            "org_m_in"_a, "org_n_in"_a, "org_ka_in"_a, "org_kb_in"_a)
+        .def(
+            "set_shape",
+            [](MatmulApiTilingBase &self, int32_t m, int32_t n, int32_t k) { return self.SetShape(m, n, k); }, "m"_a,
+            "n"_a, "k"_a,
+            R"doc(
           设置Matmul计算的形状m、n、k，该形状可以为原始完整矩阵或其局部矩阵，单位为元素。该形状的矩阵乘可以由单核或多核计算完成。
 
           **对应的Ascend C函数原型**
@@ -1057,10 +1098,10 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def(
-          "set_sparse", [](MatmulApiTilingBase &self, bool isSparceIn) { return self.SetSparse(isSparceIn); },
-          "is_sparce_in"_a = false, 
-          R"doc(
+        .def(
+            "set_sparse", [](MatmulApiTilingBase &self, bool isSparceIn) { return self.SetSparse(isSparceIn); },
+            "is_sparce_in"_a = false,
+            R"doc(
           设置Matmul的使用场景是否为Sparse Matmul场景。
 
           **对应的Ascend C函数原型**
@@ -1100,10 +1141,10 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def("set_traverse",
-           [](MatmulApiTilingBase &self, MatrixTraverse traverse) { return self.SetTraverse(traverse); },
-           "traverse"_a, 
-          R"doc(
+        .def(
+            "set_traverse",
+            [](MatmulApiTilingBase &self, MatrixTraverse traverse) { return self.SetTraverse(traverse); }, "traverse"_a,
+            R"doc(
           设置固定的Matmul计算方向，M轴优先还是N轴优先。
 
           **对应的Ascend C函数原型**
@@ -1139,15 +1180,15 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def(
-          "set_split_range",
-          [](MatmulApiTilingBase &self, int32_t maxBaseM, int32_t maxBaseN, int32_t maxBaseK, int32_t minBaseM,
-             int32_t minBaseN, int32_t minBaseK) {
-            return self.SetSplitRange(maxBaseM, maxBaseN, maxBaseK, minBaseM, minBaseN, minBaseK);
-          },
-          "max_base_m"_a = -1, "max_base_n"_a = -1, "max_base_k"_a = -1, "min_base_m"_a = -1, "min_base_n"_a = -1,
-          "min_base_k"_a = -1, 
-          R"doc(
+        .def(
+            "set_split_range",
+            [](MatmulApiTilingBase &self, int32_t maxBaseM, int32_t maxBaseN, int32_t maxBaseK, int32_t minBaseM,
+               int32_t minBaseN, int32_t minBaseK) {
+                return self.SetSplitRange(maxBaseM, maxBaseN, maxBaseK, minBaseM, minBaseN, minBaseK);
+            },
+            "max_base_m"_a = -1, "max_base_n"_a = -1, "max_base_k"_a = -1, "min_base_m"_a = -1, "min_base_n"_a = -1,
+            "min_base_k"_a = -1,
+            R"doc(
           设置baseM/baseN/baseK的最大值和最小值。 目前Tiling暂时不支持该功能。
 
           **对应的Ascend C函数原型**
@@ -1175,10 +1216,10 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
           若base_m/base_n/base_k不满足C0_size对齐，计算Tiling时会将该值对齐到C0_size。提示，half/bfloat16_t数据类型的C0_size为16，float数据类型的C0_size为8，int8_t数据类型的C0_size为32，int4b_t数据类型的C0_size为64。
           )doc");
 
-  // MatmulApiTiling class
-  py::class_<MatmulApiTiling, MatmulApiTilingBase>(m, "MatmulApiTiling", py::module_local())
-      .def(py::init<const platform_ascendc::PlatformAscendC &>(), 
-          R"doc(
+    // MatmulApiTiling class
+    py::class_<MatmulApiTiling, MatmulApiTilingBase>(m, "MatmulApiTiling", py::module_local())
+        .def(py::init<const platform_ascendc::PlatformAscendC &>(),
+             R"doc(
           创建MatmulApiTiling对象。
 
           **对应的Ascend C函数原型**
@@ -1220,10 +1261,10 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
                 ret = tiling.get_tiling(tiling_data)
           )doc");
 
-  // MultiCoreMatmulTiling class
-  py::class_<MultiCoreMatmulTiling, MatmulApiTilingBase>(m, "MultiCoreMatmulTiling", py::module_local())
-      .def(py::init<const platform_ascendc::PlatformAscendC &>(), 
-          R"doc(
+    // MultiCoreMatmulTiling class
+    py::class_<MultiCoreMatmulTiling, MatmulApiTilingBase>(m, "MultiCoreMatmulTiling", py::module_local())
+        .def(py::init<const platform_ascendc::PlatformAscendC &>(),
+             R"doc(
           创建MultiCoreMatmulTiling对象。
 
           **对应的Ascend C函数原型**
@@ -1264,11 +1305,11 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
                 tiling_data = host.TCubeTiling()
                 ret = tiling.get_tiling(tiling_data)
           )doc")
-      // Enable methods
-      .def("enable_multi_core_split_k",
-           [](MultiCoreMatmulTiling &self, bool flag) { return self.EnableMultiCoreSplitK(flag); },
-           "flag"_a, 
-          R"doc(
+        // Enable methods
+        .def(
+            "enable_multi_core_split_k",
+            [](MultiCoreMatmulTiling &self, bool flag) { return self.EnableMultiCoreSplitK(flag); }, "flag"_a,
+            R"doc(
           多核场景，通过该接口使能切K轴。不调用该接口的情况下，默认不切K轴。在GetTiling接口调用前使用。
 
           **对应的Ascend C函数原型**
@@ -1307,17 +1348,19 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               ret = tiling.get_tiling(tiling_data)
 
           )doc")
-      // Get methods
-      .def("get_core_num", [](MultiCoreMatmulTiling &self) -> py::object {
-                                int32_t dim, mDim, nDim;
-                                auto ret = self.GetCoreNum(dim, mDim, nDim);
-                                if (ret != 0) {
-                                  return py::none();
-                                } else {
-                                  return py::make_tuple(dim, mDim, nDim);
-                                }
-                              }, 
-          R"doc(
+        // Get methods
+        .def(
+            "get_core_num",
+            [](MultiCoreMatmulTiling &self) -> py::object {
+                int32_t dim, mDim, nDim;
+                auto ret = self.GetCoreNum(dim, mDim, nDim);
+                if (ret != 0) {
+                    return py::none();
+                } else {
+                    return py::make_tuple(dim, mDim, nDim);
+                }
+            },
+            R"doc(
           获得多核切分所使用的BlockDim参数。
 
           **对应的Ascend C函数原型**
@@ -1357,16 +1400,18 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               dim, m_dim, n_dim = 0
               ret1 = tiling.get_core_num(dim, m_dim, n_dim)
           )doc")
-      .def("get_single_shape", [](MultiCoreMatmulTiling &self) -> py::object {
-                                    int32_t shapeM, shapeN, shapeK;
-                                    auto ret = self.GetSingleShape(shapeM, shapeN, shapeK);
-                                    if (ret != 0) {
-                                      return py::none();
-                                    } else {
-                                      return py::make_tuple(shapeM, shapeN, shapeK);
-                                    }
-                                  }, 
-          R"doc(
+        .def(
+            "get_single_shape",
+            [](MultiCoreMatmulTiling &self) -> py::object {
+                int32_t shapeM, shapeN, shapeK;
+                auto ret = self.GetSingleShape(shapeM, shapeN, shapeK);
+                if (ret != 0) {
+                    return py::none();
+                } else {
+                    return py::make_tuple(shapeM, shapeN, shapeK);
+                }
+            },
+            R"doc(
           获取计算后的single_core_m/single_core_n/single_core_k。
 
           **对应的Ascend C函数原型**
@@ -1410,12 +1455,15 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               single_m, single_n, single_k = 0
               ret = tiling.get_single_shape(single_m, single_n, single_k)
           )doc")
-     
-      // Set methods
-      .def("set_align_split", [](MultiCoreMatmulTiling &self, int32_t alignM, int32_t alignN,
-                                 int32_t alignK) { return self.SetAlignSplit(alignM, alignN, alignK); },
-                                 "align_m"_a, "align_n"_a, "align_k"_a, 
-          R"doc(
+
+        // Set methods
+        .def(
+            "set_align_split",
+            [](MultiCoreMatmulTiling &self, int32_t alignM, int32_t alignN, int32_t alignK) {
+                return self.SetAlignSplit(alignM, alignN, alignK);
+            },
+            "align_m"_a, "align_n"_a, "align_k"_a,
+            R"doc(
           多核切分时， 设置single_core_m/single_core_n/single_core_k的对齐值。比如设置single_core_m的对齐值为64（单位为元素），切分出的singleCoreM为64的倍数。
 
           **对应的Ascend C函数原型**
@@ -1454,9 +1502,9 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret1 = tiling.get_tiling(tiling_data)
           )doc")
-      .def("set_dim", [](MultiCoreMatmulTiling &self, int32_t dim) { return self.SetDim(dim); },
-           "dim"_a, 
-          R"doc(
+        .def(
+            "set_dim", [](MultiCoreMatmulTiling &self, int32_t dim) { return self.SetDim(dim); }, "dim"_a,
+            R"doc(
           设置多核Matmul时，参与运算的核数。
 
           **对应的Ascend C函数原型**
@@ -1493,13 +1541,13 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def(
-          "set_single_shape",
-          [](MultiCoreMatmulTiling &self, int32_t singleMIn, int32_t singleNIn, int32_t singleKIn) {
-            return self.SetSingleShape(singleMIn, singleNIn, singleKIn);
-          },
-          "single_m_in"_a = -1, "single_n_in"_a = -1, "single_k_in"_a = -1, 
-          R"doc(
+        .def(
+            "set_single_shape",
+            [](MultiCoreMatmulTiling &self, int32_t singleMIn, int32_t singleNIn, int32_t singleKIn) {
+                return self.SetSingleShape(singleMIn, singleNIn, singleKIn);
+            },
+            "single_m_in"_a = -1, "single_n_in"_a = -1, "single_k_in"_a = -1,
+            R"doc(
           设置Matmul单核计算的形状single_m_in，single_n_in，single_k_in，单位为元素。
 
           **对应的Ascend C函数原型**
@@ -1538,12 +1586,12 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               tiling_data = host.TCubeTiling()
               ret = tiling.get_tiling(tiling_data)
           )doc")
-      .def(
-          "set_single_range",
-          [](MultiCoreMatmulTiling &self, int32_t maxM, int32_t maxN, int32_t maxK, int32_t minM, int32_t minN,
-             int32_t minK) { return self.SetSingleRange(maxM, maxN, maxK, minM, minN, minK); },
-          "max_m"_a = -1, "max_n"_a = -1, "max_k"_a = -1, "min_m"_a = -1, "min_n"_a = -1, "min_k"_a = -1, 
-          R"doc(
+        .def(
+            "set_single_range",
+            [](MultiCoreMatmulTiling &self, int32_t maxM, int32_t maxN, int32_t maxK, int32_t minM, int32_t minN,
+               int32_t minK) { return self.SetSingleRange(maxM, maxN, maxK, minM, minN, minK); },
+            "max_m"_a = -1, "max_n"_a = -1, "max_k"_a = -1, "min_m"_a = -1, "min_n"_a = -1, "min_k"_a = -1,
+            R"doc(
           设置single_core_m/single_core_n/single_core_k的最大值与最小值。
 
           **对应的Ascend C函数原型**
@@ -1586,10 +1634,10 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
               ret = tiling.get_tiling(tiling_data)
           )doc");
 
-  // BatchMatmulTiling class
-  py::class_<BatchMatmulTiling, MatmulApiTilingBase>(m, "BatchMatmulTiling", py::module_local())
-      .def(py::init<const platform_ascendc::PlatformAscendC &>(), 
-          R"doc(
+    // BatchMatmulTiling class
+    py::class_<BatchMatmulTiling, MatmulApiTilingBase>(m, "BatchMatmulTiling", py::module_local())
+        .def(py::init<const platform_ascendc::PlatformAscendC &>(),
+             R"doc(
           创建BatchMatmulTiling对象。
 
           **对应的Ascend C函数原型**
@@ -1630,18 +1678,19 @@ void pyasc_init_matmul_api_tiling(py::module &m) {
                 tiling_data = host.TCubeTiling()
                 ret = tiling.get_tiling(tiling_data)
           )doc")
-      // Get methods
-      .def("get_core_num",
-           [](BatchMatmulTiling &self) -> py::object {
+        // Get methods
+        .def(
+            "get_core_num",
+            [](BatchMatmulTiling &self) -> py::object {
                 int32_t dim, mDim, nDim, batchCoreM, batchCoreN;
                 auto ret = self.GetCoreNum(dim, mDim, nDim, batchCoreM, batchCoreN);
                 if (ret != 0) {
-                  return py::none();
+                    return py::none();
                 } else {
-                  return py::make_tuple(dim, mDim, nDim, batchCoreM, batchCoreN);
+                    return py::make_tuple(dim, mDim, nDim, batchCoreM, batchCoreN);
                 }
-              }, 
-          R"doc(
+            },
+            R"doc(
           获得多核切分所使用的BlockDim参数。
 
           **对应的Ascend C函数原型**

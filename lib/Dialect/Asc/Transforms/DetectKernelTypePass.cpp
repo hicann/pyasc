@@ -20,8 +20,8 @@ namespace mlir {
 namespace ascendc {
 #define GEN_PASS_DEF_DETECTKERNELTYPE
 #include "ascir/Dialect/Asc/Transforms/Passes.h.inc"
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir
 
 using namespace mlir;
 using namespace mlir::ascendc;
@@ -29,7 +29,7 @@ using namespace mlir::ascendc;
 namespace {
 
 class DetectKernelTypePass : public ascendc::impl::DetectKernelTypeBase<DetectKernelTypePass> {
-public:
+  public:
     void runOnOperation() override
     {
         ModuleOp op = getOperation();
@@ -38,7 +38,7 @@ public:
     }
 };
 
-}  // namespace
+} // namespace
 
 namespace mlir {
 namespace ascendc {
@@ -46,5 +46,5 @@ std::unique_ptr<Pass> createDetectKernelTypePass()
 {
     return std::make_unique<DetectKernelTypePass>();
 }
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir

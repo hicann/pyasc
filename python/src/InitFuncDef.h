@@ -12,14 +12,14 @@
 #define PYTHON_SRC_INIT_FUNC_DEF_H
 
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>  // automatic casts between containers and python types
+#include <pybind11/stl.h> // automatic casts between containers and python types
 
 namespace pybind11 {
 namespace asc {
-    void pyasc_init_ir(pybind11::module &&m);           // from IR.cpp
-    void pyasc_init_passes(pybind11::module &&m);       // from Passes.cpp
-    void pyasc_init_translation(pybind11::module &&m);  // from Translation.cpp
-    void pyasc_init_ir_builder(pybind11::module &m);
-}
-}
-#endif  // PYTHON_SRC_INIT_FUNC_DEF_H
+void pyasc_init_ir(pybind11::module &&m);          // from IR.cpp
+void pyasc_init_passes(pybind11::module &&m);      // from Passes.cpp
+void pyasc_init_translation(pybind11::module &&m); // from Translation.cpp
+void pyasc_init_ir_builder(pybind11::module &m);
+} // namespace asc
+} // namespace pybind11
+#endif // PYTHON_SRC_INIT_FUNC_DEF_H

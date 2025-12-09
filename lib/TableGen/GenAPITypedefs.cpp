@@ -17,33 +17,31 @@ using mlir::raw_indented_ostream;
 
 namespace {
 
-class GenAPITypedefs
-{
-  	const RecordKeeper &records;
+class GenAPITypedefs {
+    const RecordKeeper &records;
 
-public:
-  	explicit GenAPITypedefs(const RecordKeeper &records) : records(records) {}
+  public:
+    explicit GenAPITypedefs(const RecordKeeper &records) : records(records) {}
 
-  	void run(raw_ostream &os);
+    void run(raw_ostream &os);
 };
 
 void GenAPITypedefs::run(raw_ostream &os)
 {
-	raw_indented_ostream ios(os);
-	for (const auto *def : records.getAllDerivedDefinitions("APIType")) {
-		if (!def->getValueAsBit("genTypedef")) {
-			continue;
-		}
-		auto defName = def->getValueAsString("typeName");
-		ios << "def AscendC_" << defName << " : AscendC_Type<\"" << defName
-			<< "\", \"" << def->getValueAsString("mnemonic") << "\"> {\n";
-		ios.indent() << "let description = \"Represents "
-			<< def->getValueAsString("apiName") << "\";\n";
-		ios.unindent() << "}\n";
-	}
+    raw_indented_ostream ios(os);
+    for (const auto *def : records.getAllDerivedDefinitions("APIType")) {
+        if (!def->getValueAsBit("genTypedef")) {
+            continue;
+        }
+        auto defName = def->getValueAsString("typeName");
+        ios << "def AscendC_" << defName << " : AscendC_Type<\"" << defName << "\", \""
+            << def->getValueAsString("mnemonic") << "\"> {\n";
+        ios.indent() << "let description = \"Represents " << def->getValueAsString("apiName") << "\";\n";
+        ios.unindent() << "}\n";
+    }
 }
 
-TableGen::Emitter::OptClass<GenAPITypedefs>
-    registration("gen-api-typedefs", "Generate MLIR typedefs from API type declarations");
+TableGen::Emitter::OptClass<GenAPITypedefs> registration("gen-api-typedefs",
+                                                         "Generate MLIR typedefs from API type declarations");
 
 } // namespace

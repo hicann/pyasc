@@ -18,8 +18,8 @@ namespace mlir {
 namespace ascendc {
 #define GEN_PASS_DEF_PRIVATIZEFUNC
 #include "ascir/Dialect/Asc/Transforms/Passes.h.inc"
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir
 
 using namespace mlir;
 
@@ -28,18 +28,17 @@ namespace {
 struct PrivatizeFuncPass : public ascendc::impl::PrivatizeFuncBase<PrivatizeFuncPass> {
     void runOnOperation() override
     {
-        getOperation().walk(
-            [](func::FuncOp op) {
-              if (!op->hasAttrOfType<UnitAttr>(ascendc::attr::global)) {
-                  op.setPrivate();
-              } else if (!op.isDeclaration()) {
-                  op.setPublic();
-              }
+        getOperation().walk([](func::FuncOp op) {
+            if (!op->hasAttrOfType<UnitAttr>(ascendc::attr::global)) {
+                op.setPrivate();
+            } else if (!op.isDeclaration()) {
+                op.setPublic();
+            }
         });
     }
 };
 
-}  // namespace
+} // namespace
 
 namespace mlir {
 namespace ascendc {
@@ -47,5 +46,5 @@ std::unique_ptr<Pass> createPrivatizeFuncPass()
 {
     return std::make_unique<PrivatizeFuncPass>();
 }
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir
