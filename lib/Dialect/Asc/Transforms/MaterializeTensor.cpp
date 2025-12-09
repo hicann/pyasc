@@ -32,72 +32,73 @@ using namespace mlir;
 namespace {
 
 struct MaterializeLocalTensor : OpRewritePattern<ascendc::LocalTensorAutoOp> {
-  using OpRewritePattern::OpRewritePattern;
+    using OpRewritePattern::OpRewritePattern;
 
-  static ascendc::TPosition getPosition(ascendc::LocalTensorAutoOp op) {
-    if (op.getOutput())
-        return ascendc::TPosition::VECOUT;
-    if (op.getInput())
-        return ascendc::TPosition::VECIN;
-    llvm_unreachable("position is undefined because tensor cannot be enqueued");
-  }
-
-  LogicalResult matchAndRewrite(ascendc::LocalTensorAutoOp op,
-                                PatternRewriter &rewriter) const override {
-    auto type = op.getType();
-    auto loc = op.getLoc();
-    ascir::ConstantOpBuilder consts(rewriter);
-    Value length;
-    if (type.hasStaticShape()) {
-        length = consts.i64(type.getNumElements() * type.getElementTypeBitWidth() / CHAR_BIT);
-    } else {
-        assert(op->getNumOperands() != 0 && "must have operands for dynamic shape");
-        length = consts.i64(type.getElementTypeBitWidth() / CHAR_BIT);
-        for (auto dim : op.getDynamicShape()) {
-            length = rewriter.create<arith::MulIOp>(loc, length, dim);
-        }
+    static ascendc::TPosition getPosition(ascendc::LocalTensorAutoOp op)
+    {
+        if (op.getOutput())
+            return ascendc::TPosition::VECOUT;
+        if (op.getInput())
+            return ascendc::TPosition::VECIN;
+        llvm_unreachable("position is undefined because tensor cannot be enqueued");
     }
-    Value pipe = rewriter.create<ascendc::PipeOp>(loc);
-    if (!op.getInput() && !op.getOutput()) {
-        auto bufferTy = ascendc::TBufType::get(op.getContext(), ascendc::TPosition::VECCALC);
-        Value buffer = rewriter.create<ascendc::TBufOp>(loc, bufferTy);
-        rewriter.create<ascendc::TPipeInitBufferOp>(loc, pipe, buffer, length);
-        rewriter.replaceOpWithNewOp<ascendc::TBufGetTensorOp>(op, type, buffer);
+
+    LogicalResult matchAndRewrite(ascendc::LocalTensorAutoOp op, PatternRewriter &rewriter) const override
+    {
+        auto type = op.getType();
+        auto loc = op.getLoc();
+        ascir::ConstantOpBuilder consts(rewriter);
+        Value length;
+        if (type.hasStaticShape()) {
+            length = consts.i64(type.getNumElements() * type.getElementTypeBitWidth() / CHAR_BIT);
+        } else {
+            assert(op->getNumOperands() != 0 && "must have operands for dynamic shape");
+            length = consts.i64(type.getElementTypeBitWidth() / CHAR_BIT);
+            for (auto dim : op.getDynamicShape()) {
+                length = rewriter.create<arith::MulIOp>(loc, length, dim);
+            }
+        }
+        Value pipe = rewriter.create<ascendc::PipeOp>(loc);
+        if (!op.getInput() && !op.getOutput()) {
+            auto bufferTy = ascendc::TBufType::get(op.getContext(), ascendc::TPosition::VECCALC);
+            Value buffer = rewriter.create<ascendc::TBufOp>(loc, bufferTy);
+            rewriter.create<ascendc::TPipeInitBufferOp>(loc, pipe, buffer, length);
+            rewriter.replaceOpWithNewOp<ascendc::TBufGetTensorOp>(op, type, buffer);
+            return success();
+        }
+        auto queueTy = ascendc::QueueType::get(op.getContext(), getPosition(op), 1);
+        Value queue = rewriter.create<ascendc::QueueOp>(loc, queueTy);
+        Value num = consts.i32(1);
+        rewriter.create<ascendc::TPipeInitQueueOp>(loc, pipe, queue, num, length);
+        auto allocOp = rewriter.replaceOpWithNewOp<ascendc::TQueBindAllocTensorOp>(op, type, queue);
+        rewriter.setInsertionPoint(allocOp->getBlock()->getTerminator());
+        rewriter.create<ascendc::TQueBindFreeTensorOp>(allocOp->getLoc(), queue, allocOp.getTensor());
         return success();
     }
-    auto queueTy = ascendc::QueueType::get(op.getContext(), getPosition(op), 1);
-    Value queue = rewriter.create<ascendc::QueueOp>(loc, queueTy);
-    Value num = consts.i32(1);
-    rewriter.create<ascendc::TPipeInitQueueOp>(loc, pipe, queue, num, length);
-    auto allocOp =
-        rewriter.replaceOpWithNewOp<ascendc::TQueBindAllocTensorOp>(op, type, queue);
-    rewriter.setInsertionPoint(allocOp->getBlock()->getTerminator());
-    rewriter.create<ascendc::TQueBindFreeTensorOp>(allocOp->getLoc(), queue, allocOp.getTensor());
-    return success();
-  }
 };
 
-class MaterializeTensorPass
-    : public ascendc::impl::MaterializeTensorBase<MaterializeTensorPass> {
-  void runOnOperation() override {
-    func::FuncOp funcOp = getOperation();
-    if (funcOp.isDeclaration()) {
-      return;
+class MaterializeTensorPass : public ascendc::impl::MaterializeTensorBase<MaterializeTensorPass> {
+    void runOnOperation() override
+    {
+        func::FuncOp funcOp = getOperation();
+        if (funcOp.isDeclaration()) {
+            return;
+        }
+        MLIRContext *context = &getContext();
+        RewritePatternSet patterns(context);
+        patterns.add<MaterializeLocalTensor>(context);
+        if (applyPatternsAndFoldGreedily(funcOp, std::move(patterns)).failed()) {
+            signalPassFailure();
+        }
     }
-    MLIRContext *context = &getContext();
-    RewritePatternSet patterns(context);
-    patterns.add<MaterializeLocalTensor>(context);
-    if (applyPatternsAndFoldGreedily(funcOp, std::move(patterns)).failed()) {
-      signalPassFailure();
-    }
-  }
 };
 } // namespace
 
 namespace mlir {
 namespace ascendc {
-std::unique_ptr<Pass> createMaterializeTensorPass() {
-  return std::make_unique<MaterializeTensorPass>();
+std::unique_ptr<Pass> createMaterializeTensorPass()
+{
+    return std::make_unique<MaterializeTensorPass>();
 }
 } // namespace ascendc
 } // namespace mlir

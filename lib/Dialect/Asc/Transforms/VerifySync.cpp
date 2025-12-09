@@ -20,8 +20,8 @@ namespace mlir {
 namespace ascendc {
 #define GEN_PASS_DEF_VERIFYSYNC
 #include "ascir/Dialect/Asc/Transforms/Passes.h.inc"
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir
 
 using namespace mlir;
 
@@ -40,9 +40,10 @@ ascendc::TQueBindAllocTensorOp findDef(TypedValue<ascendc::LocalTensorType> tens
 }
 
 struct VerifySyncPass : public ascendc::impl::VerifySyncBase<VerifySyncPass> {
-    void dealTQueBindFreeTensorOp(ascendc::TQueBindFreeTensorOp &TQueBindFreeTensorOp, ValueMap<SmallVector<Operation *>> &queBinds,
-        std::unordered_map<ascendc::TQueBindDequeTensorOp, ascendc::TQueBindEnqueTensorOp,
-            PointerLikeTypeHash<ascendc::TQueBindDequeTensorOp>> &deqToEnq)
+    void dealTQueBindFreeTensorOp(ascendc::TQueBindFreeTensorOp &TQueBindFreeTensorOp,
+                                  ValueMap<SmallVector<Operation *>> &queBinds,
+                                  std::unordered_map<ascendc::TQueBindDequeTensorOp, ascendc::TQueBindEnqueTensorOp,
+                                                     PointerLikeTypeHash<ascendc::TQueBindDequeTensorOp>> &deqToEnq)
     {
         auto &operations = queBinds[TQueBindFreeTensorOp.getQueue()];
         auto allocTensorOp = findDef(TQueBindFreeTensorOp.getTensor(), deqToEnq);
@@ -61,18 +62,18 @@ struct VerifySyncPass : public ascendc::impl::VerifySyncBase<VerifySyncPass> {
             }
         } else {
             TQueBindFreeTensorOp.emitWarning()
-                .append(TQueBindFreeTensorOp.getAPIName(),
-                    ": there is no corresponding call to ",
-                    ascendc::TQueBindAllocTensorOp::getAPIName())
+                .append(TQueBindFreeTensorOp.getAPIName(), ": there is no corresponding call to ",
+                        ascendc::TQueBindAllocTensorOp::getAPIName())
                 .attachNote(TQueBindFreeTensorOp.getTensor().getLoc())
                 .append("tensor declared here");
         }
     }
 
     void dealTQueBindDequeTensorOp(Operation *oriOp, ascendc::TQueBindDequeTensorOp &deque,
-        ValueMap<SmallVector<Operation *>> &queBinds,
-        std::unordered_map<ascendc::TQueBindDequeTensorOp, ascendc::TQueBindEnqueTensorOp,
-            PointerLikeTypeHash<ascendc::TQueBindDequeTensorOp>> &deqToEnq, DominanceInfo &di)
+                                   ValueMap<SmallVector<Operation *>> &queBinds,
+                                   std::unordered_map<ascendc::TQueBindDequeTensorOp, ascendc::TQueBindEnqueTensorOp,
+                                                      PointerLikeTypeHash<ascendc::TQueBindDequeTensorOp>> &deqToEnq,
+                                   DominanceInfo &di)
     {
         auto &operations = queBinds[deque.getQueue()];
         auto *it = llvm::find_if(operations, [](Operation *op) { return isa<ascendc::TQueBindEnqueTensorOp>(op); });
@@ -88,18 +89,15 @@ struct VerifySyncPass : public ascendc::impl::VerifySyncBase<VerifySyncPass> {
             });
             for (auto *op : users) {
                 op->emitWarning()
-                    .append("unexpected use of tensor between ",
-                        ascendc::TQueBindEnqueTensorOp::getAPIName(),
-                        " and ",
-                        ascendc::TQueBindDequeTensorOp::getAPIName())
+                    .append("unexpected use of tensor between ", ascendc::TQueBindEnqueTensorOp::getAPIName(), " and ",
+                            ascendc::TQueBindDequeTensorOp::getAPIName())
                     .attachNote(tensor.getLoc())
                     .append("tensor declared here");
             }
         } else {
             oriOp->emitWarning()
-                .append(deque.getAPIName(),
-                    ": there is no corresponding call to ",
-                    ascendc::TQueBindEnqueTensorOp::getAPIName())
+                .append(deque.getAPIName(), ": there is no corresponding call to ",
+                        ascendc::TQueBindEnqueTensorOp::getAPIName())
                 .attachNote(deque.getQueue().getLoc())
                 .append("queue declared here");
         }
@@ -112,9 +110,8 @@ struct VerifySyncPass : public ascendc::impl::VerifySyncBase<VerifySyncPass> {
             return;
         }
         ValueMap<SmallVector<Operation *>> queBinds;
-        std::unordered_map<ascendc::TQueBindDequeTensorOp,
-            ascendc::TQueBindEnqueTensorOp,
-            PointerLikeTypeHash<ascendc::TQueBindDequeTensorOp>>
+        std::unordered_map<ascendc::TQueBindDequeTensorOp, ascendc::TQueBindEnqueTensorOp,
+                           PointerLikeTypeHash<ascendc::TQueBindDequeTensorOp>>
             deqToEnq;
         DominanceInfo di;
         funcOp.walk([&](Operation *op) {
@@ -133,16 +130,12 @@ struct VerifySyncPass : public ascendc::impl::VerifySyncBase<VerifySyncPass> {
                 continue;
             for (auto &op : operations) {
                 if (auto alloc = dyn_cast<ascendc::TQueBindAllocTensorOp>(op)) {
-                    alloc.emitWarning().append(alloc.getAPIName(),
-                        ": there is no corresponding call to ",
-                        ascendc::TQueBindFreeTensorOp::getAPIName(),
-                        " for this tensor");
+                    alloc.emitWarning().append(alloc.getAPIName(), ": there is no corresponding call to ",
+                                               ascendc::TQueBindFreeTensorOp::getAPIName(), " for this tensor");
                 } else if (auto enque = dyn_cast<ascendc::TQueBindEnqueTensorOp>(op)) {
                     enque.emitWarning()
-                        .append(enque.getAPIName(),
-                            ": there is no corresponding call to ",
-                            ascendc::TQueBindDequeTensorOp::getAPIName(),
-                            " for this tensor")
+                        .append(enque.getAPIName(), ": there is no corresponding call to ",
+                                ascendc::TQueBindDequeTensorOp::getAPIName(), " for this tensor")
                         .attachNote(enque.getQueue().getLoc())
                         .append("queue declared here");
                 }
@@ -151,7 +144,7 @@ struct VerifySyncPass : public ascendc::impl::VerifySyncBase<VerifySyncPass> {
     }
 };
 
-}  // namespace
+} // namespace
 
 namespace mlir {
 namespace ascendc {
@@ -159,5 +152,5 @@ std::unique_ptr<Pass> createVerifySyncPass()
 {
     return std::make_unique<VerifySyncPass>();
 }
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir

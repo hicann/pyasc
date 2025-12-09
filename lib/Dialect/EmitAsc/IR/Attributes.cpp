@@ -27,9 +27,10 @@ using namespace mlir::emitasc;
 // EmitAscDialect
 //===----------------------------------------------------------------------===//
 
-void EmitAscDialect::registerAttributes() {
-  addAttributes<
+void EmitAscDialect::registerAttributes()
+{
+    addAttributes<
 #define GET_ATTRDEF_LIST
 #include "ascir/Dialect/EmitAsc/IR/EmitAscAttributes.cpp.inc"
-      >();
+        >();
 }

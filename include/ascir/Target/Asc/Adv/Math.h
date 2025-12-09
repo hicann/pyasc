@@ -21,21 +21,20 @@ namespace ascendc {
 //===----------------------------------------------------------------------===//
 
 template <typename UnaryMathOp>
-auto printOperation(CodeEmitter& emitter, UnaryMathOp op) -> LogicalResultForT<UnaryMathOp, ascendc::AcoshOp,
-    ascendc::AcosOp, ascendc::AsinhOp, ascendc::AsinOp, ascendc::AtanhOp, ascendc::AtanOp,
-    ascendc::CeilOp, ascendc::CoshOp, ascendc::CosOp, ascendc::DigammaOp, ascendc::ErfcOp,
-    ascendc::ErfOp, ascendc::FloorOp, ascendc::FracOp, ascendc::LgammaOp,
-    ascendc::LogOp, ascendc::RoundOp, ascendc::SignOp, ascendc::SinhOp, ascendc::SinOp,
-    ascendc::TanhOp, ascendc::TanOp, ascendc::TruncOp>
+auto printOperation(CodeEmitter &emitter, UnaryMathOp op)
+    -> LogicalResultForT<UnaryMathOp, ascendc::AcoshOp, ascendc::AcosOp, ascendc::AsinhOp, ascendc::AsinOp,
+                         ascendc::AtanhOp, ascendc::AtanOp, ascendc::CeilOp, ascendc::CoshOp, ascendc::CosOp,
+                         ascendc::DigammaOp, ascendc::ErfcOp, ascendc::ErfOp, ascendc::FloorOp, ascendc::FracOp,
+                         ascendc::LgammaOp, ascendc::LogOp, ascendc::RoundOp, ascendc::SignOp, ascendc::SinhOp,
+                         ascendc::SinOp, ascendc::TanhOp, ascendc::TanOp, ascendc::TruncOp>
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName();
     os << "<";
     auto dstType = op.getDst().getType().getElementType();
     FAIL_OR(emitter.emitType(op.getLoc(), dstType));
     os << ", " << emitter.getOrCreateName(op.getIsReuseSource()) << ">";
-    os << "(" << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc());
+    os << "(" << emitter.getOrCreateName(op.getDst()) << ", " << emitter.getOrCreateName(op.getSrc());
     if (auto sharedTmpBuffer = op.getSharedTmpBuffer()) {
         os << ", " << emitter.getOrCreateName(sharedTmpBuffer);
     }
@@ -51,16 +50,16 @@ auto printOperation(CodeEmitter& emitter, UnaryMathOp op) -> LogicalResultForT<U
 //===----------------------------------------------------------------------===//
 
 template <typename BinaryMathOp>
-LogicalResultForT<BinaryMathOp, ascendc::PowerOp, ascendc::XorOp> printOperation(CodeEmitter& emitter, BinaryMathOp op)
+LogicalResultForT<BinaryMathOp, ascendc::PowerOp, ascendc::XorOp> printOperation(CodeEmitter &emitter, BinaryMathOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName();
     os << "<";
     auto dstType = op.getDst().getType().getElementType();
     FAIL_OR(emitter.emitType(op.getLoc(), dstType));
     os << ", " << emitter.getOrCreateName(op.getIsReuseSource()) << ">";
-    os << "(" << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc0()) << ", " << emitter.getOrCreateName(op.getSrc1());
+    os << "(" << emitter.getOrCreateName(op.getDst()) << ", " << emitter.getOrCreateName(op.getSrc0()) << ", "
+       << emitter.getOrCreateName(op.getSrc1());
     if (auto sharedTmpBuffer = op.getSharedTmpBuffer()) {
         os << ", " << emitter.getOrCreateName(sharedTmpBuffer);
     }
@@ -76,16 +75,15 @@ LogicalResultForT<BinaryMathOp, ascendc::PowerOp, ascendc::XorOp> printOperation
 //===----------------------------------------------------------------------===//
 
 template <typename Clamp>
-LogicalResultForT<Clamp, ascendc::ClampMaxOp, ascendc::ClampMinOp> printOperation(CodeEmitter& emitter, Clamp op)
+LogicalResultForT<Clamp, ascendc::ClampMaxOp, ascendc::ClampMinOp> printOperation(CodeEmitter &emitter, Clamp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName();
     os << "<";
     auto dstType = op.getDst().getType().getElementType();
     FAIL_OR(emitter.emitType(op.getLoc(), dstType));
     os << ", " << emitter.getOrCreateName(op.getIsReuseSource()) << ">";
-    os << "(" << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc());
+    os << "(" << emitter.getOrCreateName(op.getDst()) << ", " << emitter.getOrCreateName(op.getSrc());
     if (auto sharedTmpBuffer = op.getSharedTmpBuffer()) {
         os << ", " << emitter.getOrCreateName(sharedTmpBuffer);
     }
@@ -94,11 +92,11 @@ LogicalResultForT<Clamp, ascendc::ClampMaxOp, ascendc::ClampMinOp> printOperatio
     return success();
 }
 
-LogicalResult printOperation(CodeEmitter& emitter, ascendc::ExpOp op);
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::ExpOp op);
 
-LogicalResult printOperation(CodeEmitter& emitter, ascendc::AxpyOp op);
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::AxpyOp op);
 
-LogicalResult printOperation(CodeEmitter& emitter, ascendc::CumSumOp op);
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::CumSumOp op);
 
 } // namespace ascendc
 } // namespace mlir

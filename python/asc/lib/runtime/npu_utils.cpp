@@ -14,43 +14,39 @@
 #include <sys/syscall.h>
 
 #include "acl/acl.h"
-#include "experiment/runtime/runtime/rt.h"
-#include "experiment/msprof/toolchain/prof_data_config.h"
 #include "experiment/msprof/toolchain/prof_api.h"
-
+#include "experiment/msprof/toolchain/prof_data_config.h"
+#include "experiment/runtime/runtime/rt.h"
 
 static unsigned int moduleId = 8;
 static unsigned int msprofFlagL0 = 0;
 static unsigned int msprofFlagL1 = 0;
 
-
-extern "C"
+extern "C" {
+int ProfCtrlHandle(unsigned int ctrlType, void *ctrlData, unsigned int dataLen)
 {
-    int ProfCtrlHandle(unsigned int ctrlType, void *ctrlData, unsigned int dataLen)
-    {
-        if (ctrlType != PROF_CTRL_SWITCH || ctrlData == nullptr ||
-            dataLen < sizeof(MsprofCommandHandle)) {
-            return 1;
-        }
-
-        MsprofCommandHandle *handle = static_cast<MsprofCommandHandle *>(ctrlData);
-        const uint64_t profSwitch = handle->profSwitch;
-        const uint64_t profType =  handle->type;
-        if (profType == PROF_COMMANDHANDLE_TYPE_START) {
-            if ((profSwitch & PROF_TASK_TIME) == PROF_TASK_TIME) {
-                msprofFlagL0 = 1;
-            }
-
-            if ((profSwitch & PROF_TASK_TIME_L1) == PROF_TASK_TIME_L1) {
-                msprofFlagL1 = 1;
-            }
-        }
-        if (profType == PROF_COMMANDHANDLE_TYPE_STOP) {
-            msprofFlagL0 = 0;
-            msprofFlagL1 = 0;
-        }
-        return 0;
+    if (ctrlType != PROF_CTRL_SWITCH || ctrlData == nullptr || dataLen < sizeof(MsprofCommandHandle)) {
+        return 1;
     }
+
+    MsprofCommandHandle *handle = static_cast<MsprofCommandHandle *>(ctrlData);
+    const uint64_t profSwitch = handle->profSwitch;
+    const uint64_t profType = handle->type;
+    if (profType == PROF_COMMANDHANDLE_TYPE_START) {
+        if ((profSwitch & PROF_TASK_TIME) == PROF_TASK_TIME) {
+            msprofFlagL0 = 1;
+        }
+
+        if ((profSwitch & PROF_TASK_TIME_L1) == PROF_TASK_TIME_L1) {
+            msprofFlagL1 = 1;
+        }
+    }
+    if (profType == PROF_COMMANDHANDLE_TYPE_STOP) {
+        msprofFlagL0 = 0;
+        msprofFlagL1 = 0;
+    }
+    return 0;
+}
 }
 
 static PyObject *aclInit(PyObject *self, PyObject *args)
@@ -196,10 +192,7 @@ static PyMethodDef NpuUtilsMethods[] = {
     {"msprof_report_additional_info", MsprofReportAdditionalInfo, METH_VARARGS, "MsprofReportAdditionalInfo"},
     {nullptr, nullptr, 0, nullptr}};
 
-static PyModuleDef ModuleDef = {
-    PyModuleDef_HEAD_INIT, "npu_utils",
-    "Npu utils", -1,
-    NpuUtilsMethods};
+static PyModuleDef ModuleDef = {PyModuleDef_HEAD_INIT, "npu_utils", "Npu utils", -1, NpuUtilsMethods};
 
 PyMODINIT_FUNC PyInit_npu_utils(void)
 {

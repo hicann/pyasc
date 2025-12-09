@@ -20,9 +20,9 @@ using namespace mlir::emitasc;
 // EmitAsc operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::CallOpaqueOp op)
+LogicalResult mlir::emitasc::printOperation(CodeEmitter &emitter, emitasc::CallOpaqueOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
 
     FAIL_OR(emitter.emitAssignPrefix(*op.getOperation()));
     os << op.getCallee() << '(';
@@ -32,7 +32,7 @@ LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::CallO
     return success();
 }
 
-LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::CopyStructOp op)
+LogicalResult mlir::emitasc::printOperation(CodeEmitter &emitter, emitasc::CopyStructOp op)
 {
     FAIL_OR(emitter.emitType(op.getLoc(), op.getType()));
     auto base = emitter.getOrCreateName(op.getBase());
@@ -53,17 +53,17 @@ LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::CopyS
     return success();
 }
 
-LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::DereferenceOp op)
+LogicalResult mlir::emitasc::printOperation(CodeEmitter &emitter, emitasc::DereferenceOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     FAIL_OR(emitter.emitType(op.getLoc(), op.getType()));
     os << "& " << emitter.getOrCreateName(op.getResult()) << " = *" << emitter.getOrCreateName(op.getBase());
     return success();
 }
 
-LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::MemberOp op)
+LogicalResult mlir::emitasc::printOperation(CodeEmitter &emitter, emitasc::MemberOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     FAIL_OR(emitter.emitAssignPrefix(*op.getOperation()));
     os << emitter.getOrCreateName(op.getBase());
     if (isa<MemRefType>(op.getBase().getType()))
@@ -74,9 +74,9 @@ LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::Membe
     return success();
 }
 
-LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::MemberPtrOp op)
+LogicalResult mlir::emitasc::printOperation(CodeEmitter &emitter, emitasc::MemberPtrOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
 
     FAIL_OR(emitter.emitAssignPrefix(*op.getOperation()));
     os << "reinterpret_cast<";
@@ -92,9 +92,9 @@ LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::Membe
     return success();
 }
 
-LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::DeclarePyStructOp op)
+LogicalResult mlir::emitasc::printOperation(CodeEmitter &emitter, emitasc::DeclarePyStructOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << "#pragma pack(push, 8)\n";
     auto pType = dyn_cast<emitasc::PyStructType>(op.getPystruct());
     os << "struct " << pType.getNameAttr().getValue() << " {\n";
@@ -109,9 +109,9 @@ LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::Decla
     return success();
 }
 
-LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::MemberRefOp op)
+LogicalResult mlir::emitasc::printOperation(CodeEmitter &emitter, emitasc::MemberRefOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
 
     FAIL_OR(emitter.emitType(op.getLoc(), op.getType()));
     os << "& " << emitter.getOrCreateName(op.getResult()) << " = reinterpret_cast<";
@@ -127,10 +127,10 @@ LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::Membe
     return success();
 }
 
-LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::PtrOffsetOp op)
+LogicalResult mlir::emitasc::printOperation(CodeEmitter &emitter, emitasc::PtrOffsetOp op)
 {
     FAIL_OR(emitter.emitAssignPrefix(*op.getOperation()));
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << emitter.getOrCreateName(op.getBase()) << " + ";
     if (auto offset = op.getDynamicOffset()) {
         os << emitter.getOrCreateName(offset);
@@ -140,9 +140,9 @@ LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::PtrOf
     return success();
 }
 
-LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::ReinterpretCastOp op)
+LogicalResult mlir::emitasc::printOperation(CodeEmitter &emitter, emitasc::ReinterpretCastOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
 
     FAIL_OR(emitter.emitAssignPrefix(*op.getOperation()));
     os << "reinterpret_cast<";
@@ -152,18 +152,18 @@ LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::Reint
     return success();
 }
 
-LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::SetMemberOp op)
+LogicalResult mlir::emitasc::printOperation(CodeEmitter &emitter, emitasc::SetMemberOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << emitter.getOrCreateName(op.getBase()) << "." << op.getField() << " = "
        << emitter.getOrCreateName(op.getValue());
 
     return success();
 }
 
-LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::VariableOp op)
+LogicalResult mlir::emitasc::printOperation(CodeEmitter &emitter, emitasc::VariableOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     auto loc = op.getLoc();
     auto res = op.getResult();
     auto resType = res.getType();
@@ -171,7 +171,9 @@ LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::Varia
     FAIL_OR(emitter.emitType(op.getLoc(), resType.getElementType()));
     os << ' ' << emitter.getOrCreateName(res);
 
-    for (auto size : resType.getShape()) { os << '[' << size << ']'; }
+    for (auto size : resType.getShape()) {
+        os << '[' << size << ']';
+    }
 
     os << '{';
     if (op.isStatic()) {
@@ -184,9 +186,9 @@ LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::Varia
     return success();
 }
 
-LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::VerbatimOp op)
+LogicalResult mlir::emitasc::printOperation(CodeEmitter &emitter, emitasc::VerbatimOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     auto args = op.getArgs();
     auto code = op.getValue();
     if (args.empty()) {
@@ -197,14 +199,16 @@ LogicalResult mlir::emitasc::printOperation(CodeEmitter& emitter, emitasc::Verba
     result.reserve(2 * code.size()); // the factor of 2 is used to ensure sufficient space.
     size_t i = 1;
     size_t rem = 0;
-    const char* data = code.data();
+    const char *data = code.data();
     while (i < code.size()) {
         if (code[i - 1] != '$') {
             i++;
             continue;
         }
         size_t j = i;
-        while (j < code.size() && isdigit(code[j])) { j++; }
+        while (j < code.size() && isdigit(code[j])) {
+            j++;
+        }
         if (j - i > 0) {
             size_t index = 0;
             auto fcResult = std::from_chars(data + i, data + j, index);

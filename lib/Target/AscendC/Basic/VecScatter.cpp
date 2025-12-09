@@ -17,17 +17,14 @@ using namespace mlir::ascendc;
 // Scatter operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::ScatterL1Op op) {
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::ScatterL1Op op)
+{
     auto &os = emitter.ostream();
     auto maskName = printMask(emitter, op);
 
-    os << ascNamespace << "::" << op.getAPIName() << "("
-       << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc()) << ", "
-       << emitter.getOrCreateName(op.getDstOffset()) << ", "
-       << emitter.getOrCreateName(op.getDstBase()) << ", "
-       << maskName << ", "
-       << emitter.getOrCreateName(op.getRepeatTimes()) << ", "
-       << emitter.getOrCreateName(op.getSrcRepStride()) << ")";
+    os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+       << emitter.getOrCreateName(op.getSrc()) << ", " << emitter.getOrCreateName(op.getDstOffset()) << ", "
+       << emitter.getOrCreateName(op.getDstBase()) << ", " << maskName << ", "
+       << emitter.getOrCreateName(op.getRepeatTimes()) << ", " << emitter.getOrCreateName(op.getSrcRepStride()) << ")";
     return success();
 }

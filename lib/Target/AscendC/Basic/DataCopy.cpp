@@ -16,8 +16,9 @@ using namespace mlir::ascendc;
 namespace {
 
 template <typename CopyOpTy>
-LogicalResult emitCopyTemplateArgs(CodeEmitter& emitter, CopyOpTy op) {
-    auto& os = emitter.ostream();
+LogicalResult emitCopyTemplateArgs(CodeEmitter &emitter, CopyOpTy op)
+{
+    auto &os = emitter.ostream();
 
     os << "<";
     auto tensorType = cast<LocalTensorType>(op.getDst().getType());
@@ -25,19 +26,19 @@ LogicalResult emitCopyTemplateArgs(CodeEmitter& emitter, CopyOpTy op) {
     os << ", ";
     os << emitter.getOrCreateName(op.getIsSetMask());
     os << ">";
-    
+
     return success();
 }
 
-}
+} // namespace
 
 //===----------------------------------------------------------------------===//
 // Data transfer operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::DataCopySliceOp op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::DataCopySliceOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     auto dstName = (emitter.getOrCreateName(op.getDst()) + "_slice_info").str();
     auto srcName = (emitter.getOrCreateName(op.getSrc()) + "_slice_info").str();
 
@@ -55,40 +56,34 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::DataC
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::CopyL0Op op) {
-    auto& os = emitter.ostream();
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CopyL0Op op)
+{
+    auto &os = emitter.ostream();
 
     auto maskName = (emitter.getOrCreateName(op.getDst()) + "_mask").str();
     os << "uint64_t " << maskName << "[] = {";
-    llvm::interleaveComma(op.getMask(), os, [&](Value operand) {
-        os << emitter.getOrCreateName(operand);
-    });
+    llvm::interleaveComma(op.getMask(), os, [&](Value operand) { os << emitter.getOrCreateName(operand); });
     os << "};\n";
 
     os << ascNamespace << "::" << op.getAPIName();
     FAIL_OR(emitCopyTemplateArgs(emitter, op));
-    
-    os << "("
-       << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc()) << ", "
-       << maskName << ", "
-       << emitter.getOrCreateName(op.getRepeatTime()) << ", "
+
+    os << "(" << emitter.getOrCreateName(op.getDst()) << ", " << emitter.getOrCreateName(op.getSrc()) << ", "
+       << maskName << ", " << emitter.getOrCreateName(op.getRepeatTime()) << ", "
        << emitter.getOrCreateName(op.getRepeatParams()) << ")";
-       
+
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::CopyL1Op op) {
-    auto& os = emitter.ostream();
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CopyL1Op op)
+{
+    auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName();
     FAIL_OR(emitCopyTemplateArgs(emitter, op));
-    
-    os << "("
-       << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc()) << ", "
-       << emitter.getOrCreateName(op.getMask()) << ", "
-       << emitter.getOrCreateName(op.getRepeatTime()) << ", "
+
+    os << "(" << emitter.getOrCreateName(op.getDst()) << ", " << emitter.getOrCreateName(op.getSrc()) << ", "
+       << emitter.getOrCreateName(op.getMask()) << ", " << emitter.getOrCreateName(op.getRepeatTime()) << ", "
        << emitter.getOrCreateName(op.getRepeatParams()) << ")";
-       
+
     return success();
 }

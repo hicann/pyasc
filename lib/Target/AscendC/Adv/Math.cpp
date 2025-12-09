@@ -17,16 +17,15 @@ using namespace mlir::ascendc;
 // Other math library operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::ExpOp op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::ExpOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName() << "<";
     auto resultType = op.getDst().getType().getElementType();
     FAIL_OR(emitter.emitType(op.getLoc(), resultType));
     os << ", " << emitter.getOrCreateName(op.getTaylorExpandLevel()) << ", "
        << emitter.getOrCreateName(op.getIsReuseSource()) << ">";
-    os << "(" << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc());
+    os << "(" << emitter.getOrCreateName(op.getDst()) << ", " << emitter.getOrCreateName(op.getSrc());
     if (auto sharedTmpBuffer = op.getSharedTmpBuffer()) {
         os << ", " << emitter.getOrCreateName(sharedTmpBuffer);
     }
@@ -35,9 +34,9 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::ExpOp
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::AxpyOp op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::AxpyOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName() << "<";
     auto dstType = op.getDst().getType().getElementType();
     FAIL_OR(emitter.emitType(op.getLoc(), dstType));
@@ -45,8 +44,8 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::AxpyO
     auto srcType = op.getSrc().getType().getElementType();
     FAIL_OR(emitter.emitType(op.getLoc(), srcType));
     os << ", " << emitter.getOrCreateName(op.getIsReuseSource()) << ">";
-    os << "(" << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc()) << ", " << emitter.getOrCreateName(op.getScalar());
+    os << "(" << emitter.getOrCreateName(op.getDst()) << ", " << emitter.getOrCreateName(op.getSrc()) << ", "
+       << emitter.getOrCreateName(op.getScalar());
     if (auto sharedTmpBuffer = op.getSharedTmpBuffer()) {
         os << ", " << emitter.getOrCreateName(sharedTmpBuffer);
     }
@@ -55,9 +54,9 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::AxpyO
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::CumSumOp op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CumSumOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
        << emitter.getOrCreateName(op.getLastRow()) << ", " << emitter.getOrCreateName(op.getSrc());
     if (auto sharedTmpBuffer = op.getSharedTmpBuffer()) {

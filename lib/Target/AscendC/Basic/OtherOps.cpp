@@ -16,57 +16,64 @@ using namespace mlir::ascendc;
 namespace {
 
 struct AippMemberInfo {
-    const char* aippMemberName;
-    const std::vector<const char*> subMemberNames;
+    const char *aippMemberName;
+    const std::vector<const char *> subMemberNames;
 };
 
-const AippMemberInfo* getAippMemberInfo(size_t index) {
+const AippMemberInfo *getAippMemberInfo(size_t index)
+{
     static const std::vector<AippMemberInfo> memberInfos = {
         {"paddingParams", {"paddingMode", "paddingValueCh0", "paddingValueCh1", "paddingValueCh2", "paddingValueCh3"}},
         {"swapParams", {"isSwapRB", "isSwapUV", "isSwapAX"}},
         {"singleLineParams", {"isSingleLineCopy"}},
-        {"dtcParams", {"dtcMeanCh0", "dtcMeanCh1", "dtcMeanCh2", "dtcMinCh0", "dtcMinCh1", "dtcMinCh2", "dtcVarCh0", "dtcVarCh1", "dtcVarCh2", "dtcRoundMode"}},
+        {"dtcParams",
+         {"dtcMeanCh0", "dtcMeanCh1", "dtcMeanCh2", "dtcMinCh0", "dtcMinCh1", "dtcMinCh2", "dtcVarCh0", "dtcVarCh1",
+          "dtcVarCh2", "dtcRoundMode"}},
         {"cPaddingParams", {"cPaddingMode", "cPaddingValue"}},
-        {"cscParams", {"isEnableCsc", "cscMatrixR0C0", "cscMatrixR0C1", "cscMatrixR0C2", "cscMatrixR1C0", "cscMatrixR1C1", "cscMatrixR1C2", "cscMatrixR2C0", "cscMatrixR2C1", "cscMatrixR2C2", "cscBiasIn0", "cscBiasIn1", "cscBiasIn2", "cscBiasOut0", "cscBiasOut1", "cscBiasOut2"}}
-    };
-    
+        {"cscParams",
+         {"isEnableCsc", "cscMatrixR0C0", "cscMatrixR0C1", "cscMatrixR0C2", "cscMatrixR1C0", "cscMatrixR1C1",
+          "cscMatrixR1C2", "cscMatrixR2C0", "cscMatrixR2C1", "cscMatrixR2C2", "cscBiasIn0", "cscBiasIn1", "cscBiasIn2",
+          "cscBiasOut0", "cscBiasOut1", "cscBiasOut2"}}};
+
     if (index >= memberInfos.size()) {
         return nullptr;
     }
-    
+
     return &memberInfos[index];
 }
 
-LogicalResult printAippMemberAssignment(
-    CodeEmitter& emitter, ascendc::ConstructOp op, size_t memberIndex) 
+LogicalResult printAippMemberAssignment(CodeEmitter &emitter, ascendc::ConstructOp op, size_t memberIndex)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
 
-    const AippMemberInfo* memberInfoPtr = getAippMemberInfo(memberIndex);
+    const AippMemberInfo *memberInfoPtr = getAippMemberInfo(memberIndex);
 
     if (!memberInfoPtr) {
-        return op.emitError("Internal Error: Index out of bounds when accessing AippMemberInfo for member index ") << memberIndex;
+        return op.emitError("Internal Error: Index out of bounds when accessing AippMemberInfo for member index ")
+               << memberIndex;
     }
-    
+
     auto subStructOp = dyn_cast_or_null<ascendc::ConstructOp>(op->getOperand(memberIndex).getDefiningOp());
     if (!subStructOp) {
         return op.emitError("Internal Error: Expected operand of AippParams to be a ConstructOp.");
     }
 
     if (subStructOp->getNumOperands() != memberInfoPtr->subMemberNames.size()) {
-        return op.emitError("Internal Error: Mismatch in operand count for AIPP member ") << memberInfoPtr->aippMemberName;
+        return op.emitError("Internal Error: Mismatch in operand count for AIPP member ")
+               << memberInfoPtr->aippMemberName;
     }
 
     for (size_t i = 0; i < subStructOp->getNumOperands(); ++i) {
-        os << emitter.getOrCreateName(op->getResult(0)) << "." << memberInfoPtr->aippMemberName << "." << memberInfoPtr->subMemberNames[i]
-           << " = " << emitter.getOrCreateName(subStructOp->getOperand(i)) << ";\n";
+        os << emitter.getOrCreateName(op->getResult(0)) << "." << memberInfoPtr->aippMemberName << "."
+           << memberInfoPtr->subMemberNames[i] << " = " << emitter.getOrCreateName(subStructOp->getOperand(i)) << ";\n";
     }
 
     return success();
 }
 
-LogicalResult printAippStructConstruction(CodeEmitter& emitter, ascendc::ConstructOp op) {
-    auto& os = emitter.ostream();
+LogicalResult printAippStructConstruction(CodeEmitter &emitter, ascendc::ConstructOp op)
+{
+    auto &os = emitter.ostream();
     mlir::Type resultType = op->getResult(0).getType();
 
     return llvm::TypeSwitch<mlir::Type, LogicalResult>(resultType)
@@ -76,48 +83,46 @@ LogicalResult printAippStructConstruction(CodeEmitter& emitter, ascendc::Constru
             if (op->getNumOperands() <= PADDING_PARAMS_OP_INDEX) {
                 return op.emitError("Internal Error: AippParams is missing operands.");
             }
-            auto paddingConstructOp = dyn_cast_or_null<ascendc::ConstructOp>(op->getOperand(PADDING_PARAMS_OP_INDEX).getDefiningOp());
+            auto paddingConstructOp =
+                dyn_cast_or_null<ascendc::ConstructOp>(op->getOperand(PADDING_PARAMS_OP_INDEX).getDefiningOp());
             if (!paddingConstructOp || paddingConstructOp->getNumOperands() <= TEMPLATE_TYPE_MEMBER_INDEX) {
                 return op.emitError("Internal Error: Cannot deduce template type from paddingParams.");
             }
             mlir::Type templateType = paddingConstructOp->getOperand(TEMPLATE_TYPE_MEMBER_INDEX).getType();
 
             os << "AscendC::AippParams<";
-            if (failed(emitter.emitType(op.getLoc(), templateType))) { return failure(); }
+            if (failed(emitter.emitType(op.getLoc(), templateType))) {
+                return failure();
+            }
             os << "> " << emitter.getOrCreateName(op->getResult(0)) << ";\n";
-            
+
             for (size_t i = 0; i < op->getNumOperands(); ++i) {
                 if (failed(printAippMemberAssignment(emitter, op, i))) {
                     return failure();
                 }
             }
-            
+
             return success();
         })
-        .Case<ascendc::AippPaddingParamsType, ascendc::AippSwapParamsType,
-              ascendc::AippSingleLineParamsType, ascendc::AippDataTypeConvParamsType,
-              ascendc::AippChannelPaddingParamsType, ascendc::AippColorSpaceConvParamsType>(
-            [&](auto type) -> LogicalResult {
-                return success();
-        })
-        .Default([](auto type) -> LogicalResult {
-            return failure();
-        });
+        .Case<ascendc::AippPaddingParamsType, ascendc::AippSwapParamsType, ascendc::AippSingleLineParamsType,
+              ascendc::AippDataTypeConvParamsType, ascendc::AippChannelPaddingParamsType,
+              ascendc::AippColorSpaceConvParamsType>([&](auto type) -> LogicalResult { return success(); })
+        .Default([](auto type) -> LogicalResult { return failure(); });
 }
 
-}
+} // namespace
 
 //===----------------------------------------------------------------------===//
 // Other operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::ConstructOp op)
-{   
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::ConstructOp op)
+{
     if (succeeded(printAippStructConstruction(emitter, op))) {
         return success();
     }
 
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     if (op.getIsStatic()) {
         os << "static ";
     }
@@ -152,24 +157,24 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::Const
         types.append(op->getOperandTypes().begin(), op->getOperandTypes().end());
     }
     llvm::interleaveComma(llvm::zip_equal(op.getOperands(), types), os, [&emitOperand](auto pair) {
-        const auto& [operand, type] = pair;
+        const auto &[operand, type] = pair;
         emitOperand(operand, type);
     });
     os << '}';
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::FftsCrossCoreSyncOp op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::FftsCrossCoreSyncOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << "ffts_cross_core_sync(" << ascendc::stringifyEnum(op.getPipe()).upper() << ", "
        << emitter.getOrCreateName(op.getConfig()) << ")";
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::PopStackBufferOp op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::PopStackBufferOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName() << "<";
     FAIL_OR(emitter.emitType(op.getLoc(), op.getTensor().getType().getElementType()));
     os << ", ";
@@ -178,14 +183,14 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::PopSt
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::SetFftsBaseAddrOp op)
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::SetFftsBaseAddrOp op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << "set_ffts_base_addr(*" << emitter.getOrCreateName(op.getOperand()) << ")";
     return success();
 }
 
-LogicalResult mlir::printOperation(CodeEmitter& emitter, LLVM::UndefOp op)
+LogicalResult mlir::printOperation(CodeEmitter &emitter, LLVM::UndefOp op)
 {
     return emitter.emitVariableDeclaration(op->getResult(0), false);
 }

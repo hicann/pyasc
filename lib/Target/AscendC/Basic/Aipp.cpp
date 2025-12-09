@@ -17,17 +17,18 @@ using namespace mlir::ascendc;
 // AIPP Emitters
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, SetAippFunctionsOp op) {
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, SetAippFunctionsOp op)
+{
     auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName();
-    
+
     os << "(";
     os << emitter.getOrCreateName(op.getSrc0());
-    
+
     if (auto src1 = op.getSrc1()) {
         os << ", " << emitter.getOrCreateName(src1);
     }
-    
+
     os << ", " << ascNamespace << "::AippInputFormat::" << ascendc::stringifyEnum(op.getFormat());
     os << ", " << emitter.getOrCreateName(op.getConfig());
     os << ")";

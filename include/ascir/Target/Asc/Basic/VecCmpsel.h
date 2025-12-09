@@ -21,10 +21,10 @@ namespace ascendc {
 //===----------------------------------------------------------------------===//
 
 template <typename SelectL2Op>
-LogicalResultForT<SelectL2Op, ascendc::SelectL2Op, ascendc::SelectScalarL2Op> printOperation(CodeEmitter& emitter,
+LogicalResultForT<SelectL2Op, ascendc::SelectL2Op, ascendc::SelectScalarL2Op> printOperation(CodeEmitter &emitter,
                                                                                              SelectL2Op op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
        << emitter.getOrCreateName(op.getSelMask()) << ", " << emitter.getOrCreateName(op.getSrc0()) << ", "
        << emitter.getOrCreateName(op.getSrc1())
@@ -34,10 +34,10 @@ LogicalResultForT<SelectL2Op, ascendc::SelectL2Op, ascendc::SelectScalarL2Op> pr
 }
 
 template <typename SelectL0Op>
-LogicalResultForT<SelectL0Op, ascendc::SelectL0Op, ascendc::SelectScalarL0Op> printOperation(CodeEmitter& emitter,
+LogicalResultForT<SelectL0Op, ascendc::SelectL0Op, ascendc::SelectScalarL0Op> printOperation(CodeEmitter &emitter,
                                                                                              SelectL0Op op)
 {
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
        << emitter.getOrCreateName(op.getSelMask()) << ", " << emitter.getOrCreateName(op.getSrc0()) << ", "
        << emitter.getOrCreateName(op.getSrc1()) << ", "

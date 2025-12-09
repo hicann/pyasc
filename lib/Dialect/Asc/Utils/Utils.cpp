@@ -55,5 +55,5 @@ void registerInlinerInterfaces(DialectRegistry &registry)
     });
 }
 
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir

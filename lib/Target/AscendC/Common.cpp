@@ -13,13 +13,13 @@
 using namespace mlir;
 
 namespace {
-    constexpr uint32_t TYPE_WIDTH_16 = 16;
+constexpr uint32_t TYPE_WIDTH_16 = 16;
 }
 
-LogicalResult mlir::printConstantOp(CodeEmitter& emitter, Operation* operation, Attribute value)
+LogicalResult mlir::printConstantOp(CodeEmitter &emitter, Operation *operation, Attribute value)
 {
     OpResult result = operation->getResult(0);
-    auto& os = emitter.ostream();
+    auto &os = emitter.ostream();
     auto fType = dyn_cast_or_null<FloatType>(operation->getResult(0).getType());
     if (!fType || fType.getWidth() != TYPE_WIDTH_16) {
         os << "constexpr ";
@@ -44,21 +44,22 @@ LogicalResult mlir::printConstantOp(CodeEmitter& emitter, Operation* operation, 
 // Mask operations
 //===----------------------------------------------------------------------===//
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::SetVectorMaskL0Op op) {
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::SetVectorMaskL0Op op)
+{
     auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName() << "<";
-    FAIL_OR(emitter.emitType(op.getLoc(), op.getDtype(), true)); 
+    FAIL_OR(emitter.emitType(op.getLoc(), op.getDtype(), true));
     os << ", " << ascNamespace << "::MaskMode::" << ascendc::stringifyEnum(op.getMode()).upper();
     os << ">(" << emitter.getOrCreateName(op.getLen()) << ")";
     return success();
 }
 
-LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::SetVectorMaskL1Op op) {
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::SetVectorMaskL1Op op)
+{
     auto &os = emitter.ostream();
     os << ascNamespace << "::" << op.getAPIName() << "<";
-    FAIL_OR(emitter.emitType(op.getLoc(), op.getDtype(), true)); 
+    FAIL_OR(emitter.emitType(op.getLoc(), op.getDtype(), true));
     os << ", " << ascNamespace << "::MaskMode::" << ascendc::stringifyEnum(op.getMode()).upper();
-    os << ">("<< emitter.getOrCreateName(op.getMaskHigh()) << ", "
-    << emitter.getOrCreateName(op.getMaskLow()) << ")";
+    os << ">(" << emitter.getOrCreateName(op.getMaskHigh()) << ", " << emitter.getOrCreateName(op.getMaskLow()) << ")";
     return success();
 }

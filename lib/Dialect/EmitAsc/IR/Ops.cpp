@@ -24,46 +24,56 @@ using namespace mlir::emitasc;
 // PtrOffsetOp
 //===----------------------------------------------------------------------===//
 
-Value PtrOffsetOp::getViewSource() { return getBase(); }
+Value PtrOffsetOp::getViewSource()
+{
+    return getBase();
+}
 
-OpFoldResult PtrOffsetOp::fold(FoldAdaptor adaptor) {
-  if (auto offset = getStaticOffset())
-    return offset->isZero() ? getBase() : nullptr;
-  if (auto offset = getDynamicOffset())
-    return isConstantIntValue(offset, 0) ? getBase() : nullptr;
-  return nullptr;
+OpFoldResult PtrOffsetOp::fold(FoldAdaptor adaptor)
+{
+    if (auto offset = getStaticOffset())
+        return offset->isZero() ? getBase() : nullptr;
+    if (auto offset = getDynamicOffset())
+        return isConstantIntValue(offset, 0) ? getBase() : nullptr;
+    return nullptr;
 }
 
 //===----------------------------------------------------------------------===//
 // ReinterpretCastOp
 //===----------------------------------------------------------------------===//
 
-bool ReinterpretCastOp::areCastCompatible(TypeRange inputs, TypeRange outputs) {
-  return inputs.size() == 1U && outputs.size() == 1U;
+bool ReinterpretCastOp::areCastCompatible(TypeRange inputs, TypeRange outputs)
+{
+    return inputs.size() == 1U && outputs.size() == 1U;
 }
 
 //===----------------------------------------------------------------------===//
 // VariableOp
 //===----------------------------------------------------------------------===//
 
-bool VariableOp::isStatic() { return getStaticInit().has_value(); }
+bool VariableOp::isStatic()
+{
+    return getStaticInit().has_value();
+}
 
-OpFoldResult VariableOp::getInit(bool fold) {
-  auto dynamicInit = getDynamicInit();
-  if (dynamicInit)
-    return fold ? getAsOpFoldResult(dynamicInit) : dynamicInit;
-  auto staticInit = getStaticInit();
-  assert(staticInit.has_value() && "either static or dynamic init must exist");
-  return staticInit.value();
+OpFoldResult VariableOp::getInit(bool fold)
+{
+    auto dynamicInit = getDynamicInit();
+    if (dynamicInit)
+        return fold ? getAsOpFoldResult(dynamicInit) : dynamicInit;
+    auto staticInit = getStaticInit();
+    assert(staticInit.has_value() && "either static or dynamic init must exist");
+    return staticInit.value();
 }
 
 //===----------------------------------------------------------------------===//
 // EmitAscDialect
 //===----------------------------------------------------------------------===//
 
-void EmitAscDialect::registerOps() {
-  addOperations<
+void EmitAscDialect::registerOps()
+{
+    addOperations<
 #define GET_OP_LIST
 #include "ascir/Dialect/EmitAsc/IR/EmitAscOps.cpp.inc"
-      >();
+        >();
 }

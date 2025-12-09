@@ -19,23 +19,23 @@
 #include "mlir/Support/IndentedOstream.h"
 #include "llvm/ADT/ScopedHashTable.h"
 
-#include <unordered_map>
 #include <functional>
+#include <unordered_map>
 namespace mlir {
 
-static constexpr const char* ascNamespace = "AscendC";
+static constexpr const char *ascNamespace = "AscendC";
 struct CodeEmitter {
     const std::string structFieldNamePrefix = "var";
 
-    static void emitCubeFormat(raw_ostream& os, ascendc::CubeFormat format);
+    static void emitCubeFormat(raw_ostream &os, ascendc::CubeFormat format);
 
-    static void emitTPosition(raw_ostream& os, ascendc::TPosition pos);
+    static void emitTPosition(raw_ostream &os, ascendc::TPosition pos);
 
-    static void emitLayoutMode(raw_ostream& os, ascendc::LayoutMode layout);
+    static void emitLayoutMode(raw_ostream &os, ascendc::LayoutMode layout);
 
-    explicit CodeEmitter(raw_ostream& os);
+    explicit CodeEmitter(raw_ostream &os);
 
-    static void emitMatmulConfig(raw_ostream& os, ascendc::MatmulConfigAttr config);
+    static void emitMatmulConfig(raw_ostream &os, ascendc::MatmulConfigAttr config);
 
     LogicalResult emitAscMatmulSimplifiedTemplate(Location loc, Type type, bool emitAsUnsigned);
 
@@ -55,7 +55,7 @@ struct CodeEmitter {
     LogicalResult emitVariableDeclaration(OpResult opResult, bool trailingSemicolon);
 
     /// Emits a label for the block.
-    LogicalResult emitLabel(Block& block);
+    LogicalResult emitLabel(Block &block);
 
     /// Emits the variable declaration and assignment prefix for 'op'.
     /// - emits separate variable followed by std::tie for multi-valued operation;
@@ -63,16 +63,16 @@ struct CodeEmitter {
     /// - emits nothing if no value produced by op;
     /// Emits final '=' operator where a type is produced. Returns failure if
     /// any result type could not be converted.
-    LogicalResult emitAssignPrefix(Operation& op);
+    LogicalResult emitAssignPrefix(Operation &op);
 
     /// Return the existing or a new label of a Block.
-    StringRef getOrCreateName(Block& block);
+    StringRef getOrCreateName(Block &block);
 
     /// Whether to map an mlir integer to a unsigned integer in C++.
     bool shouldMapToUnsigned(IntegerType::SignednessSemantics val);
 
     /// Emits the operands of the operation. All operands are emitted in order.
-    LogicalResult emitOperands(Operation& op);
+    LogicalResult emitOperands(Operation &op);
 
     /// Return the existing or a new name for a Value.
     StringRef getOrCreateName(Value val);
@@ -82,40 +82,34 @@ struct CodeEmitter {
 
     /// Emit MatmulType as template
     LogicalResult emitAscMatmulTypeTemplate(Location loc, Type type, bool emitAsUnsigned);
-    
+
     /// RAII helper function to manage entering/exiting C++ scopes.
     struct Scope {
-        Scope(CodeEmitter& emitter)
+        Scope(CodeEmitter &emitter)
             : valueMapperScope(emitter.valueMapper), blockMapperScope(emitter.blockMapper), emitter(emitter)
         {
             emitter.nameStack.pushScope();
         }
-        ~Scope()
-        {
-            emitter.nameStack.popScope();
-        }
+        ~Scope() { emitter.nameStack.popScope(); }
 
-    private:
+      private:
         llvm::ScopedHashTableScope<Value, std::string> valueMapperScope;
-        llvm::ScopedHashTableScope<Block*, std::string> blockMapperScope;
-        CodeEmitter& emitter;
+        llvm::ScopedHashTableScope<Block *, std::string> blockMapperScope;
+        CodeEmitter &emitter;
     };
 
     /// Returns wether the Value is assigned to a C++ variable in the scope.
     bool hasValueInScope(Value val);
 
     // Returns whether a label is assigned to the block.
-    bool hasBlockLabel(Block& block);
+    bool hasBlockLabel(Block &block);
 
     /// Returns the output stream.
-    raw_indented_ostream& ostream()
-    {
-        return os;
-    };
+    raw_indented_ostream &ostream() { return os; };
 
-private:
+  private:
     using ValueMapper = llvm::ScopedHashTable<Value, std::string>;
-    using BlockMapper = llvm::ScopedHashTable<Block*, std::string>;
+    using BlockMapper = llvm::ScopedHashTable<Block *, std::string>;
     using StructGlobalMapper = std::unordered_map<std::string, std::string>;
     using TypeEmitFn = std::function<LogicalResult(Location, Type, bool)>;
     using AttributeEmitFn = std::function<LogicalResult(Location, Attribute)>;
@@ -185,7 +179,7 @@ private:
 
     LogicalResult emitFloatType(FloatType &fType, Location loc, Type type, bool emitAsUnsigned);
 
-    LogicalResult emitBaseMemRefType(BaseMemRefType& pType, Location loc, Type type, bool emitAsUnsigned);
+    LogicalResult emitBaseMemRefType(BaseMemRefType &pType, Location loc, Type type, bool emitAsUnsigned);
 
     LogicalResult emitFloatAttr(Location loc, Attribute attr);
 
@@ -203,10 +197,10 @@ private:
 
     LogicalResult emitStringAttr(Location loc, Attribute attr);
 
-    void printInt(const APInt& value, bool isUnsigned);
+    void printInt(const APInt &value, bool isUnsigned);
 
-    void printFloat(const APFloat& value);
+    void printFloat(const APFloat &value);
 };
-}  // namespace mlir
+} // namespace mlir
 
-#endif  // ASCIR_TARGET_ASC_CODEEMITTER_H
+#endif // ASCIR_TARGET_ASC_CODEEMITTER_H

@@ -19,44 +19,34 @@ using namespace mlir::ascendc;
 
 LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::GatherMaskOp op)
 {
-  auto &os = emitter.ostream();
-  auto dstType = op.getDst().getType();
-  auto src1PatternType = op.getSrc1Pattern().getType();
-  if (auto dstLocalTensorType = dyn_cast<ascendc::LocalTensorType>(dstType))
-  {
-    os << ascNamespace << "::" << op.getAPIName() << "<";
-    if (failed(emitter.emitType(op.getLoc(), dstLocalTensorType.getElementType())))
-      return failure();
-    os << ", ";
+    auto &os = emitter.ostream();
+    auto dstType = op.getDst().getType();
+    auto src1PatternType = op.getSrc1Pattern().getType();
+    if (auto dstLocalTensorType = dyn_cast<ascendc::LocalTensorType>(dstType)) {
+        os << ascNamespace << "::" << op.getAPIName() << "<";
+        if (failed(emitter.emitType(op.getLoc(), dstLocalTensorType.getElementType())))
+            return failure();
+        os << ", ";
 
-    if (auto src1LocalTensorType = dyn_cast<ascendc::LocalTensorType>(src1PatternType))
-    {
-      if (failed(emitter.emitType(op.getLoc(), src1LocalTensorType.getElementType())))
-        return failure();
-      os << ", ";
+        if (auto src1LocalTensorType = dyn_cast<ascendc::LocalTensorType>(src1PatternType)) {
+            if (failed(emitter.emitType(op.getLoc(), src1LocalTensorType.getElementType())))
+                return failure();
+            os << ", ";
+        }
+        os << ascNamespace << "::defaultGatherMaskMode>(" << emitter.getOrCreateName(op.getDst()) << ", "
+           << emitter.getOrCreateName(op.getSrc0()) << ", " << emitter.getOrCreateName(op.getSrc1Pattern()) << ", "
+           << emitter.getOrCreateName(op.getReduceMode()) << ", " << emitter.getOrCreateName(op.getMask()) << ", "
+           << emitter.getOrCreateName(op.getParams()) << ", ";
+    } else {
+        return op.emitOpError("dst operand must be LocalTensor type");
     }
-    os << ascNamespace << "::defaultGatherMaskMode>("
-       << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc0()) << ", "
-       << emitter.getOrCreateName(op.getSrc1Pattern()) << ", "
-       << emitter.getOrCreateName(op.getReduceMode()) << ", "
-       << emitter.getOrCreateName(op.getMask()) << ", "
-       << emitter.getOrCreateName(op.getParams()) << ", ";
-  }
-  else
-  {
-    return op.emitOpError("dst operand must be LocalTensor type");
-  }
-  Value rsvd_cnt_val = op.getRsvdCnt();
-  if (isa<MemRefType>(rsvd_cnt_val.getType()))
-  {
-    os << "*" << emitter.getOrCreateName(rsvd_cnt_val);
-  }
-  else
-  {
-    os << emitter.getOrCreateName(rsvd_cnt_val);
-  }
-  os << ")";
+    Value rsvd_cnt_val = op.getRsvdCnt();
+    if (isa<MemRefType>(rsvd_cnt_val.getType())) {
+        os << "*" << emitter.getOrCreateName(rsvd_cnt_val);
+    } else {
+        os << emitter.getOrCreateName(rsvd_cnt_val);
+    }
+    os << ")";
 
-  return success();
+    return success();
 }

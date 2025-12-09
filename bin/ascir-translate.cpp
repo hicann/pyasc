@@ -30,25 +30,22 @@ using namespace mlir;
 
 int main(int argc, char **argv)
 {
-  registerAllTranslations();
+    registerAllTranslations();
 
-  TranslateFromMLIRRegistration reg(
-      "mlir-to-ascendc", "translate from mlir to Ascend C",
-      [](Operation *op, raw_ostream &output) {
-        return translateToAscendC(op, output);
-      },
-      [](DialectRegistry &registry) {
-        registry.insert<
-            //
-            arith::ArithDialect, ascendc::AscendCDialect,
-            cf::ControlFlowDialect, DLTIDialect, emitasc::EmitAscDialect,
-            emitc::EmitCDialect, func::FuncDialect, LLVM::LLVMDialect,
-            math::MathDialect, memref::MemRefDialect, scf::SCFDialect
-            //
-            >();
-        ascendc::registerExternalModels(registry);
-        emitasc::registerExternalModels(registry);
-      });
+    TranslateFromMLIRRegistration reg(
+        "mlir-to-ascendc", "translate from mlir to Ascend C",
+        [](Operation *op, raw_ostream &output) { return translateToAscendC(op, output); },
+        [](DialectRegistry &registry) {
+            registry.insert<
+                //
+                arith::ArithDialect, ascendc::AscendCDialect, cf::ControlFlowDialect, DLTIDialect,
+                emitasc::EmitAscDialect, emitc::EmitCDialect, func::FuncDialect, LLVM::LLVMDialect, math::MathDialect,
+                memref::MemRefDialect, scf::SCFDialect
+                //
+                >();
+            ascendc::registerExternalModels(registry);
+            emitasc::registerExternalModels(registry);
+        });
 
-  return failed(mlirTranslateMain(argc, argv, "AscIR translation tool"));
+    return failed(mlirTranslateMain(argc, argv, "AscIR translation tool"));
 }

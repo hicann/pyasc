@@ -19,39 +19,38 @@ namespace mlir {
 namespace ascendc {
 #define GEN_PASS_DEF_HOISTUBALLOCATION
 #include "ascir/Dialect/Asc/Transforms/Passes.h.inc"
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir
 
 using namespace mlir;
 
 namespace {
 
 struct HoistTensor : ascendc::HoistOpPattern<ascendc::LocalTensorAutoOp> {
-  using HoistOpPattern::HoistOpPattern;
+    using HoistOpPattern::HoistOpPattern;
 
-  bool hoistable(ascendc::LocalTensorAutoOp op) const override {
-    return !op.getInput() && !op.getOutput();
-  }
+    bool hoistable(ascendc::LocalTensorAutoOp op) const override { return !op.getInput() && !op.getOutput(); }
 };
 
-struct HoistUBAllocationPass
-    : public ascendc::impl::HoistUBAllocationBase<HoistUBAllocationPass> {
-  void runOnOperation() override {
-    MLIRContext *context = &getContext();
-    RewritePatternSet patterns(context);
-    patterns.add<HoistTensor>(context);
-    if (applyPatternsAndFoldGreedily(getOperation(), std::move(patterns)).failed()) {
-      signalPassFailure();
+struct HoistUBAllocationPass : public ascendc::impl::HoistUBAllocationBase<HoistUBAllocationPass> {
+    void runOnOperation() override
+    {
+        MLIRContext *context = &getContext();
+        RewritePatternSet patterns(context);
+        patterns.add<HoistTensor>(context);
+        if (applyPatternsAndFoldGreedily(getOperation(), std::move(patterns)).failed()) {
+            signalPassFailure();
+        }
     }
-  }
 };
 
-}  // namespace
+} // namespace
 
 namespace mlir {
 namespace ascendc {
-std::unique_ptr<Pass> createHoistUBAllocationPass() {
-  return std::make_unique<HoistUBAllocationPass>();
+std::unique_ptr<Pass> createHoistUBAllocationPass()
+{
+    return std::make_unique<HoistUBAllocationPass>();
 }
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir

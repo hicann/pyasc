@@ -21,8 +21,8 @@ namespace mlir {
 namespace ascendc {
 #define GEN_PASS_DEF_DEFINECUBEONLY
 #include "ascir/Dialect/Asc/Transforms/Passes.h.inc"
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir
 
 using namespace mlir;
 using namespace mlir::ascendc;
@@ -30,7 +30,7 @@ using namespace mlir::ascendc;
 namespace {
 
 class DefineCubeOnlyPass : public ascendc::impl::DefineCubeOnlyBase<DefineCubeOnlyPass> {
-public:
+  public:
     void runOnOperation() override
     {
         auto mod = getOperation();
@@ -40,7 +40,7 @@ public:
     }
 };
 
-}  // namespace
+} // namespace
 
 namespace mlir {
 namespace ascendc {
@@ -48,5 +48,5 @@ std::unique_ptr<Pass> createDefineCubeOnlyPass()
 {
     return std::make_unique<DefineCubeOnlyPass>();
 }
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir

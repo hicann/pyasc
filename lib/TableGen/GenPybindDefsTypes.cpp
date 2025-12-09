@@ -26,33 +26,30 @@ namespace {
 
 using TypeNamePair = std::pair<std::string, std::string>;
 
-class GenPybindDefsTypes
-{
-  	const RecordKeeper &records;
+class GenPybindDefsTypes {
+    const RecordKeeper &records;
 
-public:
-  	explicit GenPybindDefsTypes(const RecordKeeper &records) : records(records) {}
+  public:
+    explicit GenPybindDefsTypes(const RecordKeeper &records) : records(records) {}
 
-  	void run(raw_ostream &os);
+    void run(raw_ostream &os);
 };
 
 void GenPybindDefsTypes::run(raw_ostream &os)
 {
-	raw_indented_ostream ios(os);
-	for (const auto *def : records.getAllDerivedDefinitions("APIType")) {
-		if (!def->getValueAsBit("genTypedef")) {
-			continue;
-		}
-		auto defName = def->getValueAsString("typeName");
-		ios << ".def(\"get_asc_" << defName << "Type\", [](" << builderClass
-			<< " &self) -> ::mlir::Type {\n";
-		ios.indent() << "return self->getType<::mlir::ascendc::" << defName
-					<< "Type>();\n";
-		ios.unindent() << "})\n";
-	}
+    raw_indented_ostream ios(os);
+    for (const auto *def : records.getAllDerivedDefinitions("APIType")) {
+        if (!def->getValueAsBit("genTypedef")) {
+            continue;
+        }
+        auto defName = def->getValueAsString("typeName");
+        ios << ".def(\"get_asc_" << defName << "Type\", [](" << builderClass << " &self) -> ::mlir::Type {\n";
+        ios.indent() << "return self->getType<::mlir::ascendc::" << defName << "Type>();\n";
+        ios.unindent() << "})\n";
+    }
 }
 
-TableGen::Emitter::OptClass<GenPybindDefsTypes>
-    registration("gen-pybind-defs-types", "Generate PyOpBuilder methods from API Types defs");
+TableGen::Emitter::OptClass<GenPybindDefsTypes> registration("gen-pybind-defs-types",
+                                                             "Generate PyOpBuilder methods from API Types defs");
 
 } // namespace

@@ -22,18 +22,19 @@ using namespace mlir::emitasc;
 // EmitAscDialect
 //===----------------------------------------------------------------------===//
 
-void EmitAscDialect::initialize() {
-  registerAttributes();
-  registerTypes();
-  registerOps();
+void EmitAscDialect::initialize()
+{
+    registerAttributes();
+    registerTypes();
+    registerOps();
 }
 
 //===----------------------------------------------------------------------===//
 // External models
 //===----------------------------------------------------------------------===//
 
-void emitasc::registerExternalModels(DialectRegistry &registry) {
-  registry.addExtension(+[](MLIRContext *ctx, EmitAscDialect *dialect) {
-    dialect->addInterface<ascir::PermissiveInlinerInterface>();
-  });
+void emitasc::registerExternalModels(DialectRegistry &registry)
+{
+    registry.addExtension(
+        +[](MLIRContext *ctx, EmitAscDialect *dialect) { dialect->addInterface<ascir::PermissiveInlinerInterface>(); });
 }

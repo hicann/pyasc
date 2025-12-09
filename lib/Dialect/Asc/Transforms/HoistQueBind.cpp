@@ -19,41 +19,39 @@ namespace mlir {
 namespace ascendc {
 #define GEN_PASS_DEF_HOISTQUEBIND
 #include "ascir/Dialect/Asc/Transforms/Passes.h.inc"
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir
 
 using namespace mlir;
 
 namespace {
 
-struct HoistQueBindPass
-    : public ascendc::impl::HoistQueBindBase<HoistQueBindPass> {
-public:
-  void runOnOperation() override {
-    MLIRContext *context = &getContext();
-    RewritePatternSet patterns(context);
-    patterns.add<
-        //
-        ascendc::HoistOpPattern<ascendc::QueueOp>,
-        ascendc::HoistOpPattern<ascendc::QueBindOp>,
-        ascendc::HoistOpPattern<ascendc::TBufOp>,
-        ascendc::HoistOpPattern<ascendc::TPipeInitBufferOp>,
-        ascendc::HoistOpPattern<ascendc::TPipeInitQueueOp>,
-        ascendc::HoistOpPattern<ascendc::TBufGetTensorOp>
-        //
-        >(context);
-    if (applyPatternsAndFoldGreedily(getOperation(), std::move(patterns)).failed()) {
-      signalPassFailure();
+struct HoistQueBindPass : public ascendc::impl::HoistQueBindBase<HoistQueBindPass> {
+  public:
+    void runOnOperation() override
+    {
+        MLIRContext *context = &getContext();
+        RewritePatternSet patterns(context);
+        patterns.add<
+            //
+            ascendc::HoistOpPattern<ascendc::QueueOp>, ascendc::HoistOpPattern<ascendc::QueBindOp>,
+            ascendc::HoistOpPattern<ascendc::TBufOp>, ascendc::HoistOpPattern<ascendc::TPipeInitBufferOp>,
+            ascendc::HoistOpPattern<ascendc::TPipeInitQueueOp>, ascendc::HoistOpPattern<ascendc::TBufGetTensorOp>
+            //
+            >(context);
+        if (applyPatternsAndFoldGreedily(getOperation(), std::move(patterns)).failed()) {
+            signalPassFailure();
+        }
     }
-  }
 };
 
-}  // namespace
+} // namespace
 
 namespace mlir {
 namespace ascendc {
-std::unique_ptr<Pass> createHoistQueBindPass() {
-  return std::make_unique<HoistQueBindPass>();
+std::unique_ptr<Pass> createHoistQueBindPass()
+{
+    return std::make_unique<HoistQueBindPass>();
 }
-}  // namespace ascendc
-}  // namespace mlir
+} // namespace ascendc
+} // namespace mlir

@@ -23,10 +23,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // automatic casts between containers and python types
 
-#define DEFINE_ADD_PASS(NAME, CONSTRUCTOR)                                     \
-    m.def(NAME, [](PassManager &pm) { pm.addPass(CONSTRUCTOR()); })
+#define DEFINE_ADD_PASS(NAME, CONSTRUCTOR) m.def(NAME, [](PassManager &pm) { pm.addPass(CONSTRUCTOR()); })
 
-#define DEFINE_ADD_PASS_ON(NEST, NAME, CONSTRUCTOR)                            \
+#define DEFINE_ADD_PASS_ON(NEST, NAME, CONSTRUCTOR)                                                                    \
     m.def(NAME, [](PassManager &pm) { pm.addNestedPass<NEST>(CONSTRUCTOR()); })
 
 namespace py = pybind11;
@@ -41,34 +40,33 @@ void definePassManager(py::module &m)
     py::class_<PassManager>(m, "PassManager", py::module_local())
         .def(py::init<MLIRContext *>())
         .def("get_pipeline_str",
-            [](PassManager &self) -> std::string {
-              std::string result;
-              llvm::raw_string_ostream os(result);
-              self.printAsTextualPipeline(os);
-              os.flush();
-              return result;
-            })
+             [](PassManager &self) -> std::string {
+                 std::string result;
+                 llvm::raw_string_ostream os(result);
+                 self.printAsTextualPipeline(os);
+                 os.flush();
+                 return result;
+             })
         .def("run",
-            [](PassManager &self, ModuleOp &mod) {
-              llvm::SourceMgr sourceMgr;
-              SourceMgrDiagnosticHandler handler(sourceMgr, self.getContext());
-              if (self.run(mod.getOperation()).failed())
-                throw std::runtime_error("Failed to run passes");
-            })
-        .def("enable_verifier",
-            [](PassManager &self, bool enable) { self.enableVerifier(enable); },
-            "enable"_a = true)
+             [](PassManager &self, ModuleOp &mod) {
+                 llvm::SourceMgr sourceMgr;
+                 SourceMgrDiagnosticHandler handler(sourceMgr, self.getContext());
+                 if (self.run(mod.getOperation()).failed())
+                     throw std::runtime_error("Failed to run passes");
+             })
+        .def(
+            "enable_verifier", [](PassManager &self, bool enable) { self.enableVerifier(enable); }, "enable"_a = true)
         .def("enable_printing", [](PassManager &self) {
-          OpPrintingFlags flags;
-          flags.enableDebugInfo(true);
-          self.enableIRPrinting([](Pass *, Operation *) { return true; }, /*shouldPrintBeforePass*/
-              [](Pass *, Operation *) { return true; }, /*shouldPrintAfterPass*/
-              false, /*printModuleScope*/
-              false, /*printAfterOnlyOnChange*/
-              true, /*printAfterOnlyOnFailure*/
-              llvm::errs(), /*out*/
-              flags /*opPrintingFlags*/
-              );
+            OpPrintingFlags flags;
+            flags.enableDebugInfo(true);
+            self.enableIRPrinting([](Pass *, Operation *) { return true; }, /*shouldPrintBeforePass*/
+                                  [](Pass *, Operation *) { return true; }, /*shouldPrintAfterPass*/
+                                  false,                                    /*printModuleScope*/
+                                  false,                                    /*printAfterOnlyOnChange*/
+                                  true,                                     /*printAfterOnlyOnFailure*/
+                                  llvm::errs(),                             /*out*/
+                                  flags                                     /*opPrintingFlags*/
+            );
         });
 }
 
@@ -80,8 +78,7 @@ void defineCommonPasses(py::module &mod)
     DEFINE_ADD_PASS("add_inliner", createInlinerPass);
     DEFINE_ADD_PASS("add_licm", createLoopInvariantCodeMotionPass);
     DEFINE_ADD_PASS("add_print_ir", createPrintIRPass);
-    DEFINE_ADD_PASS("add_reconcile_unrealized_casts",
-                    createReconcileUnrealizedCastsPass);
+    DEFINE_ADD_PASS("add_reconcile_unrealized_casts", createReconcileUnrealizedCastsPass);
     DEFINE_ADD_PASS("add_sccp", createSCCPPass);
     DEFINE_ADD_PASS("add_strip_debug_info", createStripDebugInfoPass);
     DEFINE_ADD_PASS("add_symbol_dce", createSymbolDCEPass);
@@ -119,8 +116,8 @@ void pyasc_init_passes(py::module &&m)
     defineCommonPasses(m);
     defineAscendCPasses(m);
 }
-}   // namespace asc
-}   // namespace pybind11
+} // namespace asc
+} // namespace pybind11
 
 #undef DEFINE_ADD_PASS
 #undef DEFINE_ADD_PASS_ON

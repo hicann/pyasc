@@ -21,51 +21,49 @@ namespace {
 
 std::string snakeToCamel(StringRef str)
 {
-	SmallVector<StringRef> tokens;
-	str.split(tokens, '_', -1, false);
-	size_t size = 0;
-	for (auto token : tokens) {
-		size += token.size();
-	}
-	std::string result;
-	result.reserve(size);
-	result += std::string_view(tokens.front());
-	for (auto *it = tokens.begin() + 1; it != tokens.end(); ++it) {
-		result += it->take_front(1).upper();
-		result += std::string_view(it->drop_front(1));
-	}
-	return result;
+    SmallVector<StringRef> tokens;
+    str.split(tokens, '_', -1, false);
+    size_t size = 0;
+    for (auto token : tokens) {
+        size += token.size();
+    }
+    std::string result;
+    result.reserve(size);
+    result += std::string_view(tokens.front());
+    for (auto *it = tokens.begin() + 1; it != tokens.end(); ++it) {
+        result += it->take_front(1).upper();
+        result += std::string_view(it->drop_front(1));
+    }
+    return result;
 }
 
-class GenAPITypes
-{
-  	const RecordKeeper &records;
+class GenAPITypes {
+    const RecordKeeper &records;
 
-public:
-  	explicit GenAPITypes(const RecordKeeper &records) : records(records) {}
+  public:
+    explicit GenAPITypes(const RecordKeeper &records) : records(records) {}
 
-  	void run(raw_ostream &os);
+    void run(raw_ostream &os);
 };
 
 void GenAPITypes::run(raw_ostream &os)
 {
-	raw_indented_ostream ios(os);
-	auto typeDefs = records.getAllDerivedDefinitions("APIType");
-	ios << "#ifdef GEN_EMITTER\n";
-	for (const auto *def : typeDefs) {
-		if (!def->getValueAsBit("genEmitter")) {
-			continue;
-		}
-		ios << "if (auto concrete = dyn_cast<::mlir::ascendc::"
-			<< def->getValueAsString("typeName") << "Type>(type)) {\n";
-		ios.indent() << "os << \"" << def->getValueAsString("apiName") << "\";\n";
-		ios << "return success();\n";
-		ios.unindent() << "}\n";
-	}
-	ios << "#undef GEN_EMITTER\n#endif // GEN_EMITTER\n";
+    raw_indented_ostream ios(os);
+    auto typeDefs = records.getAllDerivedDefinitions("APIType");
+    ios << "#ifdef GEN_EMITTER\n";
+    for (const auto *def : typeDefs) {
+        if (!def->getValueAsBit("genEmitter")) {
+            continue;
+        }
+        ios << "if (auto concrete = dyn_cast<::mlir::ascendc::" << def->getValueAsString("typeName")
+            << "Type>(type)) {\n";
+        ios.indent() << "os << \"" << def->getValueAsString("apiName") << "\";\n";
+        ios << "return success();\n";
+        ios.unindent() << "}\n";
+    }
+    ios << "#undef GEN_EMITTER\n#endif // GEN_EMITTER\n";
 }
 
-TableGen::Emitter::OptClass<GenAPITypes>
-    registration("gen-api-types", "Generate C++ from API type declarations");
+TableGen::Emitter::OptClass<GenAPITypes> registration("gen-api-types", "Generate C++ from API type declarations");
 
 } // namespace
