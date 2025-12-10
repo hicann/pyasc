@@ -6,7 +6,7 @@
 # INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
 # See LICENSE in the root of the software repository for the full text of the License.
 
-from typing import Callable, Union, overload, TypeVar
+from typing import Union, overload
 
 from ..._C import ir
 from ..core.dtype import KnownTypes as KT
@@ -16,8 +16,6 @@ from ..core.tensor import LocalTensor
 from ..core.utils import require_jit, global_builder
 from ..core.types import GatherMaskParams
 from .utils import OverloadDispatcher, set_common_docstring
-
-T = TypeVar("T", bound=Callable)
 
 
 def check_type_gather_mask(dst: LocalTensor, src0: LocalTensor, src1_pattern: Union[LocalTensor, int]) -> None:

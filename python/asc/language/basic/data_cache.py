@@ -58,8 +58,6 @@ def get_icache_preload_status() -> int:
 @set_common_docstring(api_name="get_icache_preload_status")
 def get_icache_preload_status() -> RuntimeInt:
     builder = global_builder.get_ir_builder()
-    if not isinstance(builder, ir.Builder):
-        raise TypeError("global_builder must provide an ir.Builder")
     return PlainValue(builder.create_asc_GetICachePreloadStatusOp(KT.int64.to_ir()))
 
 

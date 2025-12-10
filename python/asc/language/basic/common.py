@@ -239,9 +239,6 @@ def set_vector_mask(mask_high: int, mask_low: int, dtype: DataType,
 @set_common_docstring("set_vector_mask")
 def set_vector_mask(*args, dtype: DataType, mode: MaskMode) -> None:
     builder = global_builder.get_ir_builder()
-    if not isinstance(builder, ir.Builder):
-        raise TypeError("global_builder must provide an ir.Builder")
-
     dispatcher = OverloadDispatcher("set_vector_mask")
 
     @dispatcher.register_auto
