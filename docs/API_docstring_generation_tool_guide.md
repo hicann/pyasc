@@ -34,8 +34,9 @@
 | ------------- | ---------------------------------------------- |
 | `conf.py`     | Sphinx 核心配置文件，包含文档主题、扩展插件、项目信息（如名称、版本）等配置      |
 | `index.rst`   | 文档首页入口文件，定义文档的目录结构（如模块列表、子文档链接）                |
-| `Makefile`    | 自动化脚本文件，提供 `make markdown` 等命令用于快速生成文档               |
+| `Makefile`    | 自动化脚本文件，提供 `make markdown` 和 `make html` 等命令用于快速生成文档               |
 | `python-api`  | Python前段模块索引文件，用于聚合项目中所有待提取 docstring 的 Python 模块                |
+| `_static`     | 配置相关css格式，仅影响html静态网页生成格式                                               |
 
 ## 标准 API 文档生成流程
 
@@ -60,16 +61,18 @@
     模块2路径（如 src.core）
     ```
 
-3. **生成文档**：执行 `Makefile` 中的 `markdown` 命令，Sphinx 会自动提取 `docstring` 并生成 Markdown 文档。
+3. **生成文档**：执行 `Makefile` 中的 `markdown` 或 `html` 命令，Sphinx 会自动提取 `docstring` 并生成 Markdown 文档或 html 静态网页。根据需要执行相应命令。
 
     ```shell
     # Linux/Mac 环境
-    make markdown
+    make markdown   # 生成markdown格式文档
+    make html       # 生成html格式文档
     # Windows 环境（无 Make 工具时）
-    sphinx-build -b markdown . /_build/markdown
+    sphinx-build -b markdown . /_build/markdown     # 生成markdown格式文档
+    sphinx-build -b html . /_build/html             # 生成html格式文档
     ```
 
-4.  **查看生成的文档**：文档生成成功后，会保存在 `docs/_build/markdown` 目录下，直接打开 `index.md` 文件，即可查看完整的 API 文档。
+4.  **查看生成的文档**：文档生成成功后，会保存在 `docs/_build/markdown` 或 `docs/_build/html` 目录下，直接打开 `index.md` 或 `index.html` 文件，即可查看完整的 API 文档。
 
 ## 更新API文档流程
 
@@ -154,16 +157,20 @@
                 builder.create_asc_AddL2Op)
     ```
 
-2.  **进入docs目录并重新生成文档**：在 `docs` 目录下执行如下文档生成命令，Sphinx 将自动识别代码变更并更新文档内容。
+2.  **进入docs目录并重新生成文档**：在 `docs` 目录下执行如下文档生成命令，Sphinx 将自动识别代码变更并更新文档内容。根据需要执行相应命令。
 
     ```shell
     # Linux/Mac 环境
-    cd docs && make markdown
+    cd docs
+    make markdown   # 更新markdown格式文档
+    make html       # 更新html格式文档
     # Windows 环境
-    cd docs && sphinx-build -b markdown . /_build/markdown
+    cd docs 
+    sphinx-build -b markdown . /_build/markdown     # 更新markdown格式文档
+    sphinx-build -b html . /_build/html             # 更新html格式文档
     ```
 
-3.  **验证文档更新结果**：重新打开 `docs/_build/markdown/index.md`，导航到该修改的模块 / 函数，确认文档内容已同步更新。
+3.  **验证文档更新结果**：重新打开 `docs/_build/markdown/index.md` 或 `docs/_build/html/index.html`，导航到该修改的模块 / 函数，确认文档内容已同步更新。
 
 ## 常见问题（FAQ）
 

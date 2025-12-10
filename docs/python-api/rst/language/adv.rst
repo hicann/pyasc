@@ -58,52 +58,6 @@ Matmul
     register_matmul
 
 
-Math Ops
-------------
-.. autosummary::
-    :toctree: generated
-    :nosignatures:
-
-    acos
-    acosh
-    asin
-    asinh
-    atan
-    atanh
-    axpy
-    ceil
-    cos
-    cosh
-    digamma
-    erf
-    erfc
-    exp
-    floor
-    frac
-    lgamma
-    log
-    power
-    round
-    sign
-    sin
-    sinh
-    tan
-    tanh
-    trunc
-    xor
-
-
-Sort Ops
-------------
-
-.. autosummary::
-    :toctree: generated
-    :nosignatures:
-
-    concat
-    extract
-
-
 Activation Ops
 ---------------
 
