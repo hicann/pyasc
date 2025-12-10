@@ -6,7 +6,7 @@
 # INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
 # See LICENSE in the root of the software repository for the full text of the License.
 
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Tuple, overload
+from typing import Any, Callable, Dict, List, Optional, Tuple, overload
 
 from ..._C import ir
 from ..core.dtype import KnownTypes as KT
@@ -15,8 +15,6 @@ from ..core.ir_value import RuntimeInt, materialize_ir_value as _mat
 from ..core.tensor import LocalTensor
 from ..core.utils import DefaultValued, OverloadDispatcher, require_jit, global_builder
 from .utils import set_common_docstring
-
-T = TypeVar("T", bound=Callable)
 
 
 def reduce_op_impl(callee: str, dst: LocalTensor, src: LocalTensor, args: Tuple[Any],
@@ -131,9 +129,6 @@ def pair_reduce_sum(dst: LocalTensor, src: LocalTensor, repeat_time: int, mask: 
 @set_common_docstring("pair_reduce_sum")
 def pair_reduce_sum(dst: LocalTensor, src: LocalTensor, *args, **kwargs) -> None:
     builder = global_builder.get_ir_builder()
-    if not isinstance(builder, ir.Builder):
-        raise TypeError("global_builder must provide an ir.Builder")
-    
     dispatcher = OverloadDispatcher("pair_reduce_sum")
 
     @dispatcher.register(repeat_time=RuntimeInt, mask=RuntimeInt, dst_rep_stride=RuntimeInt, src_blk_stride=RuntimeInt, 
@@ -309,9 +304,6 @@ def whole_reduce_sum(dst: LocalTensor, src: LocalTensor, mask: List[int], repeat
 @set_common_docstring("whole_reduce_sum")
 def whole_reduce_sum(dst: LocalTensor, src: LocalTensor, *args, **kwargs) -> None:
     builder = global_builder.get_ir_builder()
-    if not isinstance(builder, ir.Builder):
-        raise TypeError("global_builder must provide an ir.Builder")
-    
     dispatcher = OverloadDispatcher("whole_reduce_sum")
 
     @dispatcher.register(mask=RuntimeInt, repeat_time=RuntimeInt, dst_rep_stride=RuntimeInt, 

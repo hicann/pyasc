@@ -26,8 +26,6 @@ def scalar_cast(value_in: float, dtype: Type[T], round_mode: RoundMode) -> T:
 @set_common_docstring(api_name="scalar_cast")
 def scalar_cast(value_in: RuntimeFloat, dtype: Type[T], round_mode: RoundMode) -> T:
     builder = global_builder.get_ir_builder()
-    if not isinstance(builder, ir.Builder):
-        raise TypeError("global_builder must provide an ir.Builder")
 
     value_out = builder.create_asc_ScalarCastOp(
         dtype.to_ir(), 
@@ -50,8 +48,6 @@ def scalar_get_sff_value(value_in: int, count_value: int) -> int:
 @set_common_docstring(api_name="scalar_get_sff_value")
 def scalar_get_sff_value(value_in: RuntimeInt, count_value: RuntimeInt) -> RuntimeInt:
     builder = global_builder.get_ir_builder()
-    if not isinstance(builder, ir.Builder):
-        raise TypeError("global_builder must provide an ir.Builder")
     if not isinstance(count_value, int):
         raise TypeError("count_value must be a Python int (compile-time constant).")
     if count_value not in (0, 1):

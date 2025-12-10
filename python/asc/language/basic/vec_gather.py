@@ -6,43 +6,23 @@
 # INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
 # See LICENSE in the root of the software repository for the full text of the License.
 
-from typing import Any, Callable, Dict, List, Tuple, TypeVar, overload
+from typing import Any, Callable, Dict, List, Tuple, overload
 from ..._C import ir
 from ..core.dtype import KnownTypes as KT
 from ..core.ir_value import RuntimeInt, materialize_ir_value as _mat
 from ..core.tensor import LocalTensor
 from ..core.types import GatherRepeatParams 
-
 from ..core.utils import OverloadDispatcher, require_jit, global_builder
-
-
-T = TypeVar("T", bound=Callable)
-
-
-def op_impl_gatherb(callee: str, dst: LocalTensor, src0: LocalTensor, offset: LocalTensor, args: Tuple[Any],
-                    kwargs: Dict[str, Any], build_gatherb: Callable) -> None:
-    builder = build_gatherb.__self__
-    if not isinstance(builder, ir.Builder):
-        raise TypeError("Input builder must be ir.Builder")
-
-    dispatcher = OverloadDispatcher(callee)
-
-    @dispatcher.register_auto
-    def _(repeat_times: RuntimeInt, repeat_params: GatherRepeatParams):
-        build_gatherb(dst.to_ir(), src0.to_ir(), offset.to_ir(),
-                     _mat(repeat_times, KT.uint8).to_ir(),
-                     repeat_params.to_ir())
-
-    dispatcher(*args, **kwargs)
 
 
 @require_jit
 def gatherb(dst: LocalTensor, src0: LocalTensor, offset: LocalTensor,
             repeat_times: int, repeat_params: GatherRepeatParams) -> None:
     builder = global_builder.get_ir_builder()
-    op_impl_gatherb("gatherb", dst, src0, offset, (repeat_times, repeat_params), {},
-                    builder.create_asc_GatherbL0Op)
-    
+    builder.create_asc_GatherbL0Op(dst.to_ir(), src0.to_ir(), offset.to_ir(),
+                     _mat(repeat_times, KT.uint8).to_ir(),
+                     repeat_params.to_ir())
+
 
 def op_impl(callee: str, dst: LocalTensor, src: LocalTensor, src_offset: LocalTensor, src_base: int, args: Tuple[Any],
             kwargs: Dict[str, Any], build_l0: Callable, build_l1: Callable, build_l2: Callable) -> None:
@@ -99,7 +79,29 @@ def gather(dst: LocalTensor, src: LocalTensor, src_offset: LocalTensor, src_base
 def gather(dst: LocalTensor, src: LocalTensor, src_offset: LocalTensor,
            src_base: int, *args, **kwargs) -> None:
     builder = global_builder.get_ir_builder()
-    op_impl("gather", dst, src, src_offset, src_base, args, kwargs,
-            builder.create_asc_GatherL0Op,
-            builder.create_asc_GatherL1Op,
-            builder.create_asc_GatherL2Op)
+    dispatcher = OverloadDispatcher(__name__)
+
+    @dispatcher.register_auto
+    def _(mask: RuntimeInt, repeat_times: RuntimeInt, dst_rep_stride: RuntimeInt):
+        builder.create_asc_GatherL0Op(dst.to_ir(), src.to_ir(), src_offset.to_ir(),
+                 _mat(src_base, KT.uint32).to_ir(),
+                 _mat(mask, KT.uint64).to_ir(),
+                 _mat(repeat_times, KT.uint8).to_ir(),
+                 _mat(dst_rep_stride, KT.uint16).to_ir())
+
+    @dispatcher.register_auto
+    def _(mask: list, repeat_times: RuntimeInt, dst_rep_stride: RuntimeInt):
+        mask = [_mat(v, KT.uint64).to_ir() for v in mask]
+        builder.create_asc_GatherL1Op(dst.to_ir(), src.to_ir(), src_offset.to_ir(),
+                 _mat(src_base, KT.uint32).to_ir(),
+                 mask,
+                 _mat(repeat_times, KT.uint8).to_ir(),
+                 _mat(dst_rep_stride, KT.uint16).to_ir())
+
+    @dispatcher.register_auto
+    def _(count: RuntimeInt):
+        builder.create_asc_GatherL2Op(dst.to_ir(), src.to_ir(), src_offset.to_ir(),
+                 _mat(src_base, KT.uint32).to_ir(),
+                 _mat(count, KT.uint32).to_ir())
+
+    dispatcher(*args, **kwargs)
