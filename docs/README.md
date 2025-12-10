@@ -5,6 +5,7 @@
 关键目录结构如下：
 
 ```
+├── _static                                   # css样式文件目录
 ├── figures                                   # 图片目录
 ├── python-api                                # Python编程接口文档
 │   ├──index.md                               # Python编程接口分类列表
