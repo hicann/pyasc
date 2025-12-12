@@ -1167,6 +1167,314 @@ def icache_preload_docstring():
     return func_introduction, cpp_signature, param_list, return_list, "", py_example
 
 
+def load_data_docstring():
+    func_introduction = """
+    源操作数/目的操作数的数据类型为uint8_t/int8_t时，分形矩阵大小在A1/A2上为16*32， 在B1/B2上为32*16。
+    源操作数/目的操作数的数据类型为uint16_t/int16_t/half/bfloat16_t时，分形矩阵在A1/B1/A2/B2上的大小为16*16。
+    源操作数/目的操作数的数据类型为uint32_t/int32_t/float时，分形矩阵大小在A1/A2上为16*8， 在B1/B2上为8*16。
+    支持如下数据通路：
+    GM->A1; GM->B1; GM->A2; GM->B2;
+    A1->A2; B1->B2。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void LoadData(const LocalTensor<T>& dst,
+                                        const LocalTensor<T>& src,
+                                        const LoadData2DParams& loadDataParams)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void LoadData(const LocalTensor<T>& dst,
+                                        const GlobalTensor<T>& src,
+                                        const LoadData2DParams& loadDataParams)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：目的操作数，类型为 LocalTensor。
+      - 作为二维数据加载的目标 Tensor。
+      - 支持的 TPosition 为 VECIN/VECCALC/VECOUT。
+      - 起始地址需要 32 字节对齐。
+
+    - src：源操作数，类型为 LocalTensor 或 GlobalTensor。
+      - 当为 LocalTensor 时，表示在芯片内部不同本地存储单元之间按 2D 方式搬运。
+      - 当为 GlobalTensor 时，表示从 Global Memory 按 2D 方式加载数据到 LocalTensor。
+      - 元素数据类型需与 dst 保持一致。
+
+    - params：二维加载参数，类型为 LoadData2DParams。
+      - startIndex：分形矩阵ID，说明搬运起始位置为源操作数中第几个分形（0为源操作数中第1个分形矩阵）。取值范围：startIndex∈[0, 65535] 。单位：512B。默认为0。
+      - repeatTimes：迭代次数，每个迭代可以处理512B数据。取值范围：repeatTimes∈[1, 255]。
+      - srcStride：相邻迭代间，源操作数前一个分形与后一个分形起始地址的间隔，单位：512B。取值范围：src_stride∈[0, 65535]。默认为0。
+      - sid：预留参数，配置为0即可。
+      - dstGap：相邻迭代间，目的操作数前一个分形结束地址与后一个分形起始地址的间隔，单位：512B。取值范围：dstGap∈[0, 65535]。默认为0。
+      - ifTranspose：是否启用转置功能，对每个分形矩阵进行转置，默认为false:
+      - addrMode：预留参数，配置为0即可。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - dst 与 src 的数据需要满足起始地址对齐要求，具体可查看文档。
+    - 不使用或者不想改变的配置，建议保持默认值，有助于性能提升。
+
+    """
+
+    py_example = """
+    **调用示例**
+
+    - Local Memory 内部 2D 搬运（Local -> Local）
+
+      .. code-block:: python
+
+          @asc.jit
+          def kernel_load_data_l2l(x: asc.GlobalAddress) -> None:
+              x_local = asc.LocalTensor(dtype=asc.float16,
+                                        pos=asc.TPosition.VECIN,
+                                        addr=0, tile_size=512)
+              y_local = asc.LocalTensor(dtype=asc.float16,
+                                        pos=asc.TPosition.VECOUT,
+                                        addr=0, tile_size=512)
+
+              params = asc.LoadData2DParams(0, 4, 0, 0, 0, 0, 0)
+
+              asc.load_data(y_local, x_local, params)
+
+    - Global Memory 到 Local Memory 的 2D 搬运（Global -> Local）
+
+      .. code-block:: python
+
+          @asc.jit
+          def kernel_load_data_g2l(x: asc.GlobalAddress) -> None:
+              x_local = asc.LocalTensor(dtype=asc.float16,
+                                        pos=asc.TPosition.VECIN,
+                                        addr=0, tile_size=512)
+              y_local = asc.LocalTensor(dtype=asc.float16,
+                                        pos=asc.TPosition.VECOUT,
+                                        addr=0, tile_size=512)
+
+              x_gm = asc.GlobalTensor()
+              x_gm.set_global_buffer(x)
+
+              params = asc.LoadData2DParams(0, 4, 0, 0, 0, 0, 0)
+
+              asc.load_data(y_local, x_local, params)
+              asc.load_data(x_local, x_gm, params)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def load_data_with_transpose_docstring():
+    func_introduction = """
+    该接口实现带转置的2D格式数据从A1/B1到A2/B2的加载。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void LoadDataWithTranspose(const LocalTensor<T>& dst,
+                                                     const LocalTensor<T>& src,
+                                                     const LoadData2dTransposeParams& loadDataParams)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：目的操作数，类型为 LocalTensor。
+      - 用于接收转置后的二维数据。
+      - 存储位置需属于 VECIN / VECCALC / VECOUT 中的一种。
+      - 起始地址需满足 32 字节对齐要求。
+
+    - src：源操作数，类型为 LocalTensor。
+      - 作为 2D 输入块的提供者。
+      - 仅支持 Local → Local（A1/B1 → A2/B2），不支持 GlobalTensor。
+      - 数据类型必须与 dst 一致。
+
+    - params：二维转置加载参数，类型为 LoadData2dTransposeParams。
+      - startIndex：方块矩阵ID，搬运起始位置为源操作数中第几个方块矩阵（0 为源操作数中第1个方块矩阵）。取值范围：startIndex∈[0, 65535] 。默认为0。
+      - repeatTimes：迭代次数，取值范围：repeatTimes∈[0, 255]。默认为0。
+      - srcStride：相邻迭代间，源操作数前一个分形与后一个分形起始地址的间隔。这里的单位实际上是拼接后的方块矩阵的大小。取值范围：srcStride∈[0, 65535]。默认为0。
+      - dstGap：相邻迭代间，目的操作数前一个迭代第一个分形的结束地址到下一个迭代第一个分形起始地址的间隔，单位：512B。取值范围：dstGap∈[0, 65535]。默认为0。
+      - dstFracGap：每个迭代内目的操作数转置前一个分形结束地址与后一个分形起始地址的间隔，单位为512B，仅在数据类型为float/int32_t/uint32_t/uint8_t/int8_t/int4b_t时有效。取值范围：dstFracGap∈[0, 65535]。默认为0。
+      - addrMode：预留参数
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - repeatTimes 为 0 时表示不执行搬运操作。
+    - 开发者需要保证目的操作数转置后的分形没有重叠。
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        @asc.jit
+        def kernel_load_data_with_transpose(x: asc.GlobalAddress) -> None:
+            x_local = asc.LocalTensor(dtype=asc.float16,
+                                      pos=asc.TPosition.VECIN,
+                                      addr=0, tile_size=512)
+
+            y_local = asc.LocalTensor(dtype=asc.float16,
+                                      pos=asc.TPosition.VECOUT,
+                                      addr=0, tile_size=512)
+
+            params = asc.LoadData2dTransposeParams(
+                0,  # startIndex
+                4,  # repeatTimes
+                0,  # srcStride
+                0,  # dstGap
+                0,  # dstFracGap
+                0   # addrMode
+            )
+
+            asc.load_data_with_transpose(y_local, x_local, params)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
+def mmad_docstring():
+    func_introduction = """
+    完成矩阵乘加（C += A * B）操作。矩阵ABC分别为A2/B2/CO1中的数据。
+    ABC矩阵的数据排布格式分别为ZZ，ZN，NZ。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        template <typename T, typename U, typename S>
+        __aicore__ inline void Mmad(const LocalTensor<T>& dst,
+                                    const LocalTensor<U>& fm,
+                                    const LocalTensor<S>& filter,
+                                    const MmadParams& mmadParams)
+
+    .. code-block:: c++
+
+        template <typename T, typename U, typename S, typename V>
+        __aicore__ inline void Mmad(const LocalTensor<T>& dst,
+                                    const LocalTensor<U>& fm,
+                                    const LocalTensor<S>& filter,
+                                    const LocalTensor<V>& bias,
+                                    const MmadParams& mmadParams)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：结果输出 Tensor，类型为 LocalTensor。
+      - 用于存放矩阵乘累加的结果。
+      - **必须位于 CO1 存储位置（TPosition.CO1）**。
+      - 元素数据类型需与累加结果类型匹配。
+
+    - fm：左矩阵（A 矩阵）输入，类型为 LocalTensor。
+      - 表示矩阵乘法中的左操作数。
+      - **必须位于 A2 存储位置（TPosition.A2）**。
+      - 需要按照满足 Mmad 格式要求的 A2 布局存储。
+
+    - filter：右矩阵（B 矩阵）输入，类型为 LocalTensor。
+      - 表示矩阵乘法中的右操作数。
+      - **必须位于 B2 存储位置（TPosition.B2）**。
+      - 需要按照符合指令格式的 B2 分块布局排布。
+
+    - bias（可选）：偏置项，类型为 LocalTensor。
+      - 用于执行 `dst += fm × filter + bias` 的计算。
+      - 当提供 bias 时，将使用带偏置版本的指令。
+
+    - params：MmadParams 类型的矩阵乘参数。
+      - m：左矩阵Height，取值范围：m∈[0, 4095] 。默认值为0。
+      - n：右矩阵Width，取值范围：n∈[0, 4095] 。默认值为0。
+      - k：左矩阵Width、右矩阵Height，取值范围：k∈[0, 4095] 。默认值为0。
+      - cmatrixInitVal：配置C矩阵初始值是否为0。默认值true。
+      - cmatrixSource：配置C矩阵初始值是否来源于C2（存放Bias的硬件缓存区）。默认值为false。
+      - isBias：该参数废弃，新开发内容不要使用该参数。
+      - fmOffset：预留参数。
+      - enSsparse：预留参数。
+      - enWinogradA：预留参数。
+      - enWinogradB：预留参数。
+      - unitFlag：预留参数。
+      - kDirectionAlign：预留参数。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - dst只支持位于CO1，fm只支持位于A2，filter只支持位于B2。
+    - 当M、K、N中的任意一个值为0时，该指令不会被执行。
+    - 当M = 1时，会默认开启GEMV（General Matrix-Vector Multiplication）功能。在这种情况下，Mmad API从L0A Buffer读取数据时，会以ND格式进行读取，而不会将其视为ZZ格式。所以此时左矩阵需要直接按照ND格式进行排布。
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - 基本 Mmad（无 bias）
+
+      .. code-block:: python
+
+          @asc.jit
+          def kernel_mmad_basic():
+              dst = asc.LocalTensor(dtype=asc.float16,
+                                    pos=asc.TPosition.CO1,
+                                    addr=0, tile_size=1024)
+
+              fm = asc.LocalTensor(dtype=asc.float16,
+                                   pos=asc.TPosition.A2,
+                                   addr=0, tile_size=1024)
+
+              filter = asc.LocalTensor(dtype=asc.float16,
+                                       pos=asc.TPosition.B2,
+                                       addr=0, tile_size=1024)
+
+              params = asc.MmadParams(4, 4, 4)
+
+              asc.mmad(dst, fm, filter, params)
+
+    - Mmad 带 bias
+
+      .. code-block:: python
+
+          @asc.jit
+          def kernel_mmad_bias():
+              dst = asc.LocalTensor(dtype=asc.float16,
+                                    pos=asc.TPosition.CO1,
+                                    addr=0, tile_size=1024)
+
+              fm = asc.LocalTensor(dtype=asc.float16,
+                                   pos=asc.TPosition.A2,
+                                   addr=0, tile_size=1024)
+
+              filter = asc.LocalTensor(dtype=asc.float16,
+                                       pos=asc.TPosition.B2,
+                                       addr=0, tile_size=1024)
+
+              bias = asc.LocalTensor(dtype=asc.float16,
+                                     pos=asc.TPosition.VECIN,
+                                     addr=0, tile_size=1024)
+
+              params = asc.MmadParams(4, 4, 4)
+
+              asc.mmad(dst, fm, filter, bias, params)
+    """
+
+    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+
+
 def load_image_to_local_docstring():
     func_introduction = """
     将图像数据从GM搬运到A1/B1。 搬运过程中可以完成图像预处理操作：包括图像翻转，改变图像尺寸（抠图，裁边，缩放，伸展），以及色域转换，类型转换等。
@@ -3255,7 +3563,10 @@ DOC_HANDLES = {
     "get_icache_preload_status": get_icache_preload_status_docstring,
     "get_sys_workspace": get_sys_workspace_docstring,
     "icache_preload": icache_preload_docstring,
+    "load_data": load_data_docstring,
+    "load_data_with_transpose": load_data_with_transpose_docstring,
     "load_image_to_local": load_image_to_local_docstring,
+    "mmad": mmad_docstring,
     "pipe_barrier": pipe_barrier_docstring,
     "wait_flag": set_wait_flag_docstring,
     "metrics_prof_start": metrics_prof_start_docstring,

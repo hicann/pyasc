@@ -25,9 +25,47 @@ def AscendC_LoadDataOp
                    AscendC_BaseLoadDataParamsTypeInterface:$loadDataParams);
 }
 
-def AscendC_MmadOp : APIOp<"mmad", "Mmad", [AscFunc]> {
-  let arguments = (ins AnyType:$dst, AnyType:$fm,
-                   AnyType:$filter, Optional<AnyType>:$bias, AnyType:$mmadParams);
+def AscendC_LoadDataL0Op
+    : DataCopyOp<"load_data_l0", "LoadData", [AscFunc]> {
+  let description = "Perform 2D LoadData between LocalTensor and LocalTensor";
+  let arguments = (ins AscendC_BaseTensorTypeInterface:$dst,
+                       AscendC_BaseTensorTypeInterface:$src,
+                       AscendC_LoadData2DParams:$loadDataParams);
+}
+
+def AscendC_LoadDataG2LOp
+    : DataCopyOp<"load_data_g2l", "LoadData", [AscFunc]> {
+  let description = "Perform 2D LoadData from GlobalTensor to LocalTensor";
+  let arguments = (ins AscendC_BaseTensorTypeInterface:$dst,
+                       AscendC_BaseTensorTypeInterface:$src,
+                       AscendC_LoadData2DParams:$loadDataParams);
+}
+
+def AscendC_LoadDataWithTransposeOp
+    : APIOp<"load_data_with_transpose", "LoadDataWithTranspose", [AscFunc]> {
+  let description = "Perform 2D LoadData with transpose between tensors";
+  let arguments = (ins AscendC_BaseTensorTypeInterface:$dst,
+                       AscendC_BaseTensorTypeInterface:$src,
+                       AscendC_LoadData2dTransposeParams:$loadDataParams);
+}
+
+def AscendC_MmadOp
+    : APIOp<"mmad", "Mmad", [AscFunc]> {
+  let description = "Matrix multiply-accumulate between LocalTensors (dst += fm * filter)";
+  let arguments = (ins AscendC_BaseTensorTypeInterface:$dst,
+                       AscendC_BaseTensorTypeInterface:$fm,
+                       AscendC_BaseTensorTypeInterface:$filter,
+                       AscendC_MmadParams:$mmadParams);
+}
+
+def AscendC_MmadWithBiasOp
+    : APIOp<"mmad_with_bias", "Mmad", [AscFunc]> {
+  let description = "Matrix multiply-accumulate with bias (dst += fm * filter + bias)";
+  let arguments = (ins AscendC_BaseTensorTypeInterface:$dst,
+                       AscendC_BaseTensorTypeInterface:$fm,
+                       AscendC_BaseTensorTypeInterface:$filter,
+                       AscendC_BaseTensorTypeInterface:$bias,
+                       AscendC_MmadParams:$mmadParams);
 }
 
 def AscendC_SetFmatrixOp : APIOp<"set_fmatrix", "SetFmatrix", [AscFunc]> {

@@ -65,11 +65,6 @@ def AscendC_LoadData3DParamsV2
   let assemblyFormat = "`<`  $type `>`";
 }
 
-def AscendC_LoadData2DParams
-    : AscendC_BaseLoadDataParamsType<"LoadData2DParams", "load_data_2d_params"> {
-  let summary = "Represents AscendC::LoadData2DParams";
-}
-
 def AscendC_LocalTensor : AscendC_BaseTensorType<"LocalTensor", "local_tensor"> {
   let summary = "Local tensor from UB";
 }

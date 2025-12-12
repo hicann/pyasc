@@ -212,7 +212,11 @@ def KfcServer : APIType<"KfcServer"> {
 def LoadData2DParams : APIType<"LoadData2DParams"> {
   let mnemonic = "load_data_2d_params";
   let apiName = "AscendC::LoadData2DParams";
-  let genTypedef = false;
+}
+
+def LoadData2dTransposeParams : APIType<"LoadData2dTransposeParams"> {
+  let mnemonic = "load_data_2d_transpose_params";
+  let apiName = "AscendC::LoadData2dTransposeParams";
 }
 
 def LoadData2DMxParams : APIType<"LoadData2DMxParams"> {
