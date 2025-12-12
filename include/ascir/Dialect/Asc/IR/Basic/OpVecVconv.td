@@ -64,7 +64,7 @@ def AscendC_CastDeqL2Op : VectorOp<"cast_deq_l2", "CastDeq"> {
                        UnitAttr:$isVecDeq, UnitAttr:$halfBlock);
 }
 
-def AscendC_SetDeqScaleOp : APIOp<"set_deq_scale", "SetDeqScale", [AttrSizedOperandSegments]> {
+def AscendC_SetDeqScaleOp : APIOp<"set_deq_scale", "SetDeqScale", [AttrSizedOperandSegments, AscFunc]> {
   let arguments = (ins AnyType:$scale, Optional<I16>:$offset, Optional<AnyType>:$signMode);
   let assemblyFormat = [{
     $scale attr-dict (`,` $offset^)? (`,` $signMode^)? `:`

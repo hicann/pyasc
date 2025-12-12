@@ -48,7 +48,7 @@ func.func @emit_local_tensor(%tensor : !ascendc.local_tensor<*xf32>, %len : ui32
   %8 = ascendc.local_tensor.get_shape_info %tensor : !ascendc.local_tensor<*xf32>, !ascendc.shape_info
   ascendc.local_tensor.set_shape_info %tensor, %8 : !ascendc.local_tensor<*xf32>, !ascendc.shape_info
   ascendc.local_tensor.set_addr_with_offset %tensor, %bracket2, %len : !ascendc.local_tensor<*xf32>, !ascendc.local_tensor<*xf32>, ui32
-  %9 = ascendc.local_tensor_v2 vec_in, %len, %len : !ascendc.local_tensor<*xf32>
+  %9 = ascendc.local_tensor_v2 vecin, %len, %len : !ascendc.local_tensor<*xf32>
   %10 = ascendc.local_tensor : !ascendc.local_tensor<*xf32>
   return
 }

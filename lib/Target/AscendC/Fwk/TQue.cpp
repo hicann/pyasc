@@ -59,6 +59,21 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::TQueB
     return success();
 }
 
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::TQueBindDequeTensorPosOp op)
+{
+    FAIL_OR(emitter.emitVariableDeclaration(op->getResult(0), false));
+    auto &os = emitter.ostream();
+    os << " = " << emitter.getOrCreateName(op.getQueue()) << "." << op.getAPIName() << "<";
+    CodeEmitter::emitTPosition(os, op.getSrcUserPos());
+    os << ", ";
+    CodeEmitter::emitTPosition(os, op.getDstUserPos());
+    os << ", ";
+    Type elType = op.getTensor().getType().getElementType();
+    FAIL_OR(emitter.emitType(op.getLoc(), elType));
+    os << ">()";
+    return success();
+}
+
 LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::TQueBindEnqueTensorPosOp op)
 {
     auto &os = emitter.ostream();

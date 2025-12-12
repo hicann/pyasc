@@ -50,13 +50,13 @@ func.func @emit_pipe() {
 // CHECK-NEXT: }
 func.func @emit_tbuf_pool(%arg0 : ui32) {
   %0 = ascendc.pipe
-  %1 = ascendc.tBufPool : <vec_in, 4> 
-  %2 = ascendc.tBufPool : <vec_in, 4> 
-  %4 = ascendc.pipe.init_buf_pool(%0, %2, %arg0) : !ascendc.pipe, !ascendc.tbuf_pool<vec_in, 4>, ui32 -> i1
-  %5 = ascendc.pipe.init_buf_pool(%0, %2, %arg0), %1 : !ascendc.pipe, !ascendc.tbuf_pool<vec_in, 4>, ui32 , !ascendc.tbuf_pool<vec_in, 4> -> i1
-  %6 = ascendc.tBufPool : <vec_in, 4> 
-  %7 = ascendc.tbuf_pool.init_buf_pool(%1, %2, %arg0) : !ascendc.tbuf_pool<vec_in, 4>, !ascendc.tbuf_pool<vec_in, 4>, ui32 -> i1
-  %8 = ascendc.tbuf_pool.init_buf_pool(%1, %2, %arg0), %6 : !ascendc.tbuf_pool<vec_in, 4>, !ascendc.tbuf_pool<vec_in, 4>, ui32 , !ascendc.tbuf_pool<vec_in, 4> -> i1
+  %1 = ascendc.tBufPool : <vecin, 4> 
+  %2 = ascendc.tBufPool : <vecin, 4> 
+  %4 = ascendc.pipe.init_buf_pool(%0, %2, %arg0) : !ascendc.pipe, !ascendc.tbuf_pool<vecin, 4>, ui32 -> i1
+  %5 = ascendc.pipe.init_buf_pool(%0, %2, %arg0), %1 : !ascendc.pipe, !ascendc.tbuf_pool<vecin, 4>, ui32 , !ascendc.tbuf_pool<vecin, 4> -> i1
+  %6 = ascendc.tBufPool : <vecin, 4> 
+  %7 = ascendc.tbuf_pool.init_buf_pool(%1, %2, %arg0) : !ascendc.tbuf_pool<vecin, 4>, !ascendc.tbuf_pool<vecin, 4>, ui32 -> i1
+  %8 = ascendc.tbuf_pool.init_buf_pool(%1, %2, %arg0), %6 : !ascendc.tbuf_pool<vecin, 4>, !ascendc.tbuf_pool<vecin, 4>, ui32 , !ascendc.tbuf_pool<vecin, 4> -> i1
   return
 }
 
@@ -69,11 +69,11 @@ func.func @emit_tbuf_pool(%arg0 : ui32) {
 // CHECK-NEXT:   return;
 // CHECK-NEXT: }
 func.func @emit_tbuf_pool_init_buffer(%arg0 : i32) {
-  %0 = ascendc.tBufPool : <vec_in, 4> 
+  %0 = ascendc.tBufPool : <vecin, 4> 
   %buffer = ascendc.tbuf : !ascendc.tbuf<gm>
-  ascendc.tbuf_pool.init_buffer %0, %buffer, %arg0 : !ascendc.tbuf_pool<vec_in, 4>, !ascendc.tbuf<gm> , i32
+  ascendc.tbuf_pool.init_buffer %0, %buffer, %arg0 : !ascendc.tbuf_pool<vecin, 4>, !ascendc.tbuf<gm> , i32
   %queue = ascendc.queue : !ascendc.queue<gm, 1>
-  ascendc.tbuf_pool.init_queue %0, %queue, %arg0, %arg0 : !ascendc.tbuf_pool<vec_in, 4>, !ascendc.queue<gm, 1>, i32, i32
+  ascendc.tbuf_pool.init_queue %0, %queue, %arg0, %arg0 : !ascendc.tbuf_pool<vecin, 4>, !ascendc.queue<gm, 1>, i32, i32
   return
 }
 
@@ -102,9 +102,9 @@ func.func @emit_buffer() {
   %6 = ascendc.tbuf : !ascendc.tbuf<c2>
   %7 = ascendc.tbuf : !ascendc.tbuf<co1>
   %8 = ascendc.tbuf : !ascendc.tbuf<co2>
-  %9 = ascendc.tbuf : !ascendc.tbuf<vec_in>
-  %10 = ascendc.tbuf : !ascendc.tbuf<vec_out>
-  %11 = ascendc.tbuf : !ascendc.tbuf<vec_calc>
+  %9 = ascendc.tbuf : !ascendc.tbuf<vecin>
+  %10 = ascendc.tbuf : !ascendc.tbuf<vecout>
+  %11 = ascendc.tbuf : !ascendc.tbuf<veccalc>
   return
 }
 
@@ -191,10 +191,10 @@ func.func @emit_init_queue(%num : i32, %length : i32) {
 func.func @emit_base_queue_operations(%queue : !ascendc.queue<gm, 1>) {
   %local_tensor = ascendc.que_bind.alloc_tensor %queue : !ascendc.queue<gm, 1>, !ascendc.local_tensor<i32>
   ascendc.que_bind.enque_tensor %queue, %local_tensor : !ascendc.queue<gm, 1> , !ascendc.local_tensor<i32>
-  ascendc.que_bind.enque_tensor_pos %queue, %local_tensor, gm, vec_in : !ascendc.queue<gm, 1> , !ascendc.local_tensor<i32>
+  ascendc.que_bind.enque_tensor_pos %queue, %local_tensor, gm, vecin : !ascendc.queue<gm, 1> , !ascendc.local_tensor<i32>
   %deque_tensor = ascendc.que_bind.deque_tensor %queue : !ascendc.queue<gm, 1> , !ascendc.local_tensor<i32>
   ascendc.que_bind.free_tensor %queue, %local_tensor : !ascendc.queue<gm, 1>, !ascendc.local_tensor<i32>
-  %que_bind = ascendc.to_que_bind %queue : !ascendc.queue<gm, 1>, !ascendc.que_bind<gm, vec_calc, 1>
+  %que_bind = ascendc.to_que_bind %queue : !ascendc.queue<gm, 1>, !ascendc.que_bind<gm, veccalc, 1>
   %0 = ascendc.que_bind.get_tensor_count_in_que %queue :  !ascendc.queue<gm, 1>, i32
   %1 = ascendc.que_bind.has_idle_buffer %queue :  !ascendc.queue<gm, 1>, i1
   %2 = ascendc.que_bind.has_tensor_in_que %queue :  !ascendc.queue<gm, 1>, i1
@@ -207,12 +207,14 @@ func.func @emit_base_queue_operations(%queue : !ascendc.queue<gm, 1>) {
 // CHECK-NEXT:   AscendC::LocalTensor<float> v4 = AscendC::LocalTensor<float>(AscendC::TPosition::VECIN, v1, v2);
 // CHECK-NEXT:   v3.AllocTensor<float>(v4);
 // CHECK-NEXT:   v3.DeQue<float>(v4);
+// CHECK-NEXT:   AscendC::LocalTensor<float> v5 = v3.DeQue<AscendC::TPosition::GM, AscendC::TPosition::VECIN, float>();
 // CHECK-NEXT:   return;
 // CHECK-NEXT: }
 func.func @emit_que_bind_in_place(%arg0 : ui32, %arg1 : ui32) {
-  %que_bind = ascendc.que_bind : <vec_in, vec_in, 0> 
-  %tensor = ascendc.local_tensor_v2 vec_in, %arg0, %arg1 : !ascendc.local_tensor<*xf32> 
-  ascendc.que_bind.alloc_tensor_in_place %que_bind, %tensor : !ascendc.que_bind<vec_in, vec_in, 0>, !ascendc.local_tensor<*xf32> 
-  ascendc.que_bind.deque_tensor_in_place %que_bind, %tensor : !ascendc.que_bind<vec_in, vec_in, 0>, !ascendc.local_tensor<*xf32> 
+  %que_bind = ascendc.que_bind : <vecin, vecin, 0>
+  %tensor = ascendc.local_tensor_v2 vecin, %arg0, %arg1 : !ascendc.local_tensor<*xf32>
+  ascendc.que_bind.alloc_tensor_in_place %que_bind, %tensor : !ascendc.que_bind<vecin, vecin, 0>, !ascendc.local_tensor<*xf32>
+  ascendc.que_bind.deque_tensor_in_place %que_bind, %tensor : !ascendc.que_bind<vecin, vecin, 0>, !ascendc.local_tensor<*xf32>
+  %tensor0 = ascendc.que_bind.deque_tensor_pos %que_bind, gm, vecin : !ascendc.que_bind<vecin, vecin, 0>, !ascendc.local_tensor<*xf32>
   return
 }

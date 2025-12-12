@@ -84,8 +84,8 @@ def set_deq_scale(scale: RuntimeFloat, offset: Optional[RuntimeInt] = None,
     if offset is None and sign_mode is None:
         global_builder.get_ir_builder().create_asc_SetDeqScaleOp(_mat(scale, KnownTypes.half).to_ir())
     else:
-        global_builder.get_ir_builder().create_asc_SetDeqScaleOp(_mat(scale, KnownTypes.half).to_ir(), \
-            _mat(offset, KnownTypes.int16).to_ir(), _mat(sign_mode, KnownTypes.bool_).to_ir())
+        global_builder.get_ir_builder().create_asc_SetDeqScaleOp(_mat(scale, KnownTypes.float32).to_ir(), \
+            _mat(offset, KnownTypes.int16).to_ir(), _mat(sign_mode, KnownTypes.bit).to_ir())
 
 
 @overload

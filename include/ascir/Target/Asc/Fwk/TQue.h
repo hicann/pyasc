@@ -28,6 +28,8 @@ LogicalResult printOperation(CodeEmitter &emitter, ascendc::TQueBindDequeTensorO
 
 LogicalResult printOperation(CodeEmitter &emitter, ascendc::TQueBindDequeTensorInPlaceOp op);
 
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::TQueBindDequeTensorPosOp op);
+
 LogicalResult printOperation(CodeEmitter &emitter, ascendc::TQueBindEnqueTensorPosOp op);
 
 LogicalResult printOperation(CodeEmitter &emitter, ascendc::ToQueBindOp op);

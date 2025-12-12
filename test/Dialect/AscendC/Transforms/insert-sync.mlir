@@ -76,23 +76,23 @@ func.func @insert_pipe_v_pipe_all(%arg0: !ascendc.local_tensor<64xf32>, %arg1: f
 
 // CHECK-LABEL: func.func @insert_enqueue_dequeue
 // CHECK:       ascendc.data_copy_l2 %2, %arg0, %arg2 : !ascendc.local_tensor<32xf16>, !ascendc.global_tensor<*xf16>, i32
-// CHECK-NEXT:  ascendc.que_bind.enque_tensor %1, %2 : !ascendc.queue<vec_in, 1>, !ascendc.local_tensor<32xf16>
-// CHECK:       %5 = ascendc.que_bind.deque_tensor %1 : !ascendc.queue<vec_in, 1>, !ascendc.local_tensor<32xf16>
+// CHECK-NEXT:  ascendc.que_bind.enque_tensor %1, %2 : !ascendc.queue<vecin, 1>, !ascendc.local_tensor<32xf16>
+// CHECK:       %5 = ascendc.que_bind.deque_tensor %1 : !ascendc.queue<vecin, 1>, !ascendc.local_tensor<32xf16>
 // CHECK-NEXT:  ascendc.add_l2 %4, %5, %5, %arg2 : !ascendc.local_tensor<32xf16>, !ascendc.local_tensor<32xf16>, !ascendc.local_tensor<32xf16>, i32
-// CHECK-NEXT:  ascendc.que_bind.enque_tensor %3, %4 : !ascendc.queue<vec_out, 1>, !ascendc.local_tensor<32xf16>
-// CHECK-NEXT:  %6 = ascendc.que_bind.deque_tensor %3 : !ascendc.queue<vec_out, 1>, !ascendc.local_tensor<32xf16>
+// CHECK-NEXT:  ascendc.que_bind.enque_tensor %3, %4 : !ascendc.queue<vecout, 1>, !ascendc.local_tensor<32xf16>
+// CHECK-NEXT:  %6 = ascendc.que_bind.deque_tensor %3 : !ascendc.queue<vecout, 1>, !ascendc.local_tensor<32xf16>
 func.func @insert_enqueue_dequeue(%arg0: !ascendc.global_tensor<*xf16>, %arg1: !ascendc.global_tensor<*xf16>, %arg2: i32, %arg3: i64) {
     %0 = ascendc.pipe
-    %1 = ascendc.queue : <vec_in, 1>
-    ascendc.pipe.init_queue %0, %1, %arg2, %arg3 : !ascendc.queue<vec_in, 1>, i32, i64
-    %2 = ascendc.que_bind.alloc_tensor %1 : !ascendc.queue<vec_in, 1>, !ascendc.local_tensor<32xf16>
+    %1 = ascendc.queue : <vecin, 1>
+    ascendc.pipe.init_queue %0, %1, %arg2, %arg3 : !ascendc.queue<vecin, 1>, i32, i64
+    %2 = ascendc.que_bind.alloc_tensor %1 : !ascendc.queue<vecin, 1>, !ascendc.local_tensor<32xf16>
     ascendc.data_copy_l2 %2, %arg0, %arg2 : !ascendc.local_tensor<32xf16>, !ascendc.global_tensor<*xf16>, i32
-    %3 = ascendc.queue : <vec_out, 1>
-    ascendc.pipe.init_queue %0, %3, %arg2, %arg3 : !ascendc.queue<vec_out, 1>, i32, i64
-    %4 = ascendc.que_bind.alloc_tensor %3 : !ascendc.queue<vec_out, 1>, !ascendc.local_tensor<32xf16>
+    %3 = ascendc.queue : <vecout, 1>
+    ascendc.pipe.init_queue %0, %3, %arg2, %arg3 : !ascendc.queue<vecout, 1>, i32, i64
+    %4 = ascendc.que_bind.alloc_tensor %3 : !ascendc.queue<vecout, 1>, !ascendc.local_tensor<32xf16>
     ascendc.add_l2 %4, %2, %2, %arg2 : !ascendc.local_tensor<32xf16>, !ascendc.local_tensor<32xf16>, !ascendc.local_tensor<32xf16>, i32
     ascendc.data_copy_l2 %arg1, %4, %arg2 : !ascendc.global_tensor<*xf16>, !ascendc.local_tensor<32xf16>, i32
-    ascendc.que_bind.free_tensor %3, %4 : !ascendc.queue<vec_out, 1>, !ascendc.local_tensor<32xf16>
-    ascendc.que_bind.free_tensor %1, %2 : !ascendc.queue<vec_in, 1>, !ascendc.local_tensor<32xf16>
+    ascendc.que_bind.free_tensor %3, %4 : !ascendc.queue<vecout, 1>, !ascendc.local_tensor<32xf16>
+    ascendc.que_bind.free_tensor %1, %2 : !ascendc.queue<vecin, 1>, !ascendc.local_tensor<32xf16>
     return
 }

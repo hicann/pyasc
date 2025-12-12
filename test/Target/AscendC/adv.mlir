@@ -194,9 +194,9 @@ func.func @emit_concat(%arg0: memref<?xui64, 22>){
   %1 = "emitc.constant"() <{value = 0 : ui32}> : () -> ui32
   %2 = "emitc.constant"() <{value = 256 : ui32}> : () -> ui32
   %c4_i32 = arith.constant 4 : i32
-  %3 = ascendc.local_tensor_v2 vec_out, %1, %0 : !ascendc.local_tensor<*xf16>
-  %4 = ascendc.local_tensor_v2 vec_in, %1, %0 : !ascendc.local_tensor<*xf16>
-  %5 = ascendc.local_tensor_v2 vec_in, %1, %2 : !ascendc.local_tensor<*xf16>
+  %3 = ascendc.local_tensor_v2 vecout, %1, %0 : !ascendc.local_tensor<*xf16>
+  %4 = ascendc.local_tensor_v2 vecin, %1, %0 : !ascendc.local_tensor<*xf16>
+  %5 = ascendc.local_tensor_v2 vecin, %1, %2 : !ascendc.local_tensor<*xf16>
   ascendc.concat %3, %4, %5, %c4_i32 : !ascendc.local_tensor<*xf16>, !ascendc.local_tensor<*xf16>, !ascendc.local_tensor<*xf16>, i32
   return
 }
@@ -219,9 +219,9 @@ func.func @emit_extract(%arg0: memref<?xui64, 22>){
   %1 = "emitc.constant"() <{value = 0 : ui32}> : () -> ui32
   %2 = "emitc.constant"() <{value = 256 : ui32}> : () -> ui32
   %c8_i32 = arith.constant 8 : i32
-  %3 = ascendc.local_tensor_v2 vec_out, %1, %0 : !ascendc.local_tensor<*xf16>
-  %4 = ascendc.local_tensor_v2 vec_out, %1, %0 : !ascendc.local_tensor<*xui32>
-  %5 = ascendc.local_tensor_v2 vec_in, %1, %2 : !ascendc.local_tensor<*xf16>
+  %3 = ascendc.local_tensor_v2 vecout, %1, %0 : !ascendc.local_tensor<*xf16>
+  %4 = ascendc.local_tensor_v2 vecout, %1, %0 : !ascendc.local_tensor<*xui32>
+  %5 = ascendc.local_tensor_v2 vecin, %1, %2 : !ascendc.local_tensor<*xf16>
   ascendc.extract %3, %4, %5, %c8_i32 : !ascendc.local_tensor<*xf16>, !ascendc.local_tensor<*xui32>, !ascendc.local_tensor<*xf16>, i32
   return
 }
