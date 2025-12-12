@@ -45,6 +45,7 @@ from .dump_tensor import (
     metrics_prof_start, 
     metrics_prof_stop,
 )
+from .mm import load_data, load_data_with_transpose, mmad
 from .scalar import scalar_cast, scalar_get_sff_value
 from .sys_var import (
     get_arch_version,
@@ -171,6 +172,10 @@ __all__ = [
     "dump_acc_chk_point",
     "metrics_prof_start",
     "metrics_prof_stop",
+    # .mm
+    "load_data",
+    "load_data_with_transpose",
+    "mmad",
     # .scalar
     "scalar_cast",
     "scalar_get_sff_value",

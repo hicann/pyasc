@@ -55,6 +55,7 @@ from .basic.dump_tensor import (
     metrics_prof_start, 
     metrics_prof_stop,
 )
+from .basic.mm import load_data, load_data_with_transpose, mmad
 from .basic.scalar import scalar_cast, scalar_get_sff_value
 from .basic.sys_var import (
     get_arch_version,
@@ -215,6 +216,9 @@ from .core.types import (
     Nd2NzParams,
     Nz2NdParamsFull,
     DataCopyCO12DstParams,
+    LoadData2DParams,
+    LoadData2dTransposeParams,
+    MmadParams,
 )
 from .core.aipp_types import (
     AippParams,

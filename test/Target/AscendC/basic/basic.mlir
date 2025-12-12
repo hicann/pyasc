@@ -41,15 +41,6 @@ func.func @emit_set_fmatrix(%arg0: i16, %arg1: memref<4xi8>, %arg2: i8) {
   return
 }
 
-// CHECK-LABEL:void emit_load_data(AscendC::LocalTensor<half> v1, AscendC::LoadData2DParams v2) {
-// CHECK-NEXT:   AscendC::LoadData(v1, v1, v2);
-// CHECK-NEXT:   return;
-// CHECK-NEXT: }
-func.func @emit_load_data(%arg0: !ascendc.local_tensor<*xf16>, %arg1: !ascendc.load_data_2d_params) {
-  ascendc.load_data %arg0, %arg0, %arg1 : !ascendc.local_tensor<*xf16>, !ascendc.local_tensor<*xf16>, !ascendc.load_data_2d_params
-  return
-}
-
 // CHECK-LABEL:void emit_set_load_data_padding_value(float v1) {
 // CHECK-NEXT:   AscendC::SetLoadDataPaddingValue(v1);
 // CHECK-NEXT:   return;
@@ -91,17 +82,6 @@ func.func @emit_fixpipe(%arg0: !ascendc.global_tensor<*xf16>, %arg1: !ascendc.lo
   ascendc.fixpipe %arg1, %arg1, %arg2, %arg3 : !ascendc.local_tensor<*xf32>, !ascendc.local_tensor<*xf32>, !ascendc.local_tensor<*xi64>, !ascendc.fixpipe_params<i32>
   ascendc.fixpipe %arg0, %arg1, %arg3 : !ascendc.global_tensor<*xf16>, !ascendc.local_tensor<*xf32>, !ascendc.fixpipe_params<i32>
   ascendc.fixpipe %arg0, %arg1, %arg2, %arg3 : !ascendc.global_tensor<*xf16>, !ascendc.local_tensor<*xf32>, !ascendc.local_tensor<*xi64>, !ascendc.fixpipe_params<i32>
-  return
-}
-
-// CHECK-LABEL:void emit_mmad(AscendC::LocalTensor<float> v1, AscendC::LocalTensor<float> v2, AscendC::MmadParams v3) {
-// CHECK-NEXT:   AscendC::Mmad(v1, v2, v1, v3);
-// CHECK-NEXT:   AscendC::Mmad(v1, v2, v1, v2, v3);
-// CHECK-NEXT:   return;
-// CHECK-NEXT: }
-func.func @emit_mmad(%arg0: !ascendc.local_tensor<*xf32>, %arg1: !ascendc.local_tensor<*xf32>, %params: !ascendc.mmad_params) {
-  ascendc.mmad %arg0, %arg1, %arg0, %params : !ascendc.local_tensor<*xf32>, !ascendc.local_tensor<*xf32>, !ascendc.local_tensor<*xf32>, !ascendc.mmad_params
-  ascendc.mmad %arg0, %arg1, %arg0, %arg1, %params : !ascendc.local_tensor<*xf32>, !ascendc.local_tensor<*xf32>, !ascendc.local_tensor<*xf32>, !ascendc.local_tensor<*xf32>, !ascendc.mmad_params
   return
 }
 

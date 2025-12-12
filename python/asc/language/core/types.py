@@ -924,3 +924,194 @@ class GatherRepeatParams(IRValue):
 
     def to_ir(self) -> IRHandle:
         return self.handle
+
+
+class LoadData2DParams(IRValue):
+
+    @overload
+    def __init__(
+        self,
+        start_index: int = 0,
+        repeat_times: int = 1,
+        src_stride: int = 0,
+        sid: int = 0,
+        dst_gap: int = 0,
+        if_transpose: bool = False,
+        addr_mode: int = 0,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+        """This constructor should not be called by user"""
+        ...
+
+    def __init__(
+        self,
+        start_index: RuntimeInt = 0,
+        repeat_times: RuntimeInt = 1,
+        src_stride: RuntimeInt = 0,
+        sid: RuntimeInt = 0,
+        dst_gap: RuntimeInt = 0,
+        if_transpose: RuntimeBool = False,
+        addr_mode: RuntimeInt = 0,
+        handle: Optional[IRHandle] = None,
+    ) -> None:
+        if handle is not None:
+            self.handle = handle
+            return
+
+        builder = global_builder.get_ir_builder()
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_LoadData2DParamsType(),
+            [
+                _mat(start_index, KnownTypes.uint16).to_ir(),
+                _mat(repeat_times, KnownTypes.uint8).to_ir(),
+                _mat(src_stride, KnownTypes.uint16).to_ir(),
+                _mat(sid, KnownTypes.uint16).to_ir(),
+                _mat(dst_gap, KnownTypes.uint16).to_ir(),
+                _mat(if_transpose, KnownTypes.int1).to_ir(),
+                _mat(addr_mode, KnownTypes.uint8).to_ir(),
+            ],
+            builder.get_type_array_attr([
+                builder.get_ui16_type(),
+                builder.get_ui8_type(),
+                builder.get_ui16_type(),
+                builder.get_ui16_type(),
+                builder.get_ui16_type(),
+                builder.get_i1_type(),
+                builder.get_ui8_type(),
+            ]),
+        )
+
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> "LoadData2DParams":
+        return cls(handle=handle)
+
+    def to_ir(self) -> IRHandle:
+        return self.handle
+
+
+class LoadData2dTransposeParams(IRValue):
+
+    @overload
+    def __init__(
+        self,
+        start_index: int = 0,
+        repeat_times: int = 1,
+        src_stride: int = 0,
+        dst_gap: int = 0,
+        dst_frac_gap: int = 0,
+        addr_mode: int = 0,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+        """This constructor should not be called by user"""
+        ...
+
+    def __init__(
+        self,
+        start_index: RuntimeInt = 0,
+        repeat_times: RuntimeInt = 1,
+        src_stride: RuntimeInt = 0,
+        dst_gap: RuntimeInt = 0,
+        dst_frac_gap: RuntimeInt = 0,
+        addr_mode: RuntimeInt = 0,
+        handle: Optional[IRHandle] = None,
+    ) -> None:
+        if handle is not None:
+            self.handle = handle
+            return
+
+        builder = global_builder.get_ir_builder()
+
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_LoadData2dTransposeParamsType(),
+            [
+                _mat(start_index, KnownTypes.uint16).to_ir(),
+                _mat(repeat_times, KnownTypes.uint8).to_ir(),
+                _mat(src_stride, KnownTypes.uint16).to_ir(),
+                _mat(dst_gap, KnownTypes.uint16).to_ir(),
+                _mat(dst_frac_gap, KnownTypes.uint16).to_ir(),
+                _mat(addr_mode, KnownTypes.uint8).to_ir(),
+            ],
+            builder.get_type_array_attr([
+                builder.get_ui16_type(),
+                builder.get_ui8_type(),
+                builder.get_ui16_type(),
+                builder.get_ui16_type(),
+                builder.get_ui16_type(),
+                builder.get_ui8_type(),
+            ]),
+        )
+
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> "LoadData2dTransposeParams":
+        return cls(handle=handle)
+
+    def to_ir(self) -> IRHandle:
+        return self.handle
+
+
+class MmadParams(IRValue):
+
+    @overload
+    def __init__(
+        self,
+        m: int,
+        n: int,
+        k: int,
+        unit_flag: int = 0,
+        fm_offset: int = 0,
+        filter_offset: int = 0,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+        ...
+
+    def __init__(
+        self,
+        m: RuntimeInt,
+        n: RuntimeInt,
+        k: RuntimeInt,
+        unit_flag: RuntimeInt = 0,
+        fm_offset: RuntimeInt = 0,
+        filter_offset: RuntimeInt = 0,
+        handle: Optional[IRHandle] = None,
+    ) -> None:
+        if handle is not None:
+            self.handle = handle
+            return
+
+        builder = global_builder.get_ir_builder()
+
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_MmadParamsType(),
+            [
+                _mat(m, KnownTypes.uint16).to_ir(),
+                _mat(n, KnownTypes.uint16).to_ir(),
+                _mat(k, KnownTypes.uint16).to_ir(),
+                _mat(unit_flag, KnownTypes.uint8).to_ir(),
+                _mat(fm_offset, KnownTypes.uint8).to_ir(),
+                _mat(filter_offset, KnownTypes.uint8).to_ir(),
+            ],
+            builder.get_type_array_attr([
+                builder.get_ui16_type(),  # m
+                builder.get_ui16_type(),  # n
+                builder.get_ui16_type(),  # k
+                builder.get_ui8_type(),   # unitFlag
+                builder.get_ui8_type(),   # fmOffset
+                builder.get_ui8_type(),   # filterOffset
+            ]),
+        )
+
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> "MmadParams":
+        return cls(handle=handle)
+
+    def to_ir(self) -> IRHandle:
+        return self.handle

@@ -33,9 +33,12 @@ Common operations
     get_system_cycle
     get_sys_workspace
     icache_preload
+    load_data
+    load_data_with_transpose
     load_image_to_local
     metrics_prof_start
     metrics_prof_stop
+    mmad
     pipe_barrier
     printf
     proposal_concat
