@@ -92,6 +92,10 @@ class TQueBind(IRValue):
     def deque(self, tensor: LocalTensor) -> None:
         ...
     
+    @overload
+    def deque(self, dtype: DataType, src_user_pos: TPosition, dst_user_pos: TPosition) -> LocalTensor:
+        ...
+
     @require_jit
     @set_tpipe_docstring(pipe_name="TQueBind", api_name="deque")
     def deque(self, *args, **kwargs) -> Optional[LocalTensor]:
@@ -108,6 +112,12 @@ class TQueBind(IRValue):
         def _(tensor: LocalTensor):
             builder.create_asc_TQueBindDequeTensorInPlaceOp(self.to_ir(), tensor.to_ir())
 
+        @dispatcher.register(dtype=DataType, src_user_pos=TPosition, dst_user_pos=TPosition)
+        def _(dtype: DataType, src_user_pos: TPosition, dst_user_pos: TPosition):
+            tensor_type = ir.get_local_tensor_type(dtype.to_ir())
+            handle = builder.create_asc_TQueBindDequeTensorPosOp(tensor_type, self.to_ir(), \
+                        ir.TPosition.symbolize(src_user_pos), ir.TPosition.symbolize(dst_user_pos))
+            return LocalTensor(handle=handle, dtype=dtype, shape=None)
         return dispatcher(*args, **kwargs)
 
     @require_jit

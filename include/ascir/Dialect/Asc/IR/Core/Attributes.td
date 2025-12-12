@@ -387,9 +387,9 @@ def AscendC_TPositionAttr : I32EnumAttr<"TPosition", "queue/buffer position", [
   I32EnumAttrCase<"C2", 6, "c2">,
   I32EnumAttrCase<"CO1", 7, "co1">,
   I32EnumAttrCase<"CO2", 8, "co2">,
-  I32EnumAttrCase<"VECIN", 9, "vec_in">,
-  I32EnumAttrCase<"VECOUT", 10, "vec_out">,
-  I32EnumAttrCase<"VECCALC", 11, "vec_calc">,
+  I32EnumAttrCase<"VECIN", 9, "vecin">,
+  I32EnumAttrCase<"VECOUT", 10, "vecout">,
+  I32EnumAttrCase<"VECCALC", 11, "veccalc">,
 ]> {
   let cppNamespace = "::mlir::ascendc";
   let description = "Represents AscendC::TPosition";

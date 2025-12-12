@@ -56,3 +56,16 @@ func.func @emit_vector_binary_l2_ops(%dst: !ascendc.local_tensor<1024xf32>, %src
   ascendc.sub_relu_cast_l2 %dst, %src0, %src1, %calCount_i32 : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, i32
   return
 }
+
+// CHECK-LABEL:void emit_set_deq_scale(half v1, float v2, int16_t v3) {
+// CHECK-NEXT:   constexpr bool c0_i1 = false;
+// CHECK-NEXT:   AscendC::SetDeqScale(v1);
+// CHECK-NEXT:   AscendC::SetDeqScale(v2, v3, c0_i1);
+// CHECK-NEXT:   return;
+// CHECK-NEXT: }
+func.func @emit_set_deq_scale(%arg0: f16, %arg1: f32, %arg2: i16) {
+  %false = arith.constant false
+  ascendc.set_deq_scale %arg0 : f16
+  ascendc.set_deq_scale %arg1, %arg2, %false : f32, i16, i1
+  return
+}

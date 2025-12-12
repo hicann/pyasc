@@ -26,8 +26,8 @@ func.func @emit_proposal_concat(%arg0: memref<?xui64, 22>) {
   %c0 = "emitc.constant"() <{value = 0 : ui32}> : () -> ui32
   %c2_i32 = arith.constant 2 : i32
   %c4_i32 = arith.constant 4 : i32
-  %dst = ascendc.local_tensor_v2 vec_out, %c0, %c256 : !ascendc.local_tensor<*xf16>
-  %src = ascendc.local_tensor_v2 vec_in, %c0, %c256 : !ascendc.local_tensor<*xf16>
+  %dst = ascendc.local_tensor_v2 vecout, %c0, %c256 : !ascendc.local_tensor<*xf16>
+  %src = ascendc.local_tensor_v2 vecin, %c0, %c256 : !ascendc.local_tensor<*xf16>
   ascendc.proposal_concat %dst, %src, %c2_i32, %c4_i32 : !ascendc.local_tensor<*xf16>, !ascendc.local_tensor<*xf16>, i32, i32
   return
 }
@@ -50,8 +50,8 @@ func.func @emit_proposal_extract(%arg0: memref<?xui64, 22>) {
   %c0 = "emitc.constant"() <{value = 0 : ui32}> : () -> ui32
   %c2_i32 = arith.constant 2 : i32
   %c4_i32 = arith.constant 4 : i32
-  %dst = ascendc.local_tensor_v2 vec_out, %c0, %c256 : !ascendc.local_tensor<*xf16>
-  %src = ascendc.local_tensor_v2 vec_in, %c0, %c256 : !ascendc.local_tensor<*xf16>
+  %dst = ascendc.local_tensor_v2 vecout, %c0, %c256 : !ascendc.local_tensor<*xf16>
+  %src = ascendc.local_tensor_v2 vecin, %c0, %c256 : !ascendc.local_tensor<*xf16>
   ascendc.proposal_extract %dst, %src, %c2_i32, %c4_i32 : !ascendc.local_tensor<*xf16>, !ascendc.local_tensor<*xf16>, i32, i32
   return
 }

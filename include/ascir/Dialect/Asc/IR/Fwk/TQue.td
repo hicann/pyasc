@@ -58,6 +58,17 @@ def AscendC_TQueBindDequeTensorInPlaceOp : APIOp<"que_bind.deque_tensor_in_place
   }];
 }
 
+def AscendC_TQueBindDequeTensorPosOp : APIOp<"que_bind.deque_tensor_pos", "DeQue"> {
+  let summary = "Pop tensor out from queue";
+  let arguments = (ins AscendC_BaseQueueTypeInterface:$queue,
+                       AscendC_TPositionAttr:$srcUserPos, AscendC_TPositionAttr:$dstUserPos);
+  let results = (outs AscendC_LocalTensor:$tensor);
+  let assemblyFormat = [{
+    $queue `,` $srcUserPos `,` $dstUserPos attr-dict `:` qualified(type($queue)) `,`
+    qualified(type($tensor))
+  }];
+}
+
 def AscendC_TQueBindDestroyOp : APIOp<"que_bind.destroy", "Destroy", [AscMemberFunc]> {
   let summary = "Push tensor back to queue";
   let arguments = (ins AscendC_BaseQueueTypeInterface:$queue);

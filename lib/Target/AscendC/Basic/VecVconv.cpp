@@ -77,17 +77,3 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CastD
     printUnaryL2Params(emitter, op);
     return success();
 }
-
-LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::SetDeqScaleOp op)
-{
-    auto &os = emitter.ostream();
-    os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getScale());
-    if (auto Offset = op.getOffset()) {
-        os << ", " << emitter.getOrCreateName(Offset);
-    }
-    if (auto SignMode = op.getOffset()) {
-        os << ", " << emitter.getOrCreateName(SignMode);
-    }
-    os << ")";
-    return success();
-}

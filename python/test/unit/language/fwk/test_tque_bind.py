@@ -46,9 +46,9 @@ def test_deque(mock_launcher_run):
 
     @asc.jit
     def kernel_deque() -> None:
-        que = TQueBind(src=asc.TPosition.VECIN, dst=asc.TPosition.VECIN, depth=1)
+        que = TQueBind(src=asc.TPosition.VECIN, dst=asc.TPosition.VECOUT, depth=1)
         que.deque(asc.float16)
-
+        que.deque(asc.float16, asc.TPosition.GM, asc.TPosition.VECIN)
         que_in_place = TQueBind(src=asc.TPosition.VECIN, dst=asc.TPosition.VECIN, depth=0)
         y_local = asc.LocalTensor(asc.float32)
         que_in_place.deque(y_local) 

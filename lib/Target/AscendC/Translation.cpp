@@ -207,7 +207,7 @@ using PrintableOpTypes = std::tuple<
     ascendc::RsqrtL2Op, ascendc::SqrtL2Op, ascendc::NegL2Op,
     // VecVcon (Type conversion) operations
     ascendc::CastL0Op, ascendc::CastL1Op, ascendc::CastL2Op, ascendc::CastDeqL0Op, ascendc::CastDeqL1Op,
-    ascendc::CastDeqL2Op, ascendc::SetDeqScaleOp,
+    ascendc::CastDeqL2Op,
     // Vector gatherMask operations
     ascendc::GatherMaskOp, ascendc::GetGatherMaskRemainCountOp,
 
@@ -222,7 +222,8 @@ using PrintableOpTypes = std::tuple<
 
     // Fwk
     // BaseQueue operations (TQue, TQueBind)
-    ascendc::TQueBindAllocTensorOp, ascendc::TQueBindAllocTensorInPlaceOp, ascendc::TQueBindDequeTensorOp,
+    ascendc::TQueBindAllocTensorOp, ascendc::TQueBindAllocTensorInPlaceOp,
+    ascendc::TQueBindDequeTensorOp, ascendc::TQueBindDequeTensorPosOp,
     ascendc::TQueBindDequeTensorInPlaceOp, ascendc::TQueBindEnqueTensorPosOp, ascendc::ToQueBindOp,
     // Buffer operations (TBuf)
     ascendc::TBufGetTensorOp, ascendc::TBufGetWithOffsetOp,
