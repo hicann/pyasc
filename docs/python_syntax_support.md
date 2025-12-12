@@ -309,8 +309,10 @@
 
   - 示例
   
+    以下示例的kernel函数是@asc.jit修饰的核函数，func函数是@asc.jit修饰的Device侧执行函数。核函数和Device侧执行函数的定义请参考[pyasc模块与架构-编译运行模块](https://gitcode.com/cann/pyasc-dev/blob/master/docs/architecture_introduction.md#%E7%BC%96%E8%AF%91%E5%92%8C%E8%BF%90%E8%A1%8C%E6%A8%A1%E5%9D%97)和[《Ascend C编程指南》](https://www.hiascend.com/document/redirect/CANNCommunityOpdevAscendc)中的“核函数”章节。
+ 
     ```python
-    # 不支持从JIT内核直接返回
+    # 不支持从核函数直接返回
     @asc.jit
     def kernel(x):
         return x * 2 # 不支持
@@ -319,20 +321,20 @@
         kernel[...](...)
     ```
     ```python
-    # 支持Kernel函数调用其他JIT函数并获取其返回值
+    # 支持核函数调用其他Device侧执行函数并获取其返回值
     @asc.jit
-    def func() -> int:
+    def func() -> int: # Device侧执行函数
         return 2 # 支持
     
     @asc.jit
-    def kernel():
+    def kernel(): # 核函数
         x = func() # 支持
     
     def launch():
         kernel[...](...)
     ```
   
-  - 注意：return 作为顶层语句是支持的，但不能嵌套在if、for等结构中，且不能从JIT内核中返回对象，但是可以从其他JIT函数中返回。
+  - 注意：return 作为顶层语句是支持的，但不能嵌套在if、for等结构中，且不能从核函数中返回对象，但是可以从其他Device侧执行函数中返回。
   
 - continue语句
   
