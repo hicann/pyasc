@@ -88,9 +88,7 @@ def generate_tiling(m, n, k, dtype):
 
 
 param_list = [
-    # [torch.float32, (1024, 256, 512)],
     [torch.float16, (256, 64, 128)],
-    # [torch.int8, (64, 64, 64)],
 ]
 
 

@@ -262,7 +262,7 @@ class GlobalTensorDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, "", "", py_example
+        return [func_introduction, cpp_signature, param_list, "", "", py_example]
     
     @staticmethod
     def get_phy_addr_docstring():
@@ -295,7 +295,7 @@ class GlobalTensorDocstring:
         全局数据的地址。
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, "", ""
+        return [func_introduction, cpp_signature, param_list, return_list, "", ""]
 
     @staticmethod
     def get_value_docstring():
@@ -324,7 +324,7 @@ class GlobalTensorDocstring:
         返回PrimType类型的立即数。
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, "", ""
+        return [func_introduction, cpp_signature, param_list, return_list, "", ""]
 
     @staticmethod
     def set_value_docstring():
@@ -354,7 +354,7 @@ class GlobalTensorDocstring:
         如果get_value的Global Memory地址内容存在被外部改写的可能，需要先调用data_cache_clean_and_invalid，确保Data Cache与Global Memory的Cache一致性，之后再调用此接口。
         """
 
-        return func_introduction, cpp_signature, param_list, "", constraint_list, ""
+        return [func_introduction, cpp_signature, param_list, "", constraint_list, ""]
 
     @staticmethod
     def get_size_docstring():
@@ -389,7 +389,7 @@ class GlobalTensorDocstring:
         使用仅传入全局数据指针的set_global_buffer接口对GlobalTensor进行初始化，通过本接口获取到的元素个数为0。
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, ""
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, ""]
 
     @staticmethod
     def set_shape_info_docstring():
@@ -412,7 +412,7 @@ class GlobalTensorDocstring:
         - shape_info：ShapeInfo结构体。
         """
 
-        return func_introduction, cpp_signature, param_list, "", "", ""
+        return [func_introduction, cpp_signature, param_list, "", "", ""]
     
     @staticmethod
     def get_shape_info_docstring():
@@ -441,7 +441,7 @@ class GlobalTensorDocstring:
         GlobalTensor的shape信息，ShapeInfo类型。
         """
         
-        return func_introduction, cpp_signature, param_list, return_list, "", ""
+        return [func_introduction, cpp_signature, param_list, return_list, "", ""]
     
     @staticmethod
     def set_l2_cache_hint_docstring():
@@ -486,7 +486,7 @@ class GlobalTensorDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 class LocalTensorDocstring:
@@ -536,7 +536,7 @@ class LocalTensorDocstring:
                 
         """
 
-        return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
     
     @staticmethod
     def get_value_docstring():
@@ -578,7 +578,7 @@ class LocalTensorDocstring:
                 
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, "", py_example
+        return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
     @staticmethod
     def set_size_docstring():
@@ -612,7 +612,7 @@ class LocalTensorDocstring:
                 
         """
 
-        return func_introduction, cpp_signature, param_list, "", "", py_example
+        return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
     @staticmethod
     def get_size_docstring():
@@ -650,7 +650,7 @@ class LocalTensorDocstring:
                 
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, "", py_example
+        return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
     @staticmethod
     def set_user_tag_docstring():
@@ -683,7 +683,7 @@ class LocalTensorDocstring:
                 
         """
 
-        return func_introduction, cpp_signature, param_list, "", "", py_example
+        return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
     @staticmethod
     def get_user_tag_docstring():
@@ -728,7 +728,7 @@ class LocalTensorDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, "", py_example
+        return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
     
     @staticmethod
     def reinterpret_cast_docstring():
@@ -768,7 +768,7 @@ class LocalTensorDocstring:
                     
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, "", py_example
+        return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
     
     @staticmethod
     def get_phy_addr_docstring():
@@ -807,7 +807,7 @@ class LocalTensorDocstring:
                     
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, "", py_example
+        return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
     
     @staticmethod
     def get_position_docstring():
@@ -851,7 +851,7 @@ class LocalTensorDocstring:
                     
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, "", py_example
+        return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
     @staticmethod
     def get_length_docstring():
@@ -890,7 +890,7 @@ class LocalTensorDocstring:
                     
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, "", py_example
+        return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
     
     @staticmethod
     def set_shape_info_docstring():
@@ -924,7 +924,7 @@ class LocalTensorDocstring:
                     
         """
 
-        return func_introduction, cpp_signature, param_list, "", "", py_example
+        return [func_introduction, cpp_signature, param_list, "", "", py_example]
     
     @staticmethod
     def get_shape_info_docstring():
@@ -962,7 +962,7 @@ class LocalTensorDocstring:
                     
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, "", py_example
+        return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
     
     @staticmethod
     def set_addr_with_offset_docstring():
@@ -999,7 +999,7 @@ class LocalTensorDocstring:
                     
         """
 
-        return func_introduction, cpp_signature, param_list, "", "", py_example
+        return [func_introduction, cpp_signature, param_list, "", "", py_example]
     
     @staticmethod
     def set_buffer_len_docstring():
@@ -1033,7 +1033,7 @@ class LocalTensorDocstring:
                     
         """
 
-        return func_introduction, cpp_signature, param_list, "", "", py_example
+        return [func_introduction, cpp_signature, param_list, "", "", py_example]
     
     @staticmethod
     def to_file_docstring():
@@ -1072,7 +1072,7 @@ class LocalTensorDocstring:
                     
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, "", py_example
+        return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
     
     @staticmethod
     def print_docstring():
@@ -1108,7 +1108,7 @@ class LocalTensorDocstring:
                     
         """
 
-        return func_introduction, cpp_signature, param_list, "", "", py_example
+        return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
 DOC_HANDLERS = {

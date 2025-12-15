@@ -127,7 +127,7 @@ def test_enable_multi_core_split_k(asc_platform):
     matmul_tiling = host.MultiCoreMatmulTiling(asc_platform)
     matmul_tiling.set_shape(32, 32, 32)
     ret = matmul_tiling.enable_multi_core_split_k(True)
-    assert ret == None
+    assert ret is None
 
 
 def test_set_org_shape(asc_platform):
@@ -273,14 +273,14 @@ def test_set_matmul_config_params_init(asc_platform):
     matmul_config_params = host.MatmulConfigParams(1, False, host.ScheduleType.OUTER_PRODUCT,
                                                    host.MatrixTraverse.FIRSTM, False)
     ret = matmul_tiling.set_matmul_config_params(matmul_config_params)
-    assert ret == None
+    assert ret is None
 
 
 def test_set_matmul_config_params(asc_platform):
     matmul_tiling = host.MultiCoreMatmulTiling(asc_platform)
     matmul_tiling.set_shape(32, 256, 64)
     ret = matmul_tiling.set_matmul_config_params(1, False, host.ScheduleType.OUTER_PRODUCT, host.MatrixTraverse.FIRSTM)
-    assert ret == None
+    assert ret is None
 
 
 def test_set_sparse(asc_platform):

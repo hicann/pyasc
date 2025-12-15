@@ -84,7 +84,7 @@ class TQueBindDocstring:
                     
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
     
     @staticmethod
     def free_tensor_docstring():
@@ -124,7 +124,7 @@ class TQueBindDocstring:
                     
         """
 
-        return func_introduction, cpp_signature, param_list, "", "", py_example
+        return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
     @staticmethod
     def enque_docstring():
@@ -171,7 +171,7 @@ class TQueBindDocstring:
                     
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, "", py_example
+        return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
     
     @staticmethod
     def deque_docstring():
@@ -246,7 +246,7 @@ class TQueBindDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
     
     @staticmethod
     def vacant_in_que_docstring():
@@ -306,7 +306,7 @@ class TQueBindDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
     
     @staticmethod
     def has_tensor_in_que_docstring():
@@ -356,7 +356,7 @@ class TQueBindDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
     @staticmethod
     def get_tensor_count_in_que_docstring():
@@ -408,7 +408,7 @@ class TQueBindDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
     @staticmethod
     def has_idle_buffer_docstring():
@@ -465,7 +465,7 @@ class TQueBindDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
     
     @staticmethod
     def free_all_event_docstring():
@@ -513,7 +513,7 @@ class TQueBindDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
     
     @staticmethod
     def init_buf_handle_docstring():
@@ -559,7 +559,7 @@ class TQueBindDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
     
     @staticmethod
     def init_start_buf_handle_docstring():
@@ -602,7 +602,7 @@ class TQueBindDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 class TBufDocstring:
@@ -667,7 +667,7 @@ class TBufDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
     @staticmethod
     def get_with_offset_docstring():
@@ -721,7 +721,7 @@ class TBufDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
 
 class TBufPoolDocstring:
@@ -805,7 +805,7 @@ class TBufPoolDocstring:
                 pipe.reset()
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
     @staticmethod
     def init_buffer_docstring():
@@ -874,7 +874,7 @@ class TBufPoolDocstring:
                 pipe.reset()
         """
 
-        return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
     
     @staticmethod
     def reset_docstring():
@@ -932,7 +932,7 @@ class TBufPoolDocstring:
                 pipe.reset()
         """
 
-        return func_introduction, cpp_signature, param_list, "", "", py_example
+        return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
 class TPipeDocstring:
@@ -988,7 +988,7 @@ class TPipeDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
     @staticmethod
     def destroy_docstring():
@@ -1031,7 +1031,7 @@ class TPipeDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
     @staticmethod
     def init_buffer_docstring():
@@ -1092,7 +1092,7 @@ class TPipeDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
     @staticmethod
     def reset_docstring():
@@ -1132,7 +1132,7 @@ class TPipeDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, "", "", py_example
+        return [func_introduction, cpp_signature, param_list, "", "", py_example]
     
     @staticmethod
     def alloc_event_id_docstring():
@@ -1181,7 +1181,7 @@ class TPipeDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
     @staticmethod
     def release_event_id_docstring():
@@ -1225,7 +1225,7 @@ class TPipeDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
     
     @staticmethod
     def fetch_event_id_docstring():
@@ -1274,7 +1274,7 @@ class TPipeDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
     @staticmethod
     def get_base_addr_docstring():
@@ -1313,7 +1313,7 @@ class TPipeDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, return_list, "", py_example
+        return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
     @staticmethod
     def init_buf_pool_docstring():
@@ -1364,7 +1364,7 @@ class TPipeDocstring:
 
         """
 
-        return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 class TQueDocstring:
@@ -1402,7 +1402,7 @@ class TQueDocstring:
             que.alloc_tensor(asc.half, tensor)
                     
         """
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
     @staticmethod
     def free_tensor_docstring():
@@ -1422,7 +1422,7 @@ class TQueDocstring:
             que.free_tensor(tensor)
                     
         """
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
     @staticmethod
     def enque_docstring():
@@ -1442,7 +1442,7 @@ class TQueDocstring:
             que.enque(tensor)
                     
         """
-        return func_introduction, cpp_signature, param_list, return_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, py_example]
 
     @staticmethod
     def deque_docstring():
@@ -1479,7 +1479,7 @@ class TQueDocstring:
               que.free_tensor(tensor1)
 
         """
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
     @staticmethod
     def vacant_in_que_docstring():
@@ -1508,7 +1508,7 @@ class TQueDocstring:
             ret = que.vacant_in_que()   # 返回False，继续入队操作将报错
 
         """
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
     @staticmethod
     def has_tensor_in_que_docstring():
@@ -1527,7 +1527,7 @@ class TQueDocstring:
             ret = que.has_tensor_in_que()
 
         """
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
     @staticmethod
     def get_tensor_count_in_que_docstring():
@@ -1549,7 +1549,7 @@ class TQueDocstring:
             num = que.get_tensor_count_in_que()
 
         """
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
     @staticmethod
     def has_idle_buffer_docstring():
@@ -1575,7 +1575,7 @@ class TQueDocstring:
             ret = que.has_idle_buffer() # alloc_tensor了四块内存，当前无空闲内存，返回值为False，继续alloc_tensor会报错
 
         """
-        return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
 
 DOC_HANDLERS = {

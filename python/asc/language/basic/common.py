@@ -11,7 +11,7 @@ from typing import overload
 from ..._C import ir
 from ..core.dtype import DataType, KnownTypes, KnownTypes as KT
 from ..core.enums import MaskMode, TPosition
-from ..core.ir_value import GlobalAddress, PlainValue, materialize_ir_value as _mat, RuntimeInt
+from ..core.ir_value import GlobalAddress, PlainValue, materialize_ir_value as _mat, RuntimeBool, RuntimeInt
 from ..core.tensor import LocalTensor, GlobalTensor
 from ..core.aipp_types import AippParams
 from ..core.enums import AippInputFormat
@@ -95,67 +95,12 @@ def set_aipp_functions(*args, **kwargs) -> None:
 
 
 @overload
-def set_atomic_add() -> None:
-    ...
-
-
-@require_jit
-@set_common_docstring(api_name="set_atomic_add")
-def set_atomic_add(dtype: DataType) -> None:
-    builder = global_builder.get_ir_builder()
-    builder.create_asc_SetAtomicAddOp(dtype.to_ir())
-
-
-@overload
-def set_atomic_max() -> None:
-    ...
-
-
-@require_jit
-@set_common_docstring(api_name="set_atomic_max")
-def set_atomic_max(dtype: DataType) -> None:
-    builder = global_builder.get_ir_builder()
-    builder.create_asc_SetAtomicMaxOp(dtype.to_ir())
-
-
-@overload
-def set_atomic_min() -> None:
-    ...
-
-
-@require_jit
-@set_common_docstring(api_name="set_atomic_min")
-def set_atomic_min(dtype: DataType) -> None:
-    builder = global_builder.get_ir_builder()
-    builder.create_asc_SetAtomicMinOp(dtype.to_ir())
-
-
-@overload
-def set_atomic_none() -> None:
-    ...
-
-
-@require_jit
-@set_common_docstring(api_name="set_atomic_none")
-def set_atomic_none() -> None:
-    builder = global_builder.get_ir_builder()
-    builder.create_asc_SetAtomicNoneOp()
-
-
-@overload
-def set_atomic_type() -> None:
-    ...
-
-
-@require_jit
-@set_common_docstring(api_name="set_atomic_type")
-def set_atomic_type(dtype: DataType) -> None:
-    builder = global_builder.get_ir_builder()
-    builder.create_asc_SetAtomicTypeOp(dtype.to_ir())
-
-
-@require_jit
 def set_hccl_context(index: int, context: GlobalAddress) -> None:
+    ...
+
+
+@require_jit
+def set_hccl_context(index: RuntimeInt, context: GlobalAddress) -> None:
     builder = global_builder.get_ir_builder()
     idx_ir = _mat(index, KnownTypes.uint32).to_ir()
     builder.create_asc_SetHcclContextOp(idx_ir, context.to_ir())
@@ -167,7 +112,7 @@ def set_hf32_mode(hf32_mode: bool) -> None:
 
 
 @require_jit
-def set_hf32_mode(hf32_mode: bool) -> None:
+def set_hf32_mode(hf32_mode: RuntimeBool) -> None:
     builder = global_builder.get_ir_builder()
     hf32_mode = _mat(hf32_mode)
     builder.create_asc_SetHF32ModeOp(hf32_mode.to_ir())
@@ -179,7 +124,7 @@ def set_hf32_trans_mode(trans_mode: bool) -> None:
 
 
 @require_jit
-def set_hf32_trans_mode(trans_mode: bool) -> None:
+def set_hf32_trans_mode(trans_mode: RuntimeBool) -> None:
     builder = global_builder.get_ir_builder()
     trans_mode = _mat(trans_mode)
     builder.create_asc_SetHF32TransModeOp(trans_mode.to_ir())
@@ -191,7 +136,7 @@ def set_mm_layout_transform(mm_layout_mode: bool) -> None:
 
 
 @require_jit
-def set_mm_layout_transform(mm_layout_mode: bool) -> None:
+def set_mm_layout_transform(mm_layout_mode: RuntimeBool) -> None:
     builder = global_builder.get_ir_builder()
     mm_layout_mode = _mat(mm_layout_mode)
     builder.create_asc_SetMMLayoutTransformOp(mm_layout_mode.to_ir())

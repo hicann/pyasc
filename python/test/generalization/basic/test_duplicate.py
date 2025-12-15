@@ -64,8 +64,6 @@ param_list = [
     [torch.float16, (2048,)],
     [torch.int32, (8192,)],
     [torch.int16, (8192,)],
-    # [torch.uint32, (8192,)],
-    # [torch.uint16, (8192,)],
 ]
 
 

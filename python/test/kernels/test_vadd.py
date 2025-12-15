@@ -30,12 +30,7 @@ def vadd_kernel(x: asc.GlobalAddress, y: asc.GlobalAddress, z: asc.GlobalAddress
     pipe.init_buffer(que=in_queue_x, num=BUFFER_NUM, len=TILE_LENGTH * x.dtype.sizeof())
     pipe.init_buffer(que=in_queue_y, num=BUFFER_NUM, len=TILE_LENGTH * y.dtype.sizeof())
     pipe.init_buffer(que=out_queue_z, num=BUFFER_NUM, len=TILE_LENGTH * z.dtype.sizeof())
-    # example for printf and dump_tensor
-    # tmp_array = asc.array(asc.uint32, [8, 16])
-    # tmp_shape_info = asc.ShapeInfo(tmp_array)
-    # asc.dump_tensor(x_gm, 0, 64, tmp_shape_info)
     for i in range(TILE_NUM):
-        # asc.printf("current index is %d.\\n", i)
         copy_in(i, x_gm, y_gm, in_queue_x, in_queue_y, TILE_LENGTH)
         compute(z_gm, in_queue_x, in_queue_y, out_queue_z, TILE_LENGTH)
         copy_out(i, z_gm, out_queue_z, TILE_LENGTH)
@@ -48,9 +43,6 @@ def copy_in(i: int, x_gm: asc.GlobalAddress, y_gm: asc.GlobalAddress, in_queue_x
     y_local = in_queue_y.alloc_tensor(y_gm.dtype)
     asc.data_copy(x_local, x_gm[i * TILE_LENGTH:], count=TILE_LENGTH)
     asc.data_copy(y_local, y_gm[i * TILE_LENGTH:], count=TILE_LENGTH)
-    # example for dump local tensor
-    # if i == 0:
-    #     asc.dump_tensor(x_local, 1, 128)
     in_queue_x.enque(x_local)
     in_queue_y.enque(y_local)
 
