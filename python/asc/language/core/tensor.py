@@ -245,7 +245,7 @@ class LocalTensor(BaseTensor):
             builder = global_builder.get_ir_builder()
             self.shape = None
             self.handle = builder.create_asc_LocalTensorV2Op(ir.get_local_tensor_type(dtype.to_ir()), \
-                    ir.TPosition.symbolize(pos), _mat(addr, KnownTypes.uint32).to_ir(),\
+                    ir.TPosition.symbolize(pos), _mat(addr, KnownTypes.uint32).to_ir(),               \
                      _mat(tile_size, KnownTypes.uint32).to_ir())
         
         @dispatcher.register(dtype=DataType)

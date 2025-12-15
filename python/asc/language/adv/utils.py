@@ -53,7 +53,7 @@ def set_quant_scalar_docstring():
         mm.iterate_all(gm_c)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def set_quant_vector_docstring():
@@ -99,7 +99,7 @@ def set_quant_vector_docstring():
         mm.iterate_all(gm_c)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def set_org_shape_docstring():
@@ -155,7 +155,7 @@ def set_org_shape_docstring():
         mm.iterate_all(gm_c1)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def set_single_shape_docstring():
@@ -194,7 +194,7 @@ def set_single_shape_docstring():
         mm.iterate_all(gm_c)
     """
 
-    return func_introduction, cpp_signature, param_list, "", "", py_example
+    return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
 def set_self_define_data_docstring():
@@ -243,7 +243,7 @@ def set_self_define_data_docstring():
         mm.iterate_all()
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def set_sparse_index_docstring():
@@ -290,7 +290,7 @@ def set_sparse_index_docstring():
             mm.iterate_all(gm_c)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def set_user_def_info_docstring():
@@ -331,7 +331,7 @@ def set_user_def_info_docstring():
         mm.iterate_all()
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def get_matmul_api_tiling_docstring():
@@ -388,7 +388,7 @@ def get_matmul_api_tiling_docstring():
         mm = asc.adv.Matmul(a_type, b_type, c_type, bias_type, static_tiling)
     """
 
-    return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
 
 def iterate_n_batch_docstring():
@@ -480,7 +480,7 @@ def iterate_n_batch_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def end_docstring():
@@ -513,7 +513,7 @@ def end_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", "", py_example
+    return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
 def set_hf32_docstring():
@@ -559,7 +559,7 @@ def set_hf32_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def set_tail_docstring():
@@ -598,7 +598,7 @@ def set_tail_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", "", py_example
+    return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
 def set_batch_num_docstring():
@@ -646,7 +646,7 @@ def set_batch_num_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def set_workspace_docstring():
@@ -698,7 +698,7 @@ def set_workspace_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def wait_get_tensor_c_docstring():
@@ -741,7 +741,7 @@ def wait_get_tensor_c_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def get_offset_c_docstring():
@@ -777,7 +777,7 @@ def get_offset_c_docstring():
         };
     """
 
-    return func_introduction, cpp_signature, param_list, return_list, "", ""
+    return [func_introduction, cpp_signature, param_list, return_list, "", ""]
 
 
 def async_get_tensor_c_docstring():
@@ -807,7 +807,7 @@ def async_get_tensor_c_docstring():
     - 当使能MixDualMaster（双主模式）场景时，即模板参数enableMixDualMaster设置为true，不支持使用该接口。
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, ""
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, ""]
 
 
 def get_tensor_c_docstring():
@@ -906,7 +906,7 @@ def get_tensor_c_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def iterate_docstring():
@@ -960,7 +960,7 @@ def iterate_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def iterate_all_docstring():
@@ -1013,7 +1013,7 @@ def iterate_all_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def wait_iterate_all_docstring():
@@ -1058,7 +1058,7 @@ def wait_iterate_all_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def iterate_batch_docstring():
@@ -1163,7 +1163,7 @@ def iterate_batch_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def wait_iterate_batch_docstring():
@@ -1209,7 +1209,7 @@ def wait_iterate_batch_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def get_batch_tensor_c_docstring():
@@ -1266,7 +1266,7 @@ def get_batch_tensor_c_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def set_tensor_a_docstring():
@@ -1323,7 +1323,7 @@ def set_tensor_a_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def set_tensor_b_docstring():
@@ -1375,7 +1375,7 @@ def set_tensor_b_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def set_bias_docstring():
@@ -1422,7 +1422,7 @@ def set_bias_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def disable_bias_docstring():
@@ -1458,7 +1458,7 @@ def disable_bias_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", "", py_example
+    return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
 def get_basic_config_docstring():
@@ -1515,7 +1515,7 @@ def get_basic_config_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+    return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
 
 def get_special_basic_config_docstring():
@@ -1570,7 +1570,7 @@ def get_special_basic_config_docstring():
     MatmulConfig结构体。
     """
 
-    return func_introduction, cpp_signature, param_list, return_list, "", ""
+    return [func_introduction, cpp_signature, param_list, return_list, "", ""]
 
 
 def get_normal_config_docstring():
@@ -1638,7 +1638,7 @@ def get_normal_config_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+    return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
 
 def get_mdl_config_docstring():
@@ -1714,7 +1714,7 @@ def get_mdl_config_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+    return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
 
 def get_special_mdl_config_docstring():
@@ -1773,7 +1773,7 @@ def get_special_mdl_config_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+    return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
 
 def get_ib_share_norm_config_docstring():
@@ -1837,7 +1837,7 @@ def get_ib_share_norm_config_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+    return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
 
 def get_mm_config_docstring():
@@ -1956,7 +1956,7 @@ def get_mm_config_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+    return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
 
 def get_init_docstring():
@@ -1990,7 +1990,7 @@ def get_init_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", "", py_example
+    return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
 def set_regist_matmul_docstring():
@@ -2037,7 +2037,7 @@ def set_regist_matmul_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 DOC_HANDLES = {
@@ -2272,7 +2272,7 @@ def concat_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def extract_docstring():
@@ -2319,7 +2319,7 @@ def extract_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def set_sort_docstring(api_name: Optional[str] = None) -> Callable[[T], T]:
@@ -2337,13 +2337,13 @@ def set_sort_docstring(api_name: Optional[str] = None) -> Callable[[T], T]:
         raise RuntimeError(f"Invalid sort api name {api_name}")
 
     docstr = f"""
-{func_introduction}
-{cpp_signature}
-{param_list}
-{return_list}
-{constraint_list}
-{py_example}
-"""
+    {func_introduction}
+    {cpp_signature}
+    {param_list}
+    {return_list}
+    {constraint_list}
+    {py_example}
+    """
 
     def decorator(fn: T) -> T:
         fn.__doc__ = docstr

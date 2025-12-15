@@ -13,6 +13,7 @@ from .block_sync import (
     set_flag,
     wait_flag,
 )
+from .cache import data_cache_clean_and_invalid, get_icache_preload_status, icache_preload
 from .common import (
     ascend_is_aic,
     ascend_is_aiv,
@@ -20,11 +21,6 @@ from .common import (
     get_sys_workspace,
     reset_mask,
     set_aipp_functions,
-    set_atomic_add,
-    set_atomic_max,
-    set_atomic_min,
-    set_atomic_none,
-    set_atomic_type,
     set_hccl_context,
     set_hf32_mode,
     set_hf32_trans_mode,
@@ -34,19 +30,24 @@ from .common import (
     set_sys_workspace,
     set_vector_mask,
 )
-from .data_cache import data_cache_clean_and_invalid, get_icache_preload_status, icache_preload
-from .data_conversion import transpose, trans_data_to_5hd
 from .data_copy import copy, data_copy, data_copy_pad, load_image_to_local
 from .dump_tensor import (
+    dump_acc_chk_point, 
     dump_tensor, 
     printf, 
     print_time_stamp, 
-    dump_acc_chk_point, 
     metrics_prof_start, 
     metrics_prof_stop,
 )
 from .mm import load_data, load_data_with_transpose, mmad
 from .scalar import scalar_cast, scalar_get_sff_value
+from .set_atomic import (
+    set_atomic_add,
+    set_atomic_max,
+    set_atomic_min,
+    set_atomic_none,
+    set_atomic_type,
+)
 from .sys_var import (
     get_arch_version,
     get_block_idx,
@@ -110,6 +111,7 @@ from .vec_reduce import (
 )
 from .vec_scatter import scatter
 from .vec_ternary_scalar import axpy
+from .vec_transpose import transpose, trans_data_to_5hd
 from .vec_unary import (
     abs,
     exp,
@@ -122,9 +124,9 @@ from .vec_unary import (
 )
 from .vec_vconv import (
     add_relu_cast,
-    sub_relu_cast,
-    set_deq_scale,
     cast_deq,
+    set_deq_scale,
+    sub_relu_cast,
 )
 
 __all__ = [
@@ -140,11 +142,6 @@ __all__ = [
     "get_sys_workspace",
     "reset_mask",
     "set_aipp_functions",
-    "set_atomic_add",
-    "set_atomic_max",
-    "set_atomic_min",
-    "set_atomic_none",
-    "set_atomic_type",
     "set_hccl_context",
     "set_hf32_mode",
     "set_hf32_trans_mode",
@@ -166,10 +163,10 @@ __all__ = [
     "data_copy_pad",
     "load_image_to_local",
     # .dump_tensor
+    "dump_acc_chk_point",
     "dump_tensor",
     "printf",
     "print_time_stamp",
-    "dump_acc_chk_point",
     "metrics_prof_start",
     "metrics_prof_stop",
     # .mm
@@ -179,6 +176,12 @@ __all__ = [
     # .scalar
     "scalar_cast",
     "scalar_get_sff_value",
+    # .set_atomic
+    "set_atomic_add",
+    "set_atomic_max",
+    "set_atomic_min",
+    "set_atomic_none",
+    "set_atomic_type",
     # .sys_var
     "get_arch_version",
     "get_block_idx",

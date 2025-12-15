@@ -43,28 +43,27 @@ def add_relu_cast(dst: LocalTensor, src0: LocalTensor, src1: LocalTensor, *args,
 
 
 @overload
-def sub_relu_cast(dst: LocalTensor, src0: LocalTensor, src1: LocalTensor, count: int) -> None:
+def cast_deq(dst: LocalTensor, src: LocalTensor, count: int, is_vec_deq: bool = True, half_block: bool = True) -> None:
     ...
 
 
 @overload
-def sub_relu_cast(dst: LocalTensor, src0: LocalTensor, src1: LocalTensor, mask: int, repeat_times: int,
-                  repeat_params: BinaryRepeatParams, is_set_mask: bool = True) -> None:
+def cast_deq(dst: LocalTensor, src: LocalTensor, mask: int, repeat_times: int, repeat_params: UnaryRepeatParams,
+            is_set_mask: bool = True, is_vec_deq: bool = True, half_block: bool = True) -> None:
     ...
 
 
 @overload
-def sub_relu_cast(dst: LocalTensor, src0: LocalTensor, src1: LocalTensor, mask: List[int], repeat_times: int,
-                  repeat_params: BinaryRepeatParams, is_set_mask: bool = True) -> None:
+def cast_deq(dst: LocalTensor, src: LocalTensor, mask: List[int], repeat_times: int, repeat_params: UnaryRepeatParams,
+            is_set_mask: bool = True, is_vec_deq: bool = True, half_block: bool = True) -> None:
     ...
 
 
 @require_jit
-@set_binary_docstring(cpp_name="SubReluCast", append_text="按元素求差，结果和0对比取较大值，并根据源操作数和目的操作数Tensor的数据类型进行精度转换。")
-def sub_relu_cast(dst: LocalTensor, src0: LocalTensor, src1: LocalTensor, *args, **kwargs) -> None:
+def cast_deq(dst: LocalTensor, src: LocalTensor, *args, **kwargs) -> None:
     builder = global_builder.get_ir_builder()
-    op_impl("sub_relu_cast", dst, src0, src1, args, kwargs, builder.create_asc_SubReluCastL0Op,
-            builder.create_asc_SubReluCastL1Op, builder.create_asc_SubReluCastL2Op)
+    unary_op_impl("cast_deq", dst, src, args, kwargs, builder.create_asc_CastDeqL0Op, 
+                  builder.create_asc_CastDeqL1Op, builder.create_asc_CastDeqL2Op)
 
 
 @overload
@@ -89,24 +88,25 @@ def set_deq_scale(scale: RuntimeFloat, offset: Optional[RuntimeInt] = None,
 
 
 @overload
-def cast_deq(dst: LocalTensor, src: LocalTensor, count: int, is_vec_deq: bool = True, half_block: bool = True) -> None:
+def sub_relu_cast(dst: LocalTensor, src0: LocalTensor, src1: LocalTensor, count: int) -> None:
     ...
 
 
 @overload
-def cast_deq(dst: LocalTensor, src: LocalTensor, mask: int, repeat_times: int, repeat_params: UnaryRepeatParams,
-            is_set_mask: bool = True, is_vec_deq: bool = True, half_block: bool = True) -> None:
+def sub_relu_cast(dst: LocalTensor, src0: LocalTensor, src1: LocalTensor, mask: int, repeat_times: int,
+                  repeat_params: BinaryRepeatParams, is_set_mask: bool = True) -> None:
     ...
 
 
 @overload
-def cast_deq(dst: LocalTensor, src: LocalTensor, mask: List[int], repeat_times: int, repeat_params: UnaryRepeatParams,
-            is_set_mask: bool = True, is_vec_deq: bool = True, half_block: bool = True) -> None:
+def sub_relu_cast(dst: LocalTensor, src0: LocalTensor, src1: LocalTensor, mask: List[int], repeat_times: int,
+                  repeat_params: BinaryRepeatParams, is_set_mask: bool = True) -> None:
     ...
 
 
 @require_jit
-def cast_deq(dst: LocalTensor, src: LocalTensor, *args, **kwargs) -> None:
+@set_binary_docstring(cpp_name="SubReluCast", append_text="按元素求差，结果和0对比取较大值，并根据源操作数和目的操作数Tensor的数据类型进行精度转换。")
+def sub_relu_cast(dst: LocalTensor, src0: LocalTensor, src1: LocalTensor, *args, **kwargs) -> None:
     builder = global_builder.get_ir_builder()
-    unary_op_impl("cast_deq", dst, src, args, kwargs, builder.create_asc_CastDeqL0Op, 
-                  builder.create_asc_CastDeqL1Op, builder.create_asc_CastDeqL2Op)
+    op_impl("sub_relu_cast", dst, src0, src1, args, kwargs, builder.create_asc_SubReluCastL0Op,
+            builder.create_asc_SubReluCastL1Op, builder.create_asc_SubReluCastL2Op)

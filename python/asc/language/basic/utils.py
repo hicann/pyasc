@@ -301,7 +301,7 @@ def copy_docstring():
         asc.copy(dst_tensor, src_tensor, mask=128, repeat_time=4, repeat_params=params)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def set_wait_flag_docstring():
@@ -350,7 +350,7 @@ def set_wait_flag_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def pipe_barrier_docstring():
@@ -391,7 +391,7 @@ def pipe_barrier_docstring():
                 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def data_cache_clean_and_invalid_docstring():
@@ -451,7 +451,7 @@ def data_cache_clean_and_invalid_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, "", "", py_example
+    return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
 def data_copy_docstring():
@@ -604,7 +604,7 @@ def data_copy_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def data_copy_pad_docstring():
@@ -709,7 +709,7 @@ def data_copy_pad_docstring():
         asc.data_copy_pad(src_local, src_global, copy_params, pad_params)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def dump_tensor_docstring_docstring():
@@ -777,7 +777,7 @@ def dump_tensor_docstring_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def metrics_prof_start_docstring():
@@ -818,7 +818,7 @@ def metrics_prof_start_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+    return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
 
 def metrics_prof_stop_docstring():
@@ -859,7 +859,7 @@ def metrics_prof_stop_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+    return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
 
 def printf_docstring():
@@ -907,7 +907,7 @@ def printf_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def get_block_num_docstring():
@@ -939,7 +939,7 @@ def get_block_num_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, "", "", py_example
+    return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
 def get_block_idx_docstring():
@@ -983,7 +983,7 @@ def get_block_idx_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def get_data_block_size_in_bytes_docstring():
@@ -1022,7 +1022,7 @@ def get_data_block_size_in_bytes_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+    return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
 
 def get_icache_preload_status_docstring():
@@ -1058,7 +1058,7 @@ def get_icache_preload_status_docstring():
         cache_preload_status = asc.get_icache_preload_status()
     """
 
-    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+    return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
 
 def get_program_counter_docstring():
@@ -1089,7 +1089,7 @@ def get_program_counter_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, "", "", py_example
+    return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
 def get_system_cycle_docstring():
@@ -1127,7 +1127,7 @@ def get_system_cycle_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def icache_preload_docstring():
@@ -1164,7 +1164,7 @@ def icache_preload_docstring():
         asc.icache_preload(pre_fetch_len)
     """
 
-    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+    return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
 
 def load_data_docstring():
@@ -1533,7 +1533,7 @@ def load_image_to_local_docstring():
         load_data_params = asc.LoadImageToLocalParams(2, 2, 0, 0, 2, 0, 0, 0, 0)
         asc.load_image_to_local(dst, load_data_params)
     """
-    return func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
 
 def proposal_concat_docstring():
@@ -1583,7 +1583,7 @@ def proposal_concat_docstring():
         asc.proposal_concat(dst, src, repeat_time=2, mode_number=4)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def proposal_extract_docstring():
@@ -1632,7 +1632,7 @@ def proposal_extract_docstring():
         asc.proposal_extract(dst, src, repeat_time=2, mode_number=4)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def trap_docstring():
@@ -1664,7 +1664,7 @@ def trap_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, "", "", py_example
+    return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
 def duplicate_docstring():
@@ -1734,7 +1734,7 @@ def duplicate_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def pair_reduce_sum_docstring():
@@ -1833,7 +1833,7 @@ def pair_reduce_sum_docstring():
                               dst_rep_stride=1, src_blk_stride=1, src_rep_stride=8)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def repeat_reduce_sum_docstring():
@@ -1912,7 +1912,7 @@ def repeat_reduce_sum_docstring():
                               dst_blk_stride=0, src_blk_stride=1, dst_rep_stride=8, src_rep_stride=8)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def whole_reduce_max_docstring():
@@ -2048,7 +2048,7 @@ def whole_reduce_max_docstring():
                                order=asc.ReduceOrder.ORDER_INDEX_VALUE)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def whole_reduce_min_docstring():
@@ -2184,7 +2184,7 @@ def whole_reduce_min_docstring():
                                order=asc.ReduceOrder.ORDER_INDEX_VALUE)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def whole_reduce_sum_docstring():
@@ -2287,7 +2287,7 @@ def whole_reduce_sum_docstring():
                                dst_rep_stride=1, src_blk_stride=1, src_rep_stride=8)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def scatter_docstring():
@@ -2361,7 +2361,7 @@ def scatter_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, "", "", py_example
+    return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
 def set_deq_scale_docstring():
@@ -2406,7 +2406,7 @@ def set_deq_scale_docstring():
         asc.cast_deq(dst_local, src_local, count=src_size, is_vec_deq=False, half_block=False)
     """
 
-    return func_introduction, cpp_signature, param_list, "", "", py_example
+    return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
 def set_vector_mask_docstring():
@@ -2516,7 +2516,7 @@ def set_vector_mask_docstring():
           asc.reset_mask()
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def get_sys_workspace_docstring():
@@ -2548,7 +2548,7 @@ def get_sys_workspace_docstring():
 
     """
 
-    return func_introduction, cpp_signature, param_list, "", "", py_example
+    return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
 def transpose_docstring():
@@ -2628,7 +2628,7 @@ def transpose_docstring():
         asc.transpose(z_local, x_local, tmp_buffer, params)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def trans_data_to_5hd_docstring():
@@ -2704,7 +2704,7 @@ def trans_data_to_5hd_docstring():
           asc.trans_data_to_5hd(dst_list, src_list, params)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 NAME_TRANS = {
@@ -2803,7 +2803,7 @@ def set_aipp_functions_docstring():
         asc.set_aipp_functions(rgb_gm, asc.AippInputFormat.RGB888_U8, aipp_config_int8)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def set_binary_docstring(cpp_name: Optional[str] = None, append_text: str = "") -> Callable[[T], T]:
@@ -3236,7 +3236,7 @@ def gather_mask_docstring():
         asc.gather_mask(dst_local, src0_local, pattern_value, reduce_mode, mask, params, rsvd_cnt, gather_mask_mode)
 
     """
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def scalar_cast_docstring():
@@ -3295,7 +3295,7 @@ def scalar_cast_docstring():
         value_out = asc.scalar_cast(value_in, dtype, round_mode)
     """
 
-    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+    return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
 
 def scalar_get_sff_value_docstring():
@@ -3345,7 +3345,7 @@ def scalar_get_sff_value_docstring():
         one_count = asc.scalar_get_sff_value(value_in, count_value)
     """
 
-    return func_introduction, cpp_signature, param_list, return_list, "", py_example
+    return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
 
 def set_atomic_add_docstring():
@@ -3387,7 +3387,7 @@ def set_atomic_add_docstring():
         asc.set_atomic_add(dtype)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def set_atomic_max_docstring():
@@ -3430,7 +3430,7 @@ def set_atomic_max_docstring():
         asc.set_atomic_max(dtype)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def set_atomic_min_docstring():
@@ -3472,7 +3472,7 @@ def set_atomic_min_docstring():
         asc.set_atomic_min(dtype)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def set_atomic_none_docstring():
@@ -3502,7 +3502,7 @@ def set_atomic_none_docstring():
         asc.set_atomic_none()
     """
 
-    return func_introduction, cpp_signature, param_list, "", "", py_example
+    return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
 def set_atomic_type_docstring():
@@ -3543,7 +3543,7 @@ def set_atomic_type_docstring():
         asc.set_atomic_type(dtype)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 

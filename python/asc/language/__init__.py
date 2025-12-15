@@ -23,6 +23,7 @@ from .basic.block_sync import (
     set_flag,
     wait_flag,
 )
+from .basic.cache import data_cache_clean_and_invalid, get_icache_preload_status, icache_preload
 from .basic.common import (
     ascend_is_aic,
     ascend_is_aiv,
@@ -30,11 +31,6 @@ from .basic.common import (
     get_sys_workspace,
     reset_mask,
     set_aipp_functions,
-    set_atomic_add,
-    set_atomic_max,
-    set_atomic_min,
-    set_atomic_none,
-    set_atomic_type,
     set_hccl_context,
     set_hf32_mode,
     set_hf32_trans_mode,
@@ -44,19 +40,24 @@ from .basic.common import (
     set_sys_workspace,
     set_vector_mask,
 )
-from .basic.data_cache import data_cache_clean_and_invalid, get_icache_preload_status, icache_preload
 from .basic.data_copy import copy, data_copy, data_copy_pad, load_image_to_local
-from .basic.data_conversion import transpose, trans_data_to_5hd
 from .basic.dump_tensor import (
+    dump_acc_chk_point, 
     dump_tensor, 
     printf, 
     print_time_stamp, 
-    dump_acc_chk_point, 
     metrics_prof_start, 
     metrics_prof_stop,
 )
 from .basic.mm import load_data, load_data_with_transpose, mmad
 from .basic.scalar import scalar_cast, scalar_get_sff_value
+from .basic.set_atomic import (
+    set_atomic_add,
+    set_atomic_max,
+    set_atomic_min,
+    set_atomic_none,
+    set_atomic_type,
+)
 from .basic.sys_var import (
     get_arch_version,
     get_block_idx,
@@ -98,6 +99,7 @@ from .basic.vec_duplicate import duplicate
 from .basic.vec_brcb import brcb
 from .basic.vec_gather import gather, gatherb
 from .basic.vec_gather_mask import gather_mask, get_gather_mask_remain_count
+from .basic.vec_transpose import transpose, trans_data_to_5hd
 from .basic.proposal import (
     proposal_concat,
     proposal_extract,
@@ -129,9 +131,9 @@ from .basic.vec_unary import (
 )
 from .basic.vec_vconv import (
     add_relu_cast,
-    sub_relu_cast,
-    set_deq_scale,
     cast_deq,
+    set_deq_scale,
+    sub_relu_cast,
 )
 
 # core
