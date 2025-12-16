@@ -8,6 +8,7 @@
 
 from typing import Tuple
 import logging
+import argparse
 import torch
 try:
     import torch_npu
@@ -115,8 +116,8 @@ def generate_tiling(m, n, k):
     return tiling
 
 
-def matmul_leakyrelu_custom(backend: config.Backend):
-    config.set_platform(backend)
+def matmul_leakyrelu_custom(backend: config.Backend, platform: config.Platform):
+    config.set_platform(backend, platform)
     device = "npu" if config.Backend(backend) == config.Backend.NPU else "cpu"
     m, k, n = 1024, 256, 640
     a = torch.randint(-5, 5, (m, k), device=device).to(torch.float16)
@@ -130,6 +131,19 @@ def matmul_leakyrelu_custom(backend: config.Backend):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-r", type=str, default="Model", help="backend to run")
+    parser.add_argument("-v", type=str, default="Ascend910B1", help="platform to run")
+    args = parser.parse_args()
+    backend = args.r
+    platform = args.v
+    if backend not in config.Backend.__members__:
+        raise ValueError("Unsupported Backend! Supported: ['Model', 'NPU']")
+    platform_values = [platform.value for platform in config.Platform]
+    if platform not in platform_values:
+        raise ValueError(f"Unsupported Platform! Supported: {platform_values}")
+    backend = config.Backend(backend)
+    platform = config.Platform(platform)
     logging.info("[INFO] start process sample matmul_leakyrelu.")
-    matmul_leakyrelu_custom(config.Backend.Model)
+    matmul_leakyrelu_custom(backend, platform)
     logging.info("[INFO] Sample matmul_leakyrelu run success.")

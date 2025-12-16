@@ -259,12 +259,9 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
 cd pyasc
 python3 ./python/tutorials/01_add/add.py
 ```
-注：如下所示，样例代码中默认是以仿真器模式运行，请确保已完成[运行环境准备](#运行环境准备)中的[配置环境变量](#envset)步骤。
-```python
-if __name__ == "__main__":
-    logging.info("[INFO] start process sample add.")
-    vadd_custom(config.Backend.Model) # 配置仿真器模式
-    logging.info("[INFO] Sample add run success.")
+注：完整的运行命令如下所示，通过参数[RUN_MODE]配置运行模式、参数[SOC_VERSION]配置运行环境，具体请参考[编译执行](../python/tutorials/01_add/README.md/#编译执行)。若缺省参数[RUN_MODE]默认是仿真器模式，缺省参数[SOC_VERSION]默认是`Ascend910B1`环境，请确保已完成[运行环境准备](#运行环境准备)中的[配置环境变量](#envset)步骤。
+```bash
+python3 ./python/tutorials/01_add/add.py -r [RUN_MODE] -v [SOC_VERSION]
 ```
 
 ## UT测试（可选）
