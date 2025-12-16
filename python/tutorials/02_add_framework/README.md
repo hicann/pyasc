@@ -39,7 +39,17 @@
 环境配置请参考[quick_start.md](../../../docs/quick_start.md#envready)。完成环境配置后，执行如下命令可进行功能验证。
 ```
 cd pyasc/python/tutorials/02_add_framework
-python3 add_framework.py
+python3 add_framework.py -r [RUN_MODE] -v [SOC_VERSION]
+```
+其中脚本参数说明如下：
+- RUN_MODE：编译执行方式，可选择NPU仿真，NPU上板，对应参数分别为[Model/NPU]。
+- SOC_VERSION：昇腾AI处理器型号，如果无法确定具体的[SOC_VERSION]，则在安装昇腾AI处理器的服务器执行npu-smi info命令进行查询，在查询到的“Name”前增加Ascend信息，例如“Name”对应取值为xxxyy，实际配置的[SOC_VERSION]值为Ascendxxxyy。支持以下产品型号：
+  - Ascend 910C
+  - Ascend 910B
+
+示例如下，Ascendxxxyy请替换为实际的AI处理器型号。
+```
+python3 add_framework.py -r Model -v Ascendxxxyy
 ```
 用例执行完成，打屏信息出现“Sample add_framework run success.”，说明样例执行成功。
 

@@ -88,8 +88,20 @@
   修改matmul_mix.py中USE_CORE_NUM参数为当前执行平台的实际Vector核数。
 - 执行如下命令可进行功能验证
   ```
-  python3 matmul_mix.py
+  python3 matmul_mix.py -r [RUN_MODE] -v [SOC_VERSION]
   ```
+
+  其中脚本参数说明如下：
+  - RUN_MODE：编译执行方式，可选择NPU仿真，NPU上板，对应参数分别为[Model/NPU]。
+  - SOC_VERSION：昇腾AI处理器型号，如果无法确定具体的[SOC_VERSION]，则在安装昇腾AI处理器的服务器执行npu-smi info命令进行查询，在查询到的“Name”前增加Ascend信息，例如“Name”对应取值为xxxyy，实际配置的[SOC_VERSION]值为Ascendxxxyy。支持以下产品型号：
+    - Ascend 910C
+    - Ascend 910B
+
+  示例如下，Ascendxxxyy请替换为实际的AI处理器型号。
+  ```
+  python3 matmul_mix.py -r Model -v Ascendxxxyy
+  ```
+
   用例执行完成，打屏信息出现“Sample matmul_mix run success.”，说明样例执行成功。
 
 注：torch_npu尚不支持Python 3.12，因此该用例在Python 3.12环境上无法执行NPU模式。

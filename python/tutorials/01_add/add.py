@@ -7,6 +7,7 @@
 # See LICENSE in the root of the software repository for the full text of the License.
 
 import logging
+import argparse
 import torch
 try:
     import torch_npu
@@ -79,8 +80,8 @@ def vadd_launch(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     return z
 
 
-def vadd_custom(backend: config.Backend):
-    config.set_platform(backend)
+def vadd_custom(backend: config.Backend, platform: config.Platform):
+    config.set_platform(backend, platform)
     device = "npu" if config.Backend(backend) == config.Backend.NPU else "cpu"
     size = 8 * 2048
     x = torch.rand(size, dtype=torch.float32, device=device)
@@ -90,6 +91,19 @@ def vadd_custom(backend: config.Backend):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-r", type=str, default="Model", help="backend to run")
+    parser.add_argument("-v", type=str, default="Ascend910B1", help="platform to run")
+    args = parser.parse_args()
+    backend = args.r
+    platform = args.v
+    if backend not in config.Backend.__members__:
+        raise ValueError("Unsupported Backend! Supported: ['Model', 'NPU']")
+    platform_values = [platform.value for platform in config.Platform]
+    if platform not in platform_values:
+        raise ValueError(f"Unsupported Platform! Supported: {platform_values}")
+    backend = config.Backend(backend)
+    platform = config.Platform(platform)
     logging.info("[INFO] start process sample add.")
-    vadd_custom(config.Backend.Model)
+    vadd_custom(backend, platform)
     logging.info("[INFO] Sample add run success.")
