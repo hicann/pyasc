@@ -23,17 +23,17 @@ namespace asc {
 /*
 VirtualArg represents an argument of the binding function and should be emitted:
 
-	.def("...", [](OpBuilder &self, ..., const <cppType> &<name>, ...) {
-		self.create<...>(..., <substitution>, ...);
-	}, ..., "<name>"_a = <defaultValue>)
+    .def("...", [](OpBuilder &self, ..., const <cppType> &<name>, ...) {
+        self.create<...>(..., <substitution>, ...);
+    }, ..., "<name>"_a = <defaultValue>)
 
 */
 struct VirtualArg {
-	std::string cppType;
-	std::string name;
-	std::string substitution;
-	std::string defaultValue;
-	bool optional = false;
+    std::string cppType;
+    std::string name;
+    std::string substitution;
+    std::string defaultValue;
+    bool optional = false;
 };
 
 llvm::StringRef fetchOpClass(llvm::StringRef defName);

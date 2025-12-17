@@ -29,7 +29,10 @@ namespace {
 struct HoistTensor : ascendc::HoistOpPattern<ascendc::LocalTensorAutoOp> {
     using HoistOpPattern::HoistOpPattern;
 
-    bool hoistable(ascendc::LocalTensorAutoOp op) const override { return !op.getInput() && !op.getOutput(); }
+    bool hoistable(ascendc::LocalTensorAutoOp op) const override
+    {
+        return !op.getInput() && !op.getOutput();
+    }
 };
 
 struct HoistUBAllocationPass : public ascendc::impl::HoistUBAllocationBase<HoistUBAllocationPass> {

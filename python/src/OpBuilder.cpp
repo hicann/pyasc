@@ -58,7 +58,10 @@ class PyOpBuilder {
     explicit PyOpBuilder(MLIRContext *context) : builder(context), loc(builder.getUnknownLoc()) {}
     ~PyOpBuilder() = default;
 
-    void setLoc(Location newLoc) { loc = newLoc; }
+    void setLoc(Location newLoc)
+    {
+        loc = newLoc;
+    }
 
     void setLoc(const std::string &name, bool reset = false)
     {
@@ -78,13 +81,25 @@ class PyOpBuilder {
         setLoc(newLoc);
     }
 
-    Location getLoc() { return loc; }
+    Location getLoc()
+    {
+        return loc;
+    }
 
-    void resetLoc() { loc = builder.getUnknownLoc(); }
+    void resetLoc()
+    {
+        loc = builder.getUnknownLoc();
+    }
 
-    OpBuilder &getBuilder() { return builder; }
+    OpBuilder &getBuilder()
+    {
+        return builder;
+    }
 
-    OpBuilder *operator->() { return &builder; }
+    OpBuilder *operator->()
+    {
+        return &builder;
+    }
 
     void setInsertionPointToStart(Block &block)
     {
@@ -131,21 +146,21 @@ class PyOpBuilder {
     }
 
     template <typename OpTy, typename... Args>
-    auto create(Args &&...args) -> OpTy
+    auto create(Args &&... args) -> OpTy
     {
         return builder.create<OpTy>(loc, std::forward<Args>(args)...);
     }
 
     // Overload to create or fold a single result operation.
     template <typename OpTy, typename... Args>
-    std::enable_if_t<OpTy::template hasTrait<OpTrait::OneResult>(), Value> createOrFold(Args &&...args)
+    std::enable_if_t<OpTy::template hasTrait<OpTrait::OneResult>(), Value> createOrFold(Args &&... args)
     {
         return builder.createOrFold<OpTy>(loc, std::forward<Args>(args)...);
     }
 
     // Overload to create or fold a zero result operation.
     template <typename OpTy, typename... Args>
-    std::enable_if_t<OpTy::template hasTrait<OpTrait::ZeroResults>(), OpTy> createOrFold(Args &&...args)
+    std::enable_if_t<OpTy::template hasTrait<OpTrait::ZeroResults>(), OpTy> createOrFold(Args &&... args)
     {
         return builder.createOrFold<OpTy>(loc, std::forward<Args>(args)...);
     }

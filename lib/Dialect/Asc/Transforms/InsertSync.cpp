@@ -72,11 +72,11 @@ void syncGetValueOp(func::FuncOp &funcOp)
 {
     funcOp.walk([](ascendc::APIOp op) {
         if (isa<ascendc::LocalTensorGetValueOp, ascendc::GlobalTensorGetValueOp>(op)) {
-          auto loc = op.getLoc();
-          OpBuilder builder(op);
-          createSetGetValueSync(true, builder, loc);
-          builder.setInsertionPointAfter(op);
-          createSetGetValueSync(false, builder, loc);
+            auto loc = op.getLoc();
+            OpBuilder builder(op);
+            createSetGetValueSync(true, builder, loc);
+            builder.setInsertionPointAfter(op);
+            createSetGetValueSync(false, builder, loc);
         }
     });
 }

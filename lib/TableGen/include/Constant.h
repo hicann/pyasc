@@ -50,7 +50,7 @@ static constexpr int64_t kTemplateType = 5;
 static constexpr int64_t kPointerValue = -3L;
 static constexpr int64_t kPointerToIntValue = -2L;
 
-}
-}
+} // namespace asc
+} // namespace mlir
 
 #endif
