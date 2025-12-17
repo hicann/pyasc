@@ -401,8 +401,8 @@ class TensorShape(Tuple[int, ...]):
     def as_int(value: Any) -> Optional[int]:
         try:
             return int(value)
-        except Exception:
-            raise TypeError(f"TensorShape accepts values convertible to int, got {value.__class__.__name__}")
+        except Exception as e:
+            raise TypeError(f"TensorShape accepts values convertible to int, got {value.__class__.__name__}") from e
 
     @classmethod
     def new_impl(cls, t: Tuple[int, ...]):
