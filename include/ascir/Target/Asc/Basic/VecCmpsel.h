@@ -51,6 +51,12 @@ LogicalResultForT<SelectL0Op, ascendc::SelectL0Op, ascendc::SelectScalarL0Op> pr
     return success();
 }
 
+LogicalResult printOperation(CodeEmitter& emitter, ascendc::CompareL1Op op);
+
+LogicalResult printOperation(CodeEmitter& emitter, ascendc::CompareRL1Op op);
+
+LogicalResult printOperation(CodeEmitter& emitter, ascendc::CompareScalarL1Op op);
+
 } // namespace ascendc
 } // namespace mlir
 

@@ -264,3 +264,12 @@ class BatchOutMode(IntEnum):
     SINGLE_BATCH = 0,
     MULTI_BATCH = 1,
     DYNAMIC = 2,
+
+
+class CMPMODE(IntEnum):
+    LT = 0
+    GT = 1
+    EQ = 2
+    LE = 3
+    GE = 4
+    NE = 5

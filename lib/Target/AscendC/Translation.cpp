@@ -183,6 +183,7 @@ using PrintableOpTypes = std::tuple<
     // VectorTernaryScalarL2Op
     ascendc::AxpyL2Op,
     // VecCmpSel (Select) operations
+    ascendc::CompareL1Op, ascendc::CompareRL1Op, ascendc::CompareScalarL1Op, 
     ascendc::SelectL0Op, ascendc::SelectL2Op, ascendc::SelectScalarL0Op, ascendc::SelectScalarL2Op,
     // Duplicate operations
     ascendc::DuplicateL0Op, ascendc::DuplicateL1Op, ascendc::DuplicateL2Op,

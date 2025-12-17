@@ -752,3 +752,23 @@ def test_set_vector_mask_kernel(mock_launcher_run):
 
     set_vector_mask_kernel[1]()
     assert mock_launcher_run.call_count == 1
+
+
+def test_get_cmp_mask(mock_launcher_run):
+    @asc.jit
+    def kernel_get_cmp_mask() -> None:
+        x_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
+        asc.get_cmp_mask(x_local)
+
+    kernel_get_cmp_mask[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_set_cmp_mask(mock_launcher_run):
+    @asc.jit
+    def kernel_set_cmp_mask() -> None:
+        x_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+        asc.set_cmp_mask(x_local)
+
+    kernel_set_cmp_mask[1]()
+    assert mock_launcher_run.call_count == 1

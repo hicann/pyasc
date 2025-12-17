@@ -58,6 +58,9 @@ void printPrettyAippInputFormat(AsmPrinter &odsPrinter, const AippInputFormatAtt
 
 void registerExternalModels(DialectRegistry &registry);
 
+ParseResult parsePrettyCmpMode(AsmParser &odsParser, CMPMODEAttr &attr);
+void printPrettyCmpMode(AsmPrinter &odsPrinter, const CMPMODEAttr &attr);
+
 } // namespace ascendc
 } // namespace mlir
 

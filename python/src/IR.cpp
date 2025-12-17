@@ -168,6 +168,17 @@ void pyasc_bind_enums(py::module &m)
     py::enum_<ascendc::TPosition>(m, "TPosition", py::module_local())
         .def_static("symbolize",
                     [](uint8_t pos) -> ascendc::TPosition { return static_cast<ascendc::TPosition>(pos); });
+
+    py::enum_<ascendc::CMPMODE>(m, "CMPMODE", py::module_local())
+        .value("LT", ascendc::CMPMODE::LT)
+        .value("GT", ascendc::CMPMODE::GT)
+        .value("EQ", ascendc::CMPMODE::EQ)
+        .value("LE", ascendc::CMPMODE::LE)
+        .value("GE", ascendc::CMPMODE::GE)
+        .value("NE", ascendc::CMPMODE::NE)
+        .def_static("symbolize", [](uint8_t cmp_mode) -> ascendc::CMPMODE {
+            return static_cast<ascendc::CMPMODE>(cmp_mode);
+        });
 }
 
 void pyasc_bind_context_and_dialect(py::module &m)
