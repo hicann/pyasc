@@ -257,7 +257,8 @@ void printFunctionParam(raw_indented_ostream &os, const Record *def, const std::
     }
     os << "os << \")\";";
     IndentedNewLine(os);
-    os << R"(return success();)" << "\n}\n";
+    os << R"(return success();)"
+       << "\n}\n";
 }
 
 void printOp(raw_indented_ostream &os, const Record *def)

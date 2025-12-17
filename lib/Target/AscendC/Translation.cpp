@@ -222,9 +222,9 @@ using PrintableOpTypes = std::tuple<
 
     // Fwk
     // BaseQueue operations (TQue, TQueBind)
-    ascendc::TQueBindAllocTensorOp, ascendc::TQueBindAllocTensorInPlaceOp,
-    ascendc::TQueBindDequeTensorOp, ascendc::TQueBindDequeTensorPosOp,
-    ascendc::TQueBindDequeTensorInPlaceOp, ascendc::TQueBindEnqueTensorPosOp, ascendc::ToQueBindOp,
+    ascendc::TQueBindAllocTensorOp, ascendc::TQueBindAllocTensorInPlaceOp, ascendc::TQueBindDequeTensorOp,
+    ascendc::TQueBindDequeTensorPosOp, ascendc::TQueBindDequeTensorInPlaceOp, ascendc::TQueBindEnqueTensorPosOp,
+    ascendc::ToQueBindOp,
     // Buffer operations (TBuf)
     ascendc::TBufGetTensorOp, ascendc::TBufGetWithOffsetOp,
 

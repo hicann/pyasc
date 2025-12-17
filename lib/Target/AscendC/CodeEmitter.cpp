@@ -403,14 +403,13 @@ LogicalResult CodeEmitter::emitAssignPrefix(Operation &op)
     switch (op.getNumResults()) {
         case 0:
             break;
-        case 1:
-            {
-                OpResult result = op.getResult(0);
-                if (failed(emitVariableDeclaration(result, /*trailingSemicolon=*/false)))
-                    return failure();
-                os << " = ";
-                break;
-            }
+        case 1: {
+            OpResult result = op.getResult(0);
+            if (failed(emitVariableDeclaration(result, /*trailingSemicolon=*/false)))
+                return failure();
+            os << " = ";
+            break;
+        }
         default:
             llvm_unreachable("emission for multiple results is not implemented");
     }

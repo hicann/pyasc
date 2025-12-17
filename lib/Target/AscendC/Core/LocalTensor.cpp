@@ -22,7 +22,9 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::Local
     FAIL_OR(emitter.emitVariableDeclaration(op->getResult(0), false));
     auto &os = emitter.ostream();
     auto resultType = op.getResult().getType().getElementType();
-    os << " = " << "AscendC::LocalTensor" << "<";
+    os << " = "
+       << "AscendC::LocalTensor"
+       << "<";
     FAIL_OR(emitter.emitType(op.getLoc(), resultType));
     os << ">(";
     CodeEmitter::emitTPosition(os, op.getPos());

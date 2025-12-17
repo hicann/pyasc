@@ -24,7 +24,10 @@ template <typename OpT>
 struct HoistOpPattern : public OpRewritePattern<OpT> {
     using OpRewritePattern<OpT>::OpRewritePattern;
 
-    virtual bool hoistable(OpT) const { return true; }
+    virtual bool hoistable(OpT) const
+    {
+        return true;
+    }
 
     LogicalResult matchAndRewrite(OpT op, PatternRewriter &rewriter) const override
     {

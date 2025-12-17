@@ -36,7 +36,10 @@ using PyStructVector = SmallVector<emitasc::PyStructType>;
 
 struct PyStructTypeHash {
     std::hash<const void *> h;
-    size_t operator()(emitasc::PyStructType type) const { return h(type.getAsOpaquePointer()); }
+    size_t operator()(emitasc::PyStructType type) const
+    {
+        return h(type.getAsOpaquePointer());
+    }
 };
 
 PyStructVector deduplicate(ArrayRef<emitasc::PyStructType> pyStructs)

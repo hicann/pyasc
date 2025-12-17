@@ -90,7 +90,10 @@ struct CodeEmitter {
         {
             emitter.nameStack.pushScope();
         }
-        ~Scope() { emitter.nameStack.popScope(); }
+        ~Scope()
+        {
+            emitter.nameStack.popScope();
+        }
 
       private:
         llvm::ScopedHashTableScope<Value, std::string> valueMapperScope;
@@ -105,7 +108,10 @@ struct CodeEmitter {
     bool hasBlockLabel(Block &block);
 
     /// Returns the output stream.
-    raw_indented_ostream &ostream() { return os; };
+    raw_indented_ostream &ostream()
+    {
+        return os;
+    };
 
   private:
     using ValueMapper = llvm::ScopedHashTable<Value, std::string>;

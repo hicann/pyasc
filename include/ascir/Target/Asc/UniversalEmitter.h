@@ -33,12 +33,14 @@ LogicalResult emitFunctionParams(CodeEmitter &emitter, ConcreteOp op, size_t sta
     return success();
 }
 
-template <typename ConcreteOp> LogicalResult autoPrintConstructorOp(CodeEmitter &emitter, ConcreteOp op)
+template <typename ConcreteOp>
+LogicalResult autoPrintConstructorOp(CodeEmitter &emitter, ConcreteOp op)
 {
     return emitter.emitVariableDeclaration(op->getResult(0), false);
 }
 
-template <typename ConcreteOp> LogicalResult autoPrintMemberFuncOp(CodeEmitter &emitter, ConcreteOp op)
+template <typename ConcreteOp>
+LogicalResult autoPrintMemberFuncOp(CodeEmitter &emitter, ConcreteOp op)
 {
     auto resNum = op.getOperation()->getNumResults();
     auto &os = emitter.ostream();
@@ -53,7 +55,8 @@ template <typename ConcreteOp> LogicalResult autoPrintMemberFuncOp(CodeEmitter &
     return success();
 }
 
-template <typename ConcreteOp> LogicalResult autoPrintAscFuncOp(CodeEmitter &emitter, ConcreteOp op)
+template <typename ConcreteOp>
+LogicalResult autoPrintAscFuncOp(CodeEmitter &emitter, ConcreteOp op)
 {
     auto resNum = op.getOperation()->getNumResults();
     auto &os = emitter.ostream();
@@ -67,7 +70,8 @@ template <typename ConcreteOp> LogicalResult autoPrintAscFuncOp(CodeEmitter &emi
     return success();
 }
 
-template <typename ConcreteOp> LogicalResult autoPrintOp(CodeEmitter &emitter, ConcreteOp op)
+template <typename ConcreteOp>
+LogicalResult autoPrintOp(CodeEmitter &emitter, ConcreteOp op)
 {
     if constexpr (ConcreteOp::template hasTrait<mlir::OpTrait::AscConstructorTrait>()) {
         return autoPrintConstructorOp<ConcreteOp>(emitter, op);
