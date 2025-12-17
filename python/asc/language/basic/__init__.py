@@ -86,6 +86,7 @@ from .vec_binary_scalar import (
     shift_right,
 )
 from .vec_brcb import brcb
+from .vec_cmpsel import compare, compare_scalar, get_cmp_mask, set_cmp_mask
 from .vec_duplicate import duplicate
 from .vec_gather import (
     gather, 
@@ -222,6 +223,11 @@ __all__ = [
     "shift_right",
     # .vec_brcb
     "brcb",
+    # .vec_cmpsel
+    "compare",
+    "compare_scalar",
+    "get_cmp_mask",
+    "set_cmp_mask",
     # .vec_duplicate
     "duplicate",
     # .vec_gather

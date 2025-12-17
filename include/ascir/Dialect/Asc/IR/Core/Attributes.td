@@ -103,7 +103,7 @@ def AscendC_CacheRwModeAttr : I32EnumAttr<"CacheRwMode", "", [
   let underlyingType = "uint8_t";
 }
 
-def AscendC_CmpModeAttr : I64EnumAttr<"CmpMode", "", [
+def AscendC_CMPMODEAttr : I64EnumAttr<"CMPMODE", "", [
   I64EnumAttrCase<"LT", 0>,
   I64EnumAttrCase<"GT", 1>,
   I64EnumAttrCase<"EQ", 2>,

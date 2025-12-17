@@ -27,6 +27,7 @@ Common operations
     duplicate
     get_block_idx
     get_block_num
+    get_cmp_mask
     get_data_block_size_in_bytes
     get_icache_preload_status
     get_program_counter
@@ -50,6 +51,7 @@ Common operations
     set_atomic_min
     set_atomic_none
     set_atomic_type
+    set_cmp_mask
     set_flag
     set_deq_scale
     set_vector_mask
@@ -84,6 +86,7 @@ Vector binary operations
     bilinear_interpolation
     bitwise_and
     bitwise_or
+    compare
     div
     fused_mul_add
     fused_mul_add_relu
@@ -119,6 +122,7 @@ Vector-scalar operations
     :nosignatures:
 
     adds
+    compare_scalar
     leaky_relu
     maxs
     mins
