@@ -31,7 +31,7 @@ __aicore__ inline void SetOrgShape(int orgM, int orgN, int orgKa, int orgKb, int
 **调用示例**
 
 ```python
-asc.adv.register_matmul(pipe, mm, tiling)
+asc.adv.register_matmul(pipe, workspace, mm, tiling)
 mm.set_tensor_a(gm_a)
 mm.set_tensor_b(gm_b)
 mm.set_bias(gm_bias)

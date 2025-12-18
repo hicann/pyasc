@@ -33,9 +33,11 @@ def check_type(target_type: Any, type_union: List[Any], msg: str):
 
 @require_jit
 @set_matmul_docstring(api_name="register_matmul")
-def register_matmul(pipe: TPipe, matmul: Matmul, tiling: Optional[TCubeTiling] = None) -> None:
+def register_matmul(pipe: TPipe, workspace: GlobalAddress, matmul: Matmul, \
+                    tiling: Optional[TCubeTiling] = None) -> None:
     ir_tiling = tiling.to_ir() if tiling is not None else None
-    global_builder.get_ir_builder().create_asc_RegistMatmulObjOp(pipe.to_ir(), matmul.to_ir(), ir_tiling)
+    builder = global_builder.get_ir_builder()
+    builder.create_asc_RegistMatmulObjOp(pipe.to_ir(), workspace.to_ir(), matmul.to_ir(), ir_tiling)
 
 
 @dataclass(frozen=True)

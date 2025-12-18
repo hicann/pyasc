@@ -44,7 +44,7 @@
         c=asc.adv.MatmulType(asc.TPosition.GM, asc.CubeFormat.ND, c_dtype),
         bias=asc.adv.MatmulType(asc.TPosition.GM, asc.CubeFormat.ND, bias_dtype),
       )
-      asc.adv.register_matmul(pipe, matmul, tiling)
+      asc.adv.register_matmul(pipe, workspace, matmul, tiling)
       matmul.set_tensor_a(a_global, IS_TRANS_A)
       matmul.set_tensor_b(b_global, IS_TRANS_B)
       if tiling.is_bias:

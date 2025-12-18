@@ -47,7 +47,8 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::Regis
 {
     auto &os = emitter.ostream();
     os << "using namespace " << ascNamespace << ";\n";
-    os << op.getAPIName() << "(&" << emitter.getOrCreateName(op.getPipe()) << ", GetSysWorkSpacePtr(), "
+    os << op.getAPIName() << "(&" << emitter.getOrCreateName(op.getPipe()) << ", "
+       << emitter.getOrCreateName(op.getWorkspace()) << ", "
        << emitter.getOrCreateName(op.getMatmul());
     if (auto tiling = op.getTiling()) {
         os << ", &" << emitter.getOrCreateName(tiling);

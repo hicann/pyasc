@@ -12,8 +12,8 @@
 // CHECK-NEXT:    constexpr int8_t c1_i8 = 1;
 // CHECK-NEXT:    AscendC::CopyRepeatParams v9{v7, v7, v8, v8};
 // CHECK-NEXT:    AscendC::Copy<half, c1_i8>(v1, v2, v3, v4, v9)
-// CHECK-NEXT:    uint64_t v1_mask[] = {v6, v6};
-// CHECK-NEXT:    AscendC::Copy<half, c1_i8>(v1, v2, v1_mask, v5, v9);
+// CHECK-NEXT:    uint64_t v1_mask_list0[] = {v6, v6};
+// CHECK-NEXT:    AscendC::Copy<half, c1_i8>(v1, v2, v1_mask_list0, v5, v9);
 // CHECK-NEXT:    return;
 // CHECK-NEXT:  }
 func.func @emit_copy(%dst : !ascendc.local_tensor<*xf16>, %src : !ascendc.local_tensor<*xf16>, 

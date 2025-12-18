@@ -22,7 +22,7 @@ __aicore__ inline void SetQuantScalar(const uint64_t quantScalar)
 **调用示例**
 
 ```python
-asc.adv.register_matmul(pipe, mm, tiling)
+asc.adv.register_matmul(pipe, workspace, mm, tiling)
 tmp = 0.1
 ans = int.from_bytes(struct.pack('<f', tmp), 'little', signed=True) & 0xFFFFFFFF
 mm.set_quant_scalar(ans)

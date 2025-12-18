@@ -23,7 +23,6 @@ except ModuleNotFoundError:
 @asc.jit
 def matmul_kernel(a: asc.GlobalAddress, b: asc.GlobalAddress, c: asc.GlobalAddress, tiling: asc.adv.TCubeTiling,
                   workspace: asc.GlobalAddress, quant_vector: asc.GlobalAddress):
-    asc.set_sys_workspace(workspace)
     tiling.share_l1_size = asc.property(asc.TOTAL_L1_SIZE)
     tiling.share_l0c_size = asc.property(asc.TOTAL_L0C_SIZE)
     offset_a, offset_b, offset_c, offset_quant = calc_offsets(tiling)
@@ -41,7 +40,7 @@ def matmul_kernel(a: asc.GlobalAddress, b: asc.GlobalAddress, c: asc.GlobalAddre
         c=asc.adv.MatmulType(asc.TPosition.GM, asc.CubeFormat.ND, c_global.dtype),
     )
     pipe = asc.TPipe()
-    asc.adv.register_matmul(pipe, matmul, tiling)
+    asc.adv.register_matmul(pipe, workspace, matmul, tiling)
     matmul.set_org_shape(tiling.m, tiling.n, tiling.k_a)
     matmul.set_single_shape(tiling.single_core_m, tiling.single_core_n, tiling.single_core_k)
     matmul.set_tensor_a(a_global)

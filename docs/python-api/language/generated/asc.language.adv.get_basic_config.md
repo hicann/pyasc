@@ -37,7 +37,7 @@ MatmulConfig结构体。
 ```python
 mm_cfg = asc.adv.get_basic_config(128, 256, 64)
 mm = asc.adv.Matmul(a_type, b_type, c_type, bias_type, mm_cfg)
-asc.adv.register_matmul(pipe, mm, tiling)
+asc.adv.register_matmul(pipe, workspace, mm, tiling)
 mm.set_tensor_a(gm_a)
 mm.set_tensor_b(gm_b)
 mm.set_bias(gm_bias)

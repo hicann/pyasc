@@ -73,8 +73,8 @@ func.func @emit_pair_reduce_sum(%dst: !ascendc.local_tensor<*xf16>, %src: !ascen
 // CHECK-NEXT:   constexpr int32_t c5_i32 = 5;
 // CHECK-NEXT:   constexpr int32_t c6_i32 = 6;
 // CHECK-NEXT:   AscendC::ReduceMax(v1, v2, v3, c0_i32, c3_i32, c4_i32, c5_i32);
-// CHECK-NEXT:   uint64_t v1_mask_list[] = {c1_i64, c2_i64};
-// CHECK-NEXT:   AscendC::ReduceMax(v1, v2, v3, v1_mask_list, c3_i32, c4_i32, c5_i32);
+// CHECK-NEXT:   uint64_t v1_mask_list0[] = {c1_i64, c2_i64};
+// CHECK-NEXT:   AscendC::ReduceMax(v1, v2, v3, v1_mask_list0, c3_i32, c4_i32, c5_i32);
 // CHECK-NEXT:   AscendC::ReduceMax(v1, v2, v3, c6_i32, c5_i32);
 // CHECK-NEXT:   return;
 // CHECK-NEXT: }
@@ -118,8 +118,8 @@ func.func @emit_reduce_max() {
 // CHECK-NEXT:   constexpr int32_t c5_i32 = 5;
 // CHECK-NEXT:   constexpr int32_t c6_i32 = 6;
 // CHECK-NEXT:   AscendC::ReduceMin(v1, v2, v3, c0_i32, c3_i32, c4_i32, c5_i32);
-// CHECK-NEXT:   uint64_t v1_mask_list[] = {c1_i64, c2_i64};
-// CHECK-NEXT:   AscendC::ReduceMin(v1, v2, v3, v1_mask_list, c3_i32, c4_i32, c5_i32);
+// CHECK-NEXT:   uint64_t v1_mask_list0[] = {c1_i64, c2_i64};
+// CHECK-NEXT:   AscendC::ReduceMin(v1, v2, v3, v1_mask_list0, c3_i32, c4_i32, c5_i32);
 // CHECK-NEXT:   AscendC::ReduceMin(v1, v2, v3, c6_i32, c5_i32);
 // CHECK-NEXT:   return;
 // CHECK-NEXT: }
@@ -162,8 +162,8 @@ func.func @emit_reduce_min() {
 // CHECK-NEXT:   constexpr int32_t c4_i32 = 4;
 // CHECK-NEXT:   constexpr int32_t c5_i32 = 5;
 // CHECK-NEXT:   AscendC::ReduceSum(v1, v2, v3, c0_i32, c3_i32, c4_i32);
-// CHECK-NEXT:   uint64_t v1_mask_list[] = {c1_i64, c2_i64};
-// CHECK-NEXT:   AscendC::ReduceSum(v1, v2, v3, v1_mask_list, c3_i32, c4_i32);
+// CHECK-NEXT:   uint64_t v1_mask_list0[] = {c1_i64, c2_i64};
+// CHECK-NEXT:   AscendC::ReduceSum(v1, v2, v3, v1_mask_list0, c3_i32, c4_i32);
 // CHECK-NEXT:   AscendC::ReduceSum(v1, v2, v3, c5_i32);
 // CHECK-NEXT:   return;
 // CHECK-NEXT: }
