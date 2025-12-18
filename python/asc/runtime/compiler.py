@@ -19,6 +19,7 @@ from typing import List, Optional, Tuple, final
 
 from asc._C import ir, passes, translation
 from asc.lib.runtime import CoreType, get_soc_version
+from asc.lib.utils import get_ascend_path
 from .config import KernelType
 from . import utils
 
@@ -273,8 +274,8 @@ class Compiler:
     def _gen_dst_kernel(self, tmp_dir: str, src: Path, dst: Path) -> None:
         target = CompilationTarget.get(self.options.kernel_type, self.platform)
         common_options = []
-        bisheng_dir = os.path.dirname(self.compiler)
-        tikcpp_path = os.path.realpath(os.path.join(bisheng_dir, "..", "..", "tikcpp"))
+        ascend_path = get_ascend_path()
+        tikcpp_path = os.path.realpath(os.path.join(ascend_path, "compiler", "tikcpp"))
         cann_version_file_path = os.path.join(tikcpp_path, "..", "..", "include", "version", "cann_version.h")
         if os.path.exists(cann_version_file_path):
             common_options += ["-include", cann_version_file_path]
