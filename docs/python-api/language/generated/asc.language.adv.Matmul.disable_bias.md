@@ -17,7 +17,7 @@ __aicore__ inline void DisableBias()
 **调用示例**
 
 ```python
-asc.adv.register_matmul(pipe, mm, tiling)
+asc.adv.register_matmul(pipe, workspace, mm, tiling)
 mm.set_tensor_a(gm_a)
 mm.set_tensor_b(gm_b)
 mm.disable_bias()   # 清除tiling中的Bias标志位

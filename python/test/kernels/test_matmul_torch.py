@@ -25,7 +25,6 @@ def matmul_kernel(a: asc.GlobalAddress, b: asc.GlobalAddress, c: asc.GlobalAddre
                   size_base_m: asc.ConstExpr[int], size_base_k: asc.ConstExpr[int], size_base_n: asc.ConstExpr[int],  #
                   size_single_m: asc.ConstExpr[int], size_single_k: asc.ConstExpr[int],
                   size_single_n: asc.ConstExpr[int], used_core_num: asc.ConstExpr[int], workspace: asc.GlobalAddress):
-    asc.set_sys_workspace(workspace)
     tiling = asc.adv.TCubeTiling(used_core_num=used_core_num, m=size_m, k_a=size_k, k_b=size_k, n=size_n,
                                  base_m=size_base_m, base_k=size_base_k, base_n=size_base_n,
                                  single_core_m=size_single_m, single_core_k=size_single_k, single_core_n=size_single_n,
@@ -48,7 +47,7 @@ def matmul_kernel(a: asc.GlobalAddress, b: asc.GlobalAddress, c: asc.GlobalAddre
         b=asc.adv.MatmulType(asc.TPosition.GM, asc.CubeFormat.ND, b_global.dtype),
         c=asc.adv.MatmulType(asc.TPosition.VECCALC, asc.CubeFormat.ND, c_global.dtype),
     )
-    asc.adv.register_matmul(pipe, matmul)
+    asc.adv.register_matmul(pipe, workspace, matmul)
     matmul.init(tiling)
     matmul.set_tensor_a(a_global)
     matmul.set_tensor_b(b_global)

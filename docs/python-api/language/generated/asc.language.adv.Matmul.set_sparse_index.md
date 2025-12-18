@@ -27,7 +27,7 @@ __aicore__ inline void SetSparseIndex(const GlobalTensor<uint8_t>& indexGlobal)
 @asc.jit(matmul_cube_only=True) # 使能纯Cube模式（只有矩阵计算）
 def matmul_kernel(...):
     ...
-    asc.adv.register_matmul(pipe, mm, tiling)
+    asc.adv.register_matmul(pipe, workspace, mm, tiling)
     mm.set_tensor_a(gm_a)
     mm.set_tensor_b(gm_b)
     mm.set_sparse_index(gm_index) # 设置索引矩阵

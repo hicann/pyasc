@@ -28,7 +28,7 @@ template <class T> __aicore__ inline void SetWorkspace(__gm__ const T* addr, int
 **调用示例**
 
 ```python
-asc.adv.register_matmul(pipe, mm, tiling)
+asc.adv.register_matmul(pipe, workspace, mm, tiling)
 mm.set_workspace(workspace_gm)
 mm.set_tensor_a(gm_a)
 mm.set_tensor_b(gm_b)

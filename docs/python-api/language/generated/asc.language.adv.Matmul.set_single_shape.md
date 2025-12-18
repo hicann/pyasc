@@ -20,7 +20,7 @@ __aicore__ inline void SetSingleShape(int singleM, int singleN, int singleK)
 **调用示例**
 
 ```python
-asc.adv.register_matmul(pipe, mm, tiling)
+asc.adv.register_matmul(pipe, workspace, mm, tiling)
 mm.set_tensor_a(gm_a)
 mm.set_tensor_b(gm_b)
 mm.set_bias(gm_bias)

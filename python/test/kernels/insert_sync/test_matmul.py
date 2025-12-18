@@ -18,7 +18,6 @@ import asc.lib.runtime as rt
 def matmul_kernel(a: asc.GlobalAddress, b: asc.GlobalAddress, c: asc.GlobalAddress, alpha: float,
                   tiling: asc.adv.TCubeTiling, workspace: asc.GlobalAddress, bias: asc.GlobalAddress,
                   blocksize: asc.ConstExpr):
-    asc.set_sys_workspace(workspace)
     tiling.share_l1_size = asc.property(asc.TOTAL_L1_SIZE)
     tiling.share_l0c_size = asc.property(asc.TOTAL_L0C_SIZE)
     offset_a, offset_b, offset_c, offset_bias = calc_offsets(tiling)
@@ -38,7 +37,7 @@ def matmul_kernel(a: asc.GlobalAddress, b: asc.GlobalAddress, c: asc.GlobalAddre
         bias=asc.adv.MatmulType(asc.TPosition.GM, asc.CubeFormat.ND, bias_global.dtype),
         matmul_config=asc.adv.MatmulConfig()
     )
-    asc.adv.register_matmul(pipe, matmul)
+    asc.adv.register_matmul(pipe, workspace, matmul)
     matmul.init(tiling)
     matmul.set_tensor_a(a_global)
     matmul.set_tensor_b(b_global)

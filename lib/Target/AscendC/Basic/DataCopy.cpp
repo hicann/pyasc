@@ -60,10 +60,7 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CopyL
 {
     auto &os = emitter.ostream();
 
-    auto maskName = (emitter.getOrCreateName(op.getDst()) + "_mask").str();
-    os << "uint64_t " << maskName << "[] = {";
-    llvm::interleaveComma(op.getMask(), os, [&](Value operand) { os << emitter.getOrCreateName(operand); });
-    os << "};\n";
+    auto maskName = printMask(emitter, op);
 
     os << ascNamespace << "::" << op.getAPIName();
     FAIL_OR(emitCopyTemplateArgs(emitter, op));

@@ -90,10 +90,7 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::Reduc
 {
     auto &os = emitter.ostream();
 
-    auto maskName = (emitter.getOrCreateName(op.getDst()) + "_mask_list").str();
-    os << "uint64_t " << maskName << "[] = {";
-    llvm::interleaveComma(op.getMask(), os, [&](Value operand) { os << emitter.getOrCreateName(operand); });
-    os << "};\n";
+    auto maskName = printMask(emitter, op);
 
     os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
        << emitter.getOrCreateName(op.getSrc()) << ", " << emitter.getOrCreateName(op.getSharedTmpBuffer()) << ", "
@@ -110,10 +107,7 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::Reduc
 {
     auto &os = emitter.ostream();
 
-    auto maskName = (emitter.getOrCreateName(op.getDst()) + "_mask_list").str();
-    os << "uint64_t " << maskName << "[] = {";
-    llvm::interleaveComma(op.getMask(), os, [&](Value operand) { os << emitter.getOrCreateName(operand); });
-    os << "};\n";
+    auto maskName = printMask(emitter, op);
 
     os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
        << emitter.getOrCreateName(op.getSrc()) << ", " << emitter.getOrCreateName(op.getSharedTmpBuffer()) << ", "
@@ -130,10 +124,7 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::Reduc
 {
     auto &os = emitter.ostream();
 
-    auto maskName = (emitter.getOrCreateName(op.getDst()) + "_mask_list").str();
-    os << "uint64_t " << maskName << "[] = {";
-    llvm::interleaveComma(op.getMask(), os, [&](Value operand) { os << emitter.getOrCreateName(operand); });
-    os << "};\n";
+    auto maskName = printMask(emitter, op);
 
     os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
        << emitter.getOrCreateName(op.getSrc()) << ", " << emitter.getOrCreateName(op.getSharedTmpBuffer()) << ", "

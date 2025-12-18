@@ -33,7 +33,7 @@ __aicore__ inline void SetTensorA(SrcAT aScalar)
 **调用示例**
 
 ```python
-asc.adv.register_matmul(pipe, mm, tiling)
+asc.adv.register_matmul(pipe, workspace, mm, tiling)
 # 示例一：左矩阵在Global Memory
 mm.set_tensor_a(gm_a)
 mm.set_tensor_b(gm_b)

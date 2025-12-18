@@ -26,7 +26,7 @@ __aicore__ inline void SetBias(const LocalTensor<BiasT>& inputBias)
 **调用示例**
 
 ```python
-asc.adv.register_matmul(pipe, mm, tiling)
+asc.adv.register_matmul(pipe, workspace, mm, tiling)
 mm.set_tensor_a(gm_a)
 mm.set_tensor_b(gm_b)
 mm.set_bias(gm_bias)    # 设置Bias

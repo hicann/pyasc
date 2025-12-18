@@ -225,7 +225,7 @@ def AscendC_MatmulEndOp : APIOp<"matmul.end", "End"> {
 }
 
 def AscendC_RegistMatmulObjOp : APIOp<"regist_matmul_obj", "REGIST_MATMUL_OBJ"> {
-  let arguments = (ins AscendC_Pipe:$pipe, AscendC_Matmul:$matmul,
+  let arguments = (ins AscendC_Pipe:$pipe, AnyType:$workspace, AscendC_Matmul:$matmul,
                    Optional<AscendC_TCubeTiling>:$tiling);
 }
 

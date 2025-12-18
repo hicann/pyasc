@@ -31,7 +31,6 @@ logging.basicConfig(level=logging.INFO)
 @asc.jit(always_compile=True)
 def matmul_kernel(a: asc.GlobalAddress, b: asc.GlobalAddress, c: asc.GlobalAddress, tiling: asc.adv.TCubeTiling,
                   workspace: asc.GlobalAddress):
-    asc.set_sys_workspace(workspace)
     offset_a, offset_b, offset_c, tail_m, tail_n = calc_offsets(tiling, IS_TRANS_A, IS_TRANS_B)
     a_global = asc.GlobalTensor()
     b_global = asc.GlobalTensor()
@@ -45,7 +44,7 @@ def matmul_kernel(a: asc.GlobalAddress, b: asc.GlobalAddress, c: asc.GlobalAddre
         b=asc.adv.MatmulType(asc.TPosition.GM, asc.CubeFormat.ND, b_global.dtype, IS_TRANS_B),
         c=asc.adv.MatmulType(asc.TPosition.GM, asc.CubeFormat.ND, c_global.dtype),
     )
-    asc.adv.register_matmul(pipe, matmul, tiling)
+    asc.adv.register_matmul(pipe, workspace, matmul, tiling)
     if asc.get_block_idx() < tiling.used_core_num:
         matmul.set_tensor_a(a_global, IS_TRANS_A)
         matmul.set_tensor_b(b_global, IS_TRANS_B)

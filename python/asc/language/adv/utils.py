@@ -43,7 +43,7 @@ def set_quant_scalar_docstring():
 
     .. code-block:: python
 
-        asc.adv.register_matmul(pipe, mm, tiling)
+        asc.adv.register_matmul(pipe, workspace, mm, tiling)
         tmp = 0.1
         ans = int.from_bytes(struct.pack('<f', tmp), 'little', signed=True) & 0xFFFFFFFF
         mm.set_quant_scalar(ans)
@@ -91,7 +91,7 @@ def set_quant_vector_docstring():
 
         gm_quant = asc.GlobalTensor()
         ...
-        asc.adv.register_matmul(pipe, mm, tiling)
+        asc.adv.register_matmul(pipe, workspace, mm, tiling)
         mm.set_quant_vector(gm_quant)
         mm.set_tensor_a(gm_a)
         mm.set_tensor_b(gm_b)
@@ -142,7 +142,7 @@ def set_org_shape_docstring():
 
     .. code-block:: python
 
-        asc.adv.register_matmul(pipe, mm, tiling)
+        asc.adv.register_matmul(pipe, workspace, mm, tiling)
         mm.set_tensor_a(gm_a)
         mm.set_tensor_b(gm_b)
         mm.set_bias(gm_bias)
@@ -186,7 +186,7 @@ def set_single_shape_docstring():
 
     .. code-block:: python
 
-        asc.adv.register_matmul(pipe, mm, tiling)
+        asc.adv.register_matmul(pipe, workspace, mm, tiling)
         mm.set_tensor_a(gm_a)
         mm.set_tensor_b(gm_b)
         mm.set_bias(gm_bias)
@@ -282,7 +282,7 @@ def set_sparse_index_docstring():
         @asc.jit(matmul_cube_only=True) # 使能纯Cube模式（只有矩阵计算）
         def matmul_kernel(...):
             ...
-            asc.adv.register_matmul(pipe, mm, tiling)
+            asc.adv.register_matmul(pipe, workspace, mm, tiling)
             mm.set_tensor_a(gm_a)
             mm.set_tensor_b(gm_b)
             mm.set_sparse_index(gm_index) # 设置索引矩阵
@@ -687,7 +687,7 @@ def set_workspace_docstring():
 
     .. code-block:: python
 
-        asc.adv.register_matmul(pipe, mm, tiling)
+        asc.adv.register_matmul(pipe, workspace, mm, tiling)
         mm.set_workspace(workspace_gm)
         mm.set_tensor_a(gm_a)
         mm.set_tensor_b(gm_b)
@@ -1005,7 +1005,7 @@ def iterate_all_docstring():
 
     .. code-block:: python
 
-        asc.adv.register_matmul(pipe, mm, tiling)
+        asc.adv.register_matmul(pipe, workspace, mm, tiling)
         mm.set_tensor_a(gm_a)
         mm.set_tensor_b(gm_b)
         mm.set_bias(gm_bias)
@@ -1310,7 +1310,7 @@ def set_tensor_a_docstring():
 
     .. code-block:: python
 
-        asc.adv.register_matmul(pipe, mm, tiling)
+        asc.adv.register_matmul(pipe, workspace, mm, tiling)
         # 示例一：左矩阵在Global Memory
         mm.set_tensor_a(gm_a)
         mm.set_tensor_b(gm_b)
@@ -1367,7 +1367,7 @@ def set_tensor_b_docstring():
 
     .. code-block:: python
 
-        asc.adv.register_matmul(pipe, mm, tiling)
+        asc.adv.register_matmul(pipe, workspace, mm, tiling)
         mm.set_tensor_a(gm_a)
         mm.set_tensor_b(gm_b)   # 设置右矩阵B
         mm.set_bias(gm_bias)
@@ -1414,7 +1414,7 @@ def set_bias_docstring():
 
     .. code-block:: python
 
-        asc.adv.register_matmul(pipe, mm, tiling)
+        asc.adv.register_matmul(pipe, workspace, mm, tiling)
         mm.set_tensor_a(gm_a)
         mm.set_tensor_b(gm_b)   
         mm.set_bias(gm_bias)    # 设置Bias
@@ -1450,7 +1450,7 @@ def disable_bias_docstring():
 
     .. code-block:: python
 
-        asc.adv.register_matmul(pipe, mm, tiling)
+        asc.adv.register_matmul(pipe, workspace, mm, tiling)
         mm.set_tensor_a(gm_a)
         mm.set_tensor_b(gm_b)   
         mm.disable_bias()   # 清除tiling中的Bias标志位
@@ -1507,7 +1507,7 @@ def get_basic_config_docstring():
 
         mm_cfg = asc.adv.get_basic_config(128, 256, 64)
         mm = asc.adv.Matmul(a_type, b_type, c_type, bias_type, mm_cfg)
-        asc.adv.register_matmul(pipe, mm, tiling)
+        asc.adv.register_matmul(pipe, workspace, mm, tiling)
         mm.set_tensor_a(gm_a)
         mm.set_tensor_b(gm_b)   
         mm.set_bias(gm_bias)
@@ -1630,7 +1630,7 @@ def get_normal_config_docstring():
 
         mm_cfg = asc.adv.get_normal_config()
         mm = asc.adv.Matmul(a_type, b_type, c_type, bias_type, mm_cfg)
-        asc.adv.register_matmul(pipe, mm, tiling)
+        asc.adv.register_matmul(pipe, workspace, mm, tiling)
         mm.set_tensor_a(gm_a)
         mm.set_tensor_b(gm_b)   
         mm.set_bias(gm_bias)
@@ -1706,7 +1706,7 @@ def get_mdl_config_docstring():
 
         mm_cfg = asc.adv.get_mdl_config()
         mm = asc.adv.Matmul(a_type, b_type, c_type, bias_type, mm_cfg)
-        asc.adv.register_matmul(pipe, mm, tiling)
+        asc.adv.register_matmul(pipe, workspace, mm, tiling)
         mm.set_tensor_a(gm_a)
         mm.set_tensor_b(gm_b)   
         mm.set_bias(gm_bias)
@@ -1765,7 +1765,7 @@ def get_special_mdl_config_docstring():
 
         mm_cfg = asc.adv.get_special_mdl_config()
         mm = asc.adv.Matmul(a_type, b_type, c_type, bias_type, mm_cfg)
-        asc.adv.register_matmul(pipe, mm, tiling)
+        asc.adv.register_matmul(pipe, workspace, mm, tiling)
         mm.set_tensor_a(gm_a)
         mm.set_tensor_b(gm_b)   
         mm.set_bias(gm_bias)
@@ -1829,7 +1829,7 @@ def get_ib_share_norm_config_docstring():
 
         mm_cfg = asc.adv.get_ib_share_norm_config()
         mm = asc.adv.Matmul(a_type, b_type, c_type, bias_type, mm_cfg)
-        asc.adv.register_matmul(pipe, mm, tiling)
+        asc.adv.register_matmul(pipe, workspace, mm, tiling)
         mm.set_tensor_a(gm_a)
         mm.set_tensor_b(gm_b)   
         mm.set_bias(gm_bias)
@@ -2030,9 +2030,9 @@ def set_regist_matmul_docstring():
 
         pipe = asc.Tpipe()
         # 推荐：初始化单个matmul对象，传入tiling参数
-        mm.register_matmul(pipe, mm, tiling)
+        mm.register_matmul(pipe, workspace, mm, tiling)
         # 初始化单个matmul对象，未传入tiling参数。注意，该场景下需要使用Init接口单独传入tiling参数。这种方式将matmul对象的初始化和tiling的设置分离，比如，Tiling可变的场景，可通过这种方式多次对Tiling进行重新设置
-        mm.register_matmul(pipe, mm)
+        mm.register_matmul(pipe, workspace, mm)
         mm.init(&tiling)
 
     """

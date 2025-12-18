@@ -27,7 +27,6 @@ logging.basicConfig(level=logging.INFO)
 @asc.jit(always_compile=True)
 def matmul_leakyrelu_kernel(a: asc.GlobalAddress, b: asc.GlobalAddress, c: asc.GlobalAddress, bias: asc.GlobalAddress,
                 alpha: float, tiling: asc.adv.TCubeTiling, workspace: asc.GlobalAddress):
-    asc.set_sys_workspace(workspace)
     offset_a, offset_b, offset_c, offset_bias = calc_offsets(tiling)
     a_global = asc.GlobalTensor()
     b_global = asc.GlobalTensor()
@@ -47,7 +46,7 @@ def matmul_leakyrelu_kernel(a: asc.GlobalAddress, b: asc.GlobalAddress, c: asc.G
         c=asc.adv.MatmulType(asc.TPosition.VECCALC, asc.CubeFormat.ND, c_global.dtype),
         bias=asc.adv.MatmulType(asc.TPosition.GM, asc.CubeFormat.ND, bias_global.dtype),
     )
-    asc.adv.register_matmul(pipe, matmul, tiling)
+    asc.adv.register_matmul(pipe, workspace, matmul, tiling)
     matmul.set_tensor_a(a_global)
     matmul.set_tensor_b(b_global)
     matmul.set_bias(bias_global)

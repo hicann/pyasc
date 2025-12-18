@@ -25,7 +25,7 @@ __aicore__ inline void SetQuantVector(const GlobalTensor<uint64_t>& quantTensor)
 ```python
 gm_quant = asc.GlobalTensor()
 ...
-asc.adv.register_matmul(pipe, mm, tiling)
+asc.adv.register_matmul(pipe, workspace, mm, tiling)
 mm.set_quant_vector(gm_quant)
 mm.set_tensor_a(gm_a)
 mm.set_tensor_b(gm_b)
