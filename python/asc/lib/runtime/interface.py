@@ -379,17 +379,6 @@ def c2c_ctrl_addr() -> int:
     return int(addr[0])
 
 
-def memory_sizes() -> support.MemorySizes:
-    _lazy_init(need_device=False)
-    sizes = support.MemorySizes.Handle()
-    state.lib.call(
-        "AiCoreMemorySizesWrapper",
-        ctypes.c_void_p(ctypes.addressof(sizes)),
-    )
-    kwargs = {field[0]: getattr(sizes, field[0]) for field in sizes.fields}
-    return support.MemorySizes(**kwargs)
-
-
 def set_pro_switch(command_type: support.ProfilingCommandHandle.Type, device_id: Optional[int] = None,
                    conf: int = 0b11111):
     device_ids = (ctypes.c_uint32 * support.ProfilingValues.RT_PROF_MAX_DEV_NUM)(_select_device_id(device_id))
