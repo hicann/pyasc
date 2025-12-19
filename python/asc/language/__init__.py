@@ -222,7 +222,10 @@ from .core.types import (
     Nz2NdParamsFull,
     DataCopyCO12DstParams,
     LoadData2DParams,
+    LoadData2DParamsV2,
     LoadData2dTransposeParams,
+    LoadData2dTransposeParamsV2,
+    LoadData3DParamsV2Pro,
     MmadParams,
 )
 from .core.aipp_types import (

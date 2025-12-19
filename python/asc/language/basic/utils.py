@@ -1193,6 +1193,27 @@ def load_data_docstring():
         __aicore__ inline void LoadData(const LocalTensor<T>& dst,
                                         const GlobalTensor<T>& src,
                                         const LoadData2DParams& loadDataParams)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void LoadData(const LocalTensor<T>& dst,
+                                        const LocalTensor<T>& src,
+                                        const LoadData2DParamsV2& loadDataParams)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void LoadData(const LocalTensor<T>& dst,
+                                        const GlobalTensor<T>& src,
+                                        const LoadData2DParamsV2& loadDataParams)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void LoadData(const LocalTensor<T>& dst,
+                                        const LocalTensor<T>& src,
+                                        const LoadData3DParamsV2Pro& loadDataParams)
     """
 
     param_list = """
@@ -1208,15 +1229,36 @@ def load_data_docstring():
       - 当为 GlobalTensor 时，表示从 Global Memory 按 2D 方式加载数据到 LocalTensor。
       - 元素数据类型需与 dst 保持一致。
 
-    - params：二维加载参数，类型为 LoadData2DParams。
-      - startIndex：分形矩阵ID，说明搬运起始位置为源操作数中第几个分形（0为源操作数中第1个分形矩阵）。取值范围：startIndex∈[0, 65535] 。单位：512B。默认为0。
-      - repeatTimes：迭代次数，每个迭代可以处理512B数据。取值范围：repeatTimes∈[1, 255]。
-      - srcStride：相邻迭代间，源操作数前一个分形与后一个分形起始地址的间隔，单位：512B。取值范围：src_stride∈[0, 65535]。默认为0。
-      - sid：预留参数，配置为0即可。
-      - dstGap：相邻迭代间，目的操作数前一个分形结束地址与后一个分形起始地址的间隔，单位：512B。取值范围：dstGap∈[0, 65535]。默认为0。
-      - ifTranspose：是否启用转置功能，对每个分形矩阵进行转置，默认为false:
-      - addrMode：预留参数，配置为0即可。
-    """
+    - params：二维加载参数，类型为 LoadData2DParams 或 LoadData2DParamsV2 或 LoadData3DParamsV2Pro。
+      - LoadData2DParams 结构体
+        - startIndex：分形矩阵ID，说明搬运起始位置为源操作数中第几个分形（0为源操作数中第1个分形矩阵）。取值范围：startIndex∈[0, 65535] 。单位：512B。默认为0。
+        - repeatTimes：迭代次数，每个迭代可以处理512B数据。取值范围：repeatTimes∈[1, 255]。
+        - srcStride：相邻迭代间，源操作数前一个分形与后一个分形起始地址的间隔，单位：512B。取值范围：src_stride∈[0, 65535]。默认为0。
+        - sid：预留参数，配置为0即可。
+        - dstGap：相邻迭代间，目的操作数前一个分形结束地址与后一个分形起始地址的间隔，单位：512B。取值范围：dstGap∈[0, 65535]。默认为0。
+        - ifTranspose：是否启用转置功能，对每个分形矩阵进行转置，默认为false:
+        - addrMode：预留参数，配置为0即可。
+
+      - LoadData2DParamsV2 结构体
+        - m_start_position：M维起始位置，取值范围：m_start_position∈[0, 65535]。默认为0。
+        - k_start_position：K维起始位置，取值范围：k_start_position∈[0, 65535]。默认为0。
+        - m_step：M维步长，取值范围：m_step∈[0, 65535]。默认为0。
+        - k_step：K维步长，取值范围：k_step∈[0, 65535]。默认为0。
+        - src_stride：源操作数步长，取值范围：src_stride∈[-2147483648, 2147483647]。默认为0。
+        - dst_stride：目的操作数步长，取值范围：dst_stride∈[0, 65535]。默认为0。
+        - if_transpose：是否启用转置功能，默认为false。
+        - sid：流ID，取值范围：sid∈[0, 255]。默认为0。
+
+      - LoadData3DParamsV2Pro 结构体
+        - channel_size：通道大小，取值范围：channel_size∈[0, 65535]。默认为0。
+        - en_transpose：是否启用转置功能，默认为false。
+        - en_small_k：是否启用小K优化，默认为false。
+        - filter_size_w：是否启用滤波器宽度优化，默认为false。
+        - filter_size_h：是否启用滤波器高度优化，默认为false。
+        - f_matrix_ctrl：是否启用矩阵控制，默认为false。
+        - ext_config：扩展配置，取值范围：ext_config∈[0, 18446744073709551615]。默认为0。
+        - filter_config：滤波器配置，取值范围：filter_config∈[0, 18446744073709551615]。默认为0x10101010101。
+      """
 
     constraint_list = """
     **约束说明**
@@ -1266,6 +1308,61 @@ def load_data_docstring():
 
               asc.load_data(y_local, x_local, params)
               asc.load_data(x_local, x_gm, params)
+
+    - Local Memory 内部 2D 搬运（V2版本，Local -> Local）
+
+      .. code-block:: python
+
+          @asc.jit
+          def kernel_load_data_l2l_v2(x: asc.GlobalAddress) -> None:
+              x_local = asc.LocalTensor(dtype=asc.float16,
+                                        pos=asc.TPosition.VECIN,
+                                        addr=0, tile_size=512)
+              y_local = asc.LocalTensor(dtype=asc.float16,
+                                        pos=asc.TPosition.VECOUT,
+                                        addr=0, tile_size=512)
+
+              params_v2 = asc.LoadData2DParamsV2(0, 0, 16, 16, 0, 0, False, 0)
+
+              asc.load_data(y_local, x_local, params_v2)
+
+    - Global Memory 到 Local Memory 的 2D 搬运（V2版本，Global -> Local）
+
+      .. code-block:: python
+
+          @asc.jit
+          def kernel_load_data_g2l_v2(x: asc.GlobalAddress) -> None:
+              x_local = asc.LocalTensor(dtype=asc.float16,
+                                        pos=asc.TPosition.VECIN,
+                                        addr=0, tile_size=512)
+              y_local = asc.LocalTensor(dtype=asc.float16,
+                                        pos=asc.TPosition.VECOUT,
+                                        addr=0, tile_size=512)
+
+              x_gm = asc.GlobalTensor()
+              x_gm.set_global_buffer(x)
+
+              params_v2 = asc.LoadData2DParamsV2(0, 0, 16, 16, 0, 0, False, 0)
+
+              asc.load_data(y_local, x_local, params_v2)
+              asc.load_data(x_local, x_gm, params_v2)
+
+    - Local Memory 内部 3D 搬运（V2Pro版本，Local -> Local）
+
+      .. code-block:: python
+
+          @asc.jit
+          def kernel_load_data_3d_v2pro(x: asc.GlobalAddress) -> None:
+              x_local = asc.LocalTensor(dtype=asc.float16,
+                                        pos=asc.TPosition.VECIN,
+                                        addr=0, tile_size=512)
+              y_local = asc.LocalTensor(dtype=asc.float16,
+                                        pos=asc.TPosition.VECOUT,
+                                        addr=0, tile_size=512)
+
+              params_3d_v2_pro = asc.LoadData3DParamsV2Pro(16, False, False, False, False, False, 0, 0x10101010101)
+
+              asc.load_data(y_local, x_local, params_3d_v2_pro)
     """
 
     return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
@@ -1285,6 +1382,13 @@ def load_data_with_transpose_docstring():
         __aicore__ inline void LoadDataWithTranspose(const LocalTensor<T>& dst,
                                                      const LocalTensor<T>& src,
                                                      const LoadData2dTransposeParams& loadDataParams)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void LoadDataWithTranspose(const LocalTensor<T>& dst,
+                                                     const LocalTensor<T>& src,
+                                                     const LoadData2dTransposeParamsV2& loadDataParams)
     """
 
     param_list = """
@@ -1300,13 +1404,23 @@ def load_data_with_transpose_docstring():
       - 仅支持 Local → Local（A1/B1 → A2/B2），不支持 GlobalTensor。
       - 数据类型必须与 dst 一致。
 
-    - params：二维转置加载参数，类型为 LoadData2dTransposeParams。
-      - startIndex：方块矩阵ID，搬运起始位置为源操作数中第几个方块矩阵（0 为源操作数中第1个方块矩阵）。取值范围：startIndex∈[0, 65535] 。默认为0。
-      - repeatTimes：迭代次数，取值范围：repeatTimes∈[0, 255]。默认为0。
-      - srcStride：相邻迭代间，源操作数前一个分形与后一个分形起始地址的间隔。这里的单位实际上是拼接后的方块矩阵的大小。取值范围：srcStride∈[0, 65535]。默认为0。
-      - dstGap：相邻迭代间，目的操作数前一个迭代第一个分形的结束地址到下一个迭代第一个分形起始地址的间隔，单位：512B。取值范围：dstGap∈[0, 65535]。默认为0。
-      - dstFracGap：每个迭代内目的操作数转置前一个分形结束地址与后一个分形起始地址的间隔，单位为512B，仅在数据类型为float/int32_t/uint32_t/uint8_t/int8_t/int4b_t时有效。取值范围：dstFracGap∈[0, 65535]。默认为0。
-      - addrMode：预留参数
+    - params：二维转置加载参数，类型为 LoadData2dTransposeParams 或 LoadData2dTransposeParamsV2。
+      - LoadData2dTransposeParams 结构体
+        - startIndex：方块矩阵ID，搬运起始位置为源操作数中第几个方块矩阵（0 为源操作数中第1个方块矩阵）。取值范围：startIndex∈[0, 65535] 。默认为0。
+        - repeatTimes：迭代次数，取值范围：repeatTimes∈[0, 255]。默认为0。
+        - srcStride：相邻迭代间，源操作数前一个分形与后一个分形起始地址的间隔。这里的单位实际上是拼接后的方块矩阵的大小。取值范围：srcStride∈[0, 65535]。默认为0。
+        - dstGap：相邻迭代间，目的操作数前一个迭代第一个分形的结束地址到下一个迭代第一个分形起始地址的间隔，单位：512B。取值范围：dstGap∈[0, 65535]。默认为0。
+        - dstFracGap：每个迭代内目的操作数转置前一个分形结束地址与后一个分形起始地址的间隔，单位为512B，仅在数据类型为float/int32_t/uint32_t/uint8_t/int8_t/int4b_t时有效。取值范围：dstFracGap∈[0, 65535]。默认为0。
+        - addrMode：预留参数
+
+      - LoadData2dTransposeParamsV2 结构体
+        - start_index：方块矩阵ID，搬运起始位置为源操作数中第几个方块矩阵（0 为源操作数中第1个方块矩阵）。取值范围：start_index∈[0, 65535] 。默认为0。
+        - repeat_times：迭代次数，取值范围：repeat_times∈[0, 255]。默认为0。
+        - src_stride：源操作数步长，取值范围：src_stride∈[0, 65535]。默认为0。
+        - dst_gap：目的操作数间隔，取值范围：dst_gap∈[0, 65535]。默认为0。
+        - dst_frac_gap：分形间隔，取值范围：dst_frac_gap∈[0, 65535]。默认为0。
+        - src_frac_gap：源分形间隔，取值范围：src_frac_gap∈[0, 65535]。默认为0。
+        - addr_mode：地址模式，取值范围：addr_mode∈[0, 255]。默认为0。
     """
 
     constraint_list = """
@@ -1315,33 +1429,50 @@ def load_data_with_transpose_docstring():
     - repeatTimes 为 0 时表示不执行搬运操作。
     - 开发者需要保证目的操作数转置后的分形没有重叠。
     - 操作数地址对齐要求请参见通用地址对齐约束。
+
+    - repeat_times 为 0 时表示不执行搬运操作。
+    - 开发者需要保证目的操作数转置后的分形没有重叠。
+    - 操作数地址对齐要求请参见通用地址对齐约束。
     """
 
     py_example = """
     **调用示例**
 
-    .. code-block:: python
+    - 调用示例（V1版本）
+    
+      .. code-block:: python
 
-        @asc.jit
-        def kernel_load_data_with_transpose(x: asc.GlobalAddress) -> None:
-            x_local = asc.LocalTensor(dtype=asc.float16,
+          @asc.jit
+          def kernel_load_data_with_transpose(x: asc.GlobalAddress) -> None:
+              x_local = asc.LocalTensor(dtype=asc.float16,
+                                        pos=asc.TPosition.VECIN,
+                                        addr=0, tile_size=512)
+
+              y_local = asc.LocalTensor(dtype=asc.float16,
+                                        pos=asc.TPosition.VECOUT,
+                                        addr=0, tile_size=512)
+
+              params = asc.LoadData2dTransposeParams(0, 4, 0, 0, 0, 0)
+
+              asc.load_data_with_transpose(y_local, x_local, params)
+
+    - 调用示例（V2版本）
+
+      .. code-block:: python
+
+          @asc.jit
+          def kernel_load_data_with_transpose_v2(x: asc.GlobalAddress) -> None:
+              x_local = asc.LocalTensor(dtype=asc.float16,
                                       pos=asc.TPosition.VECIN,
                                       addr=0, tile_size=512)
 
-            y_local = asc.LocalTensor(dtype=asc.float16,
+              y_local = asc.LocalTensor(dtype=asc.float16,
                                       pos=asc.TPosition.VECOUT,
                                       addr=0, tile_size=512)
 
-            params = asc.LoadData2dTransposeParams(
-                0,  # startIndex
-                4,  # repeatTimes
-                0,  # srcStride
-                0,  # dstGap
-                0,  # dstFracGap
-                0   # addrMode
-            )
+              params_v2 = asc.LoadData2dTransposeParamsV2(0, 4, 0, 0, 0, 0, 0)
 
-            asc.load_data_with_transpose(y_local, x_local, params)
+              asc.load_data_with_transpose(y_local, x_local, params_v2)
     """
 
     return func_introduction, cpp_signature, param_list, "", constraint_list, py_example

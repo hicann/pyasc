@@ -992,6 +992,146 @@ class LoadData2DParams(IRValue):
         return self.handle
 
 
+class LoadData2DParamsV2(IRValue):
+
+    @overload
+    def __init__(
+        self,
+        m_start_position: int = 0,
+        k_start_position: int = 0,
+        m_step: int = 0,
+        k_step: int = 0,
+        src_stride: int = 0,
+        dst_stride: int = 0,
+        if_transpose: bool = False,
+        sid: int = 0,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+        """This constructor should not be called by user"""
+        ...
+
+    def __init__(
+        self,
+        m_start_position: RuntimeInt = 0,
+        k_start_position: RuntimeInt = 0,
+        m_step: RuntimeInt = 0,
+        k_step: RuntimeInt = 0,
+        src_stride: RuntimeInt = 0,
+        dst_stride: RuntimeInt = 0,
+        if_transpose: RuntimeBool = False,
+        sid: RuntimeInt = 0,
+        handle: Optional[IRHandle] = None,
+    ) -> None:
+        if handle is not None:
+            self.handle = handle
+            return
+
+        builder = global_builder.get_ir_builder()
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_LoadData2DParamsV2Type(),
+            [
+                _mat(m_start_position, KnownTypes.uint32).to_ir(),
+                _mat(k_start_position, KnownTypes.uint32).to_ir(),
+                _mat(m_step, KnownTypes.uint16).to_ir(),
+                _mat(k_step, KnownTypes.uint16).to_ir(),
+                _mat(src_stride, KnownTypes.int32).to_ir(),
+                _mat(dst_stride, KnownTypes.uint16).to_ir(),
+                _mat(if_transpose, KnownTypes.int1).to_ir(),
+                _mat(sid, KnownTypes.uint8).to_ir(),
+            ],
+            builder.get_type_array_attr([
+                builder.get_ui32_type(),
+                builder.get_ui32_type(),
+                builder.get_ui16_type(),
+                builder.get_ui16_type(),
+                builder.get_i32_type(),
+                builder.get_ui16_type(),
+                builder.get_i1_type(),
+                builder.get_ui8_type(),
+            ]),
+        )
+
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> "LoadData2DParamsV2":
+        return cls(handle=handle)
+
+    def to_ir(self) -> IRHandle:
+        return self.handle
+
+
+class LoadData3DParamsV2Pro(IRValue):
+
+    @overload
+    def __init__(
+        self,
+        channel_size: int = 0,
+        en_transpose: bool = False,
+        en_small_k: bool = False,
+        filter_size_w: bool = False,
+        filter_size_h: bool = False,
+        f_matrix_ctrl: bool = False,
+        ext_config: int = 0,
+        filter_config: int = 0x10101010101,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+        """This constructor should not be called by user"""
+        ...
+
+    def __init__(
+        self,
+        channel_size: RuntimeInt = 0,
+        en_transpose: RuntimeBool = False,
+        en_small_k: RuntimeBool = False,
+        filter_size_w: RuntimeBool = False,
+        filter_size_h: RuntimeBool = False,
+        f_matrix_ctrl: RuntimeBool = False,
+        ext_config: RuntimeInt = 0,
+        filter_config: RuntimeInt = 0x10101010101,
+        handle: Optional[IRHandle] = None,
+    ) -> None:
+        if handle is not None:
+            self.handle = handle
+            return
+
+        builder = global_builder.get_ir_builder()
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_LoadData3DParamsV2ProType(),
+            [
+                _mat(channel_size, KnownTypes.uint16).to_ir(),
+                _mat(en_transpose, KnownTypes.int1).to_ir(),
+                _mat(en_small_k, KnownTypes.int1).to_ir(),
+                _mat(filter_size_w, KnownTypes.int1).to_ir(),
+                _mat(filter_size_h, KnownTypes.int1).to_ir(),
+                _mat(f_matrix_ctrl, KnownTypes.int1).to_ir(),
+                _mat(ext_config, KnownTypes.uint64).to_ir(),
+                _mat(filter_config, KnownTypes.uint64).to_ir(),
+            ],
+            builder.get_type_array_attr([
+                builder.get_ui16_type(),
+                builder.get_i1_type(),
+                builder.get_i1_type(),
+                builder.get_i1_type(),
+                builder.get_i1_type(),
+                builder.get_i1_type(),
+                builder.get_ui64_type(),
+                builder.get_ui64_type(),
+            ]),
+        )
+
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> "LoadData3DParamsV2Pro":
+        return cls(handle=handle)
+
+    def to_ir(self) -> IRHandle:
+        return self.handle
+
+
 class LoadData2dTransposeParams(IRValue):
 
     @overload
@@ -1049,6 +1189,72 @@ class LoadData2dTransposeParams(IRValue):
 
     @classmethod
     def from_ir(cls, handle: IRHandle) -> "LoadData2dTransposeParams":
+        return cls(handle=handle)
+
+    def to_ir(self) -> IRHandle:
+        return self.handle
+
+
+class LoadData2dTransposeParamsV2(IRValue):
+
+    @overload
+    def __init__(
+        self,
+        start_index: int = 0,
+        repeat_times: int = 0,
+        src_stride: int = 0,
+        dst_gap: int = 0,
+        dst_frac_gap: int = 0,
+        src_frac_gap: int = 0,
+        addr_mode: int = 0,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+        """This constructor should not be called by user"""
+        ...
+
+    def __init__(
+        self,
+        start_index: RuntimeInt = 0,
+        repeat_times: RuntimeInt = 0,
+        src_stride: RuntimeInt = 0,
+        dst_gap: RuntimeInt = 0,
+        dst_frac_gap: RuntimeInt = 0,
+        src_frac_gap: RuntimeInt = 0,
+        addr_mode: RuntimeInt = 0,
+        handle: Optional[IRHandle] = None,
+    ) -> None:
+        if handle is not None:
+            self.handle = handle
+            return
+
+        builder = global_builder.get_ir_builder()
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_LoadData2dTransposeParamsV2Type(),
+            [
+                _mat(start_index, KnownTypes.uint16).to_ir(),
+                _mat(repeat_times, KnownTypes.uint8).to_ir(),
+                _mat(src_stride, KnownTypes.uint16).to_ir(),
+                _mat(dst_gap, KnownTypes.uint16).to_ir(),
+                _mat(dst_frac_gap, KnownTypes.uint16).to_ir(),
+                _mat(src_frac_gap, KnownTypes.uint16).to_ir(),
+                _mat(addr_mode, KnownTypes.uint8).to_ir(),
+            ],
+            builder.get_type_array_attr([
+                builder.get_ui16_type(),
+                builder.get_ui8_type(),
+                builder.get_ui16_type(),
+                builder.get_ui16_type(),
+                builder.get_ui16_type(),
+                builder.get_ui16_type(),
+                builder.get_ui8_type(),
+            ]),
+        )
+
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> "LoadData2dTransposeParamsV2":
         return cls(handle=handle)
 
     def to_ir(self) -> IRHandle:

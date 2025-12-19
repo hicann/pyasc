@@ -8,23 +8,31 @@
 
 // RUN: ascir-translate -mlir-to-ascendc %s | FileCheck %s
 
-// CHECK-LABEL: void emit_load_data(AscendC::LocalTensor<int32_t> v1, AscendC::LocalTensor<int32_t> v2, AscendC::GlobalTensor<int32_t> v3, AscendC::LoadData2DParams v4)
+// CHECK-LABEL: void emit_load_data(AscendC::LocalTensor<int32_t> v1, AscendC::LocalTensor<int32_t> v2, AscendC::GlobalTensor<int32_t> v3, AscendC::LoadData2DParams v4, AscendC::LoadData2DParamsV2 v5, AscendC::LoadData3DParamsV2Pro v6)
 // CHECK-NEXT:   AscendC::LoadData(v1, v2, v4);
 // CHECK-NEXT:   AscendC::LoadData(v1, v3, v4);
+// CHECK-NEXT:   AscendC::LoadData(v1, v2, v5);
+// CHECK-NEXT:   AscendC::LoadData(v1, v3, v5);
+// CHECK-NEXT:   AscendC::LoadData(v1, v2, v6);
 // CHECK-NEXT:   return;
 // CHECK-NEXT: }
-func.func @emit_load_data(%arg0 : !ascendc.local_tensor<i32>, %arg1 : !ascendc.local_tensor<i32>, %arg2 : !ascendc.global_tensor<i32>, %arg3 : !ascendc.load_data_2d_params) {
+func.func @emit_load_data(%arg0 : !ascendc.local_tensor<i32>, %arg1 : !ascendc.local_tensor<i32>, %arg2 : !ascendc.global_tensor<i32>, %arg3 : !ascendc.load_data_2d_params, %arg4 : !ascendc.load_data_2d_params_v2, %arg5 : !ascendc.load_data_3d_params_v2_pro) {
   ascendc.load_data_l0  %arg0, %arg1, %arg3 : !ascendc.local_tensor<i32>, !ascendc.local_tensor<i32>, !ascendc.load_data_2d_params
   ascendc.load_data_g2l %arg0, %arg2, %arg3 : !ascendc.local_tensor<i32>, !ascendc.global_tensor<i32>, !ascendc.load_data_2d_params
+  ascendc.load_data_l0_v2  %arg0, %arg1, %arg4 : !ascendc.local_tensor<i32>, !ascendc.local_tensor<i32>, !ascendc.load_data_2d_params_v2
+  ascendc.load_data_g2l_v2 %arg0, %arg2, %arg4 : !ascendc.local_tensor<i32>, !ascendc.global_tensor<i32>, !ascendc.load_data_2d_params_v2
+  ascendc.load_data_3d_l0_v2pro %arg0, %arg1, %arg5 : !ascendc.local_tensor<i32>, !ascendc.local_tensor<i32>, !ascendc.load_data_3d_params_v2_pro
   return
 }
 
-// CHECK-LABEL: void emit_load_data_with_transpose(AscendC::LocalTensor<int32_t> v1, AscendC::LocalTensor<int32_t> v2, AscendC::LoadData2dTransposeParams v3)
+// CHECK-LABEL: void emit_load_data_with_transpose(AscendC::LocalTensor<int32_t> v1, AscendC::LocalTensor<int32_t> v2, AscendC::LoadData2dTransposeParams v3, AscendC::LoadData2dTransposeParamsV2 v4)
 // CHECK-NEXT:   AscendC::LoadDataWithTranspose(v1, v2, v3);
+// CHECK-NEXT:   AscendC::LoadDataWithTranspose(v1, v2, v4);
 // CHECK-NEXT:   return;
 // CHECK-NEXT: }
-func.func @emit_load_data_with_transpose(%v1 : !ascendc.local_tensor<i32>, %v2 : !ascendc.local_tensor<i32>, %v3 : !ascendc.load_data_2d_transpose_params) {
+func.func @emit_load_data_with_transpose(%v1 : !ascendc.local_tensor<i32>, %v2 : !ascendc.local_tensor<i32>, %v3 : !ascendc.load_data_2d_transpose_params, %v4 : !ascendc.load_data_2d_transpose_params_v2) {
   ascendc.load_data_with_transpose %v1, %v2, %v3 : !ascendc.local_tensor<i32>, !ascendc.local_tensor<i32>, !ascendc.load_data_2d_transpose_params
+  ascendc.load_data_with_transpose_v2 %v1, %v2, %v4 : !ascendc.local_tensor<i32>, !ascendc.local_tensor<i32>, !ascendc.load_data_2d_transpose_params_v2
   return
 }
 

@@ -4,6 +4,12 @@
 
 ### asc.language.basic.load_data(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src: [GlobalTensor](../core.md#asc.language.core.GlobalTensor), params: LoadData2DParams) → None
 
+### asc.language.basic.load_data(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src: [LocalTensor](../core.md#asc.language.core.LocalTensor), params: LoadData2DParamsV2) → None
+
+### asc.language.basic.load_data(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src: [GlobalTensor](../core.md#asc.language.core.GlobalTensor), params: LoadData2DParamsV2) → None
+
+### asc.language.basic.load_data(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src: [LocalTensor](../core.md#asc.language.core.LocalTensor), params: LoadData3DParamsV2Pro) → None
+
 源操作数/目的操作数的数据类型为uint8_t/int8_t时，分形矩阵大小在A1/A2上为16\*32， 在B1/B2上为32\*16。
 源操作数/目的操作数的数据类型为uint16_t/int16_t/half/bfloat16_t时，分形矩阵在A1/B1/A2/B2上的大小为16\*16。
 源操作数/目的操作数的数据类型为uint32_t/int32_t/float时，分形矩阵大小在A1/A2上为16\*8， 在B1/B2上为8\*16。
@@ -27,6 +33,27 @@ __aicore__ inline void LoadData(const LocalTensor<T>& dst,
                                 const LoadData2DParams& loadDataParams)
 ```
 
+```c++
+template <typename T>
+__aicore__ inline void LoadData(const LocalTensor<T>& dst,
+                                const LocalTensor<T>& src,
+                                const LoadData2DParamsV2& loadDataParams)
+```
+
+```c++
+template <typename T>
+__aicore__ inline void LoadData(const LocalTensor<T>& dst,
+                                const GlobalTensor<T>& src,
+                                const LoadData2DParamsV2& loadDataParams)
+```
+
+```c++
+template <typename T>
+__aicore__ inline void LoadData(const LocalTensor<T>& dst,
+                                const LocalTensor<T>& src,
+                                const LoadData3DParamsV2Pro& loadDataParams)
+```
+
 **参数说明**
 
 - dst：目的操作数，类型为 LocalTensor。
@@ -37,14 +64,33 @@ __aicore__ inline void LoadData(const LocalTensor<T>& dst,
   - 当为 LocalTensor 时，表示在芯片内部不同本地存储单元之间按 2D 方式搬运。
   - 当为 GlobalTensor 时，表示从 Global Memory 按 2D 方式加载数据到 LocalTensor。
   - 元素数据类型需与 dst 保持一致。
-- params：二维加载参数，类型为 LoadData2DParams。
-  - startIndex：分形矩阵ID，说明搬运起始位置为源操作数中第几个分形（0为源操作数中第1个分形矩阵）。取值范围：startIndex∈[0, 65535] 。单位：512B。默认为0。
-  - repeatTimes：迭代次数，每个迭代可以处理512B数据。取值范围：repeatTimes∈[1, 255]。
-  - srcStride：相邻迭代间，源操作数前一个分形与后一个分形起始地址的间隔，单位：512B。取值范围：src_stride∈[0, 65535]。默认为0。
-  - sid：预留参数，配置为0即可。
-  - dstGap：相邻迭代间，目的操作数前一个分形结束地址与后一个分形起始地址的间隔，单位：512B。取值范围：dstGap∈[0, 65535]。默认为0。
-  - ifTranspose：是否启用转置功能，对每个分形矩阵进行转置，默认为false:
-  - addrMode：预留参数，配置为0即可。
+- params：二维加载参数，类型为 LoadData2DParams 或 LoadData2DParamsV2 或 LoadData3DParamsV2Pro。
+  - LoadData2DParams 结构体
+    - startIndex：分形矩阵ID，说明搬运起始位置为源操作数中第几个分形（0为源操作数中第1个分形矩阵）。取值范围：startIndex∈[0, 65535] 。单位：512B。默认为0。
+    - repeatTimes：迭代次数，每个迭代可以处理512B数据。取值范围：repeatTimes∈[1, 255]。
+    -  srcStride：相邻迭代间，源操作数前一个分形与后一个分形起始地址的间隔，单位：512B。取值范围：src_stride∈[0, 65535]。默认为0。
+    - sid：预留参数，配置为0即可。
+    - dstGap：相邻迭代间，目的操作数前一个分形结束地址与后一个分形起始地址的间隔，单位：512B。取值范围：dstGap∈[0, 65535]。默认为0。
+    - ifTranspose：是否启用转置功能，对每个分形矩阵进行转置，默认为false:
+    - addrMode：预留参数，配置为0即可。
+  - LoadData2DParamsV2 结构体
+    - m_start_position：M维起始位置，取值范围：m_start_position∈[0, 65535]。默认为0。
+    - k_start_position：K维起始位置，取值范围：k_start_position∈[0, 65535]。默认为0。
+    - m_step：M维步长，取值范围：m_step∈[0, 65535]。默认为0。
+    - k_step：K维步长，取值范围：k_step∈[0, 65535]。默认为0。
+    - src_stride：源操作数步长，取值范围：src_stride∈[-2147483648, 2147483647]。默认为0。
+    - dst_stride：目的操作数步长，取值范围：dst_stride∈[0, 65535]。默认为0。
+    - if_transpose：是否启用转置功能，默认为false。
+    - sid：流ID，取值范围：sid∈[0, 255]。默认为0。
+  - LoadData3DParamsV2Pro 结构体
+    - channel_size：通道大小，取值范围：channel_size∈[0, 65535]。默认为0。
+    - en_transpose：是否启用转置功能，默认为false。
+    - en_small_k：是否启用小K优化，默认为false。
+    - filter_size_w：是否启用滤波器宽度优化，默认为false。
+    - filter_size_h：是否启用滤波器高度优化，默认为false。
+    - f_matrix_ctrl：是否启用矩阵控制，默认为false。
+    - ext_config：扩展配置，取值范围：ext_config∈[0, 18446744073709551615]。默认为0。
+    - filter_config：滤波器配置，取值范围：filter_config∈[0, 18446744073709551615]。默认为0x10101010101。
 
 **约束说明**
 
@@ -86,4 +132,53 @@ __aicore__ inline void LoadData(const LocalTensor<T>& dst,
 
       asc.load_data(y_local, x_local, params)
       asc.load_data(x_local, x_gm, params)
+  ```
+- Local Memory 内部 2D 搬运（V2版本，Local -> Local）
+  ```python
+  @asc.jit
+  def kernel_load_data_l2l_v2(x: asc.GlobalAddress) -> None:
+      x_local = asc.LocalTensor(dtype=asc.float16,
+                                pos=asc.TPosition.VECIN,
+                                addr=0, tile_size=512)
+      y_local = asc.LocalTensor(dtype=asc.float16,
+                                pos=asc.TPosition.VECOUT,
+                                addr=0, tile_size=512)
+
+      params_v2 = asc.LoadData2DParamsV2(0, 0, 16, 16, 0, 0, False, 0)
+
+      asc.load_data(y_local, x_local, params_v2)
+  ```
+- Global Memory 到 Local Memory 的 2D 搬运（V2版本，Global -> Local）
+  ```python
+  @asc.jit
+  def kernel_load_data_g2l_v2(x: asc.GlobalAddress) -> None:
+      x_local = asc.LocalTensor(dtype=asc.float16,
+                                pos=asc.TPosition.VECIN,
+                                addr=0, tile_size=512)
+      y_local = asc.LocalTensor(dtype=asc.float16,
+                                pos=asc.TPosition.VECOUT,
+                                addr=0, tile_size=512)
+
+      x_gm = asc.GlobalTensor()
+      x_gm.set_global_buffer(x)
+
+      params_v2 = asc.LoadData2DParamsV2(0, 0, 16, 16, 0, 0, False, 0)
+
+      asc.load_data(y_local, x_local, params_v2)
+      asc.load_data(x_local, x_gm, params_v2)
+  ```
+- Local Memory 内部 3D 搬运（V2Pro版本，Local -> Local）
+  ```python
+  @asc.jit
+  def kernel_load_data_3d_v2pro(x: asc.GlobalAddress) -> None:
+      x_local = asc.LocalTensor(dtype=asc.float16,
+                                pos=asc.TPosition.VECIN,
+                                addr=0, tile_size=512)
+      y_local = asc.LocalTensor(dtype=asc.float16,
+                                pos=asc.TPosition.VECOUT,
+                                addr=0, tile_size=512)
+
+      params_3d_v2_pro = asc.LoadData3DParamsV2Pro(16, False, False, False, False, False, 0, 0x10101010101)
+
+      asc.load_data(y_local, x_local, params_3d_v2_pro)
   ```
