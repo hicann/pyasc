@@ -263,18 +263,6 @@ RTS_API rtError_t GetC2cCtrlAddrWrapper(uint64_t *addr, uint32_t *len)
 }
 
 /**
- * @ingroup dvrt_mem
- * @brief query memory size
- * @param [in] aiCoreMemorySize
- * @return RT_ERROR_NONE for ok, errno for failed
- * @return RT_ERROR_INVALID_VALUE for error input
- */
-RTS_API rtError_t AiCoreMemorySizesWrapper(rtAiCoreMemorySize_t *aiCoreMemorySize)
-{
-    return rtAiCoreMemorySizes(aiCoreMemorySize);
-}
-
-/**
  * @ingroup profiling_base
  * @brief set profling switch, called by profiling
  * @param [in]  data  rtProfCommandHandle
