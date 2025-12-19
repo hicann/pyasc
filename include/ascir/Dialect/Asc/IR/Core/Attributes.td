@@ -478,10 +478,10 @@ def AscendC_ScheduleTypeAttr : I32EnumAttr<"ScheduleType", "", [
   let underlyingType = "uint8_t";
 }
 
-def AscendC_SelModeAttr : I32EnumAttr<"SelMode", "", [
-  I32EnumAttrCase<"VSEL_CMPMASK_SPR", 0, "vsel_cmpmask_spr">,
-  I32EnumAttrCase<"VSEL_TENSOR_SCALAR_MODE", 1, "vsel_tensor_scalar_mode">,
-  I32EnumAttrCase<"VSEL_TENSOR_TENSOR_MODE", 2, "vsel_tensor_tensor_mode">,
+def AscendC_SelModeAttr : I32EnumAttr<"SELMODE", "", [
+  I32EnumAttrCase<"VSEL_CMPMASK_SPR", 0>,
+  I32EnumAttrCase<"VSEL_TENSOR_SCALAR_MODE", 1>,
+  I32EnumAttrCase<"VSEL_TENSOR_TENSOR_MODE", 2>,
 ]> {
   let cppNamespace = "::mlir::ascendc";
   let description = "Represents AscendC::SELMODE";

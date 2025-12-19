@@ -10,14 +10,12 @@ from typing import Callable, List, TypeVar, Union, overload
 
 from ..._C import ir
 from ..core.dtype import KnownTypes as KT
-from ..core.ir_value import RuntimeInt, RuntimeNumeric, materialize_ir_value as _mat
+from ..core.ir_value import RuntimeInt, RuntimeNumeric, RuntimeFloat, materialize_ir_value as _mat
 from ..core.tensor import LocalTensor
 from ..core.utils import OverloadDispatcher, require_jit, global_builder
 from ..core.types import BinaryRepeatParams, UnaryRepeatParams
-from ..core.enums import CMPMODE
+from ..core.enums import CMPMODE, SelMode
 from .utils import set_common_docstring
-
-T = TypeVar("T", bound=Callable)
 
 
 @overload
@@ -151,3 +149,49 @@ def get_cmp_mask(dst: LocalTensor) -> None:
 def set_cmp_mask(src: LocalTensor) -> None:
     build = global_builder.get_ir_builder()
     build.create_asc_SetCmpMaskOp(src.to_ir())
+
+
+@overload
+def select(dst: LocalTensor, sel_mask: LocalTensor, src0: LocalTensor, src1: float, 
+           sel_mode: SelMode, count: int) -> None:
+    ...
+
+
+@overload
+def select(dst: LocalTensor, sel_mask: LocalTensor, src0: LocalTensor, src1: LocalTensor, 
+           sel_mode: SelMode, count: int) -> None:
+    ...
+
+
+@overload
+def select(dst: LocalTensor, sel_mask: LocalTensor, src0: LocalTensor, src1: float, sel_mode: SelMode, 
+           mask: List[int], repeat_times: int, repeat_params: BinaryRepeatParams, is_set_mask: bool = True) -> None:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="select")
+def select(dst: LocalTensor, sel_mask: LocalTensor, src0: LocalTensor, *args, **kwargs) -> None:
+    dispatcher = OverloadDispatcher(__name__)
+    builder = global_builder.get_ir_builder()
+
+    @dispatcher.register(src1=RuntimeFloat, sel_mode=SelMode, count=RuntimeInt)
+    def _(src1: RuntimeFloat, sel_mode: SelMode, count: RuntimeInt):
+        builder.create_asc_SelectScalarL2Op(dst.to_ir(), sel_mask.to_ir(), src0.to_ir(), _mat(src1, src0.dtype).to_ir(), 
+                ir.SELMODE.symbolize(sel_mode), _mat(count, KT.uint32).to_ir())
+    
+    @dispatcher.register(src1=LocalTensor, sel_mode=SelMode, count=RuntimeInt)
+    def _(src1: LocalTensor, sel_mode: SelMode, count: RuntimeInt):
+        builder.create_asc_SelectL2Op(dst.to_ir(), sel_mask.to_ir(), src0.to_ir(), src1.to_ir(), 
+                ir.SELMODE.symbolize(sel_mode), _mat(count, KT.uint32).to_ir())
+        
+    @dispatcher.register(src1=RuntimeFloat, sel_mode=SelMode, mask=list, repeat_times=RuntimeInt, 
+                         repeat_params=BinaryRepeatParams)
+    def _(src1: RuntimeFloat, sel_mode: SelMode, mask: list, repeat_times: RuntimeInt, 
+          repeat_params: BinaryRepeatParams, is_set_mask: bool = True):
+        mask = [_mat(v, KT.uint64).to_ir() for v in mask]
+        builder.create_asc_SelectScalarL1Op(dst.to_ir(), sel_mask.to_ir(), src0.to_ir(), _mat(src1, src0.dtype).to_ir(), 
+                ir.SELMODE.symbolize(sel_mode), mask, _mat(repeat_times, KT.int8).to_ir(), 
+                repeat_params.to_ir(), is_set_mask)
+
+    dispatcher(*args, **kwargs)
