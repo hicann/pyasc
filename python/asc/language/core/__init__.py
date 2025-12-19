@@ -99,7 +99,10 @@ from .types import (
     Nz2NdParamsFull,
     DataCopyCO12DstParams,
     LoadData2DParams,
+    LoadData2DParamsV2,
     LoadData2dTransposeParams,
+    LoadData2dTransposeParamsV2,
+    LoadData3DParamsV2Pro,
     MmadParams,
 )
 from .utils import ceildiv, static_assert
@@ -204,7 +207,10 @@ __all__ = [
     "Nz2NdParamsFull",
     "DataCopyCO12DstParams",
     "LoadData2DParams",
+    "LoadData2DParamsV2",
     "LoadData2dTransposeParams",
+    "LoadData2dTransposeParamsV2",
+    "LoadData3DParamsV2Pro",
     "MmadParams",
     # .core.utils
     "ceildiv",

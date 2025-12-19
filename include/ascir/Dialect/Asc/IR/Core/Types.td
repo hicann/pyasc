@@ -53,11 +53,6 @@ def AscendC_GlobalTensor : AscendC_BaseTensorType<"GlobalTensor", "global_tensor
   let summary = "Global tensor from GM (OUT)";
 }
 
-def AscendC_LoadData2DMxParams
-    : AscendC_BaseLoadDataParamsType<"LoadData2DMxParams", "load_data_2d_mx_params"> {
-  let summary = "Represents AscendC::LoadData2DMxParams";
-}
-
 def AscendC_LoadData3DParamsV2
     : AscendC_BaseLoadDataParamsType<"LoadData3DParamsV2", "load_data_3d_params_v2"> {
   let summary = "Represents AscendC::LoadData3DParamsV2";

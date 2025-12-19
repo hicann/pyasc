@@ -214,21 +214,30 @@ def LoadData2DParams : APIType<"LoadData2DParams"> {
   let apiName = "AscendC::LoadData2DParams";
 }
 
+def LoadData2DParamsV2 : APIType<"LoadData2DParamsV2"> {
+  let mnemonic = "load_data_2d_params_v2";
+  let apiName = "AscendC::LoadData2DParamsV2";
+}
+
 def LoadData2dTransposeParams : APIType<"LoadData2dTransposeParams"> {
   let mnemonic = "load_data_2d_transpose_params";
   let apiName = "AscendC::LoadData2dTransposeParams";
 }
 
-def LoadData2DMxParams : APIType<"LoadData2DMxParams"> {
-  let mnemonic = "load_data_2d_mx_params";
-  let apiName = "AscendC::LoadData2DMxParams";
-  let genTypedef = false;
+def LoadData2dTransposeParamsV2 : APIType<"LoadData2dTransposeParamsV2"> {
+  let mnemonic = "load_data_2d_transpose_params_v2";
+  let apiName = "AscendC::LoadData2dTransposeParamsV2";
 }
 
 def LoadData3DParamsV2 : APIType<"LoadData3DParamsV2"> {
   let mnemonic = "load_data_3d_params_v2";
   let apiName = "AscendC::LoadData3DParamsV2";
   let genTypedef = false;
+}
+
+def LoadData3DParamsV2Pro : APIType<"LoadData3DParamsV2Pro"> {
+  let mnemonic = "load_data_3d_params_v2_pro";
+  let apiName = "AscendC::LoadData3DParamsV2Pro";
 }
 
 def LoadDataRepeatParam : APIType<"LoadDataRepeatParam"> {

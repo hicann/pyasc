@@ -41,12 +41,44 @@ def AscendC_LoadDataG2LOp
                        AscendC_LoadData2DParams:$loadDataParams);
 }
 
+def AscendC_LoadDataL0V2Op
+    : DataCopyOp<"load_data_l0_v2", "LoadData", [AscFunc]> {
+  let description = "Perform 2D LoadData V2 between LocalTensor and LocalTensor";
+  let arguments = (ins AscendC_BaseTensorTypeInterface:$dst,
+                       AscendC_BaseTensorTypeInterface:$src,
+                       AscendC_LoadData2DParamsV2:$loadDataParams);
+}
+
+def AscendC_LoadDataG2LV2Op
+    : DataCopyOp<"load_data_g2l_v2", "LoadData", [AscFunc]> {
+  let description = "Perform 2D LoadData V2 from GlobalTensor to LocalTensor";
+  let arguments = (ins AscendC_BaseTensorTypeInterface:$dst,
+                       AscendC_BaseTensorTypeInterface:$src,
+                       AscendC_LoadData2DParamsV2:$loadDataParams);
+}
+
+def AscendC_LoadData3DL0V2ProOp
+    : DataCopyOp<"load_data_3d_l0_v2pro", "LoadData", [AscFunc]> {
+  let description = "Perform 3D LoadData V2Pro between LocalTensor and LocalTensor";
+  let arguments = (ins AscendC_BaseTensorTypeInterface:$dst,
+                       AscendC_BaseTensorTypeInterface:$src,
+                       AscendC_LoadData3DParamsV2Pro:$loadDataParams);
+}
+
 def AscendC_LoadDataWithTransposeOp
     : APIOp<"load_data_with_transpose", "LoadDataWithTranspose", [AscFunc]> {
   let description = "Perform 2D LoadData with transpose between tensors";
   let arguments = (ins AscendC_BaseTensorTypeInterface:$dst,
                        AscendC_BaseTensorTypeInterface:$src,
                        AscendC_LoadData2dTransposeParams:$loadDataParams);
+}
+
+def AscendC_LoadDataWithTransposeV2Op
+    : APIOp<"load_data_with_transpose_v2", "LoadDataWithTranspose", [AscFunc]> {
+  let description = "Perform 2D LoadData with transpose (V2 params) between tensors";
+  let arguments = (ins AscendC_BaseTensorTypeInterface:$dst,
+                       AscendC_BaseTensorTypeInterface:$src,
+                       AscendC_LoadData2dTransposeParamsV2:$loadDataParams);
 }
 
 def AscendC_MmadOp
