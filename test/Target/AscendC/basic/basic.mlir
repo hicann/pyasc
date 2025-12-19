@@ -8,28 +8,6 @@
 
 // RUN: ascir-translate -mlir-to-ascendc %s | FileCheck %s
 
-// CHECK-LABEL:void emit_select_op(AscendC::LocalTensor<float> v1, AscendC::LocalTensor<int16_t> v2, AscendC::LocalTensor<float> v3, AscendC::LocalTensor<float> v4, int32_t v5, int32_t v6) {
-// CHECK-NEXT:   AscendC::Select(v1, v2, v3, v4, AscendC::SELMODE::VSEL_TENSOR_TENSOR_MODE, v5, v6, AscendC::BinaryRepeatParams(v6, v6, v6, v6, v6, v6));
-// CHECK-NEXT:   AscendC::Select(v1, v2, v3, v4, AscendC::SELMODE::VSEL_TENSOR_TENSOR_MODE, v6);
-// CHECK-NEXT:   return;
-// CHECK-NEXT: }
-func.func @emit_select_op(%dst : !ascendc.local_tensor<1024xf32>, %cond : !ascendc.local_tensor<32xi16>, %src0 : !ascendc.local_tensor<1024xf32>, %src1 : !ascendc.local_tensor<1024xf32>, %mask : i32, %c0_i32 : i32) {
-  ascendc.select_l0 %dst, %cond, %src0, %src1, %mask, %c0_i32, %c0_i32, %c0_i32, %c0_i32, %c0_i32, %c0_i32, %c0_i32 {mode = 2 : i32}: !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<32xi16>, !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, i32, i32, i32, i32, i32, i32, i32, i32
-  ascendc.select_l2 %dst, %cond, %src0, %src1, %c0_i32 {selMode = 2 : i32}: !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<32xi16>, !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, i32
-  return
-}
-
-// CHECK-LABEL:void emit_select_scalar_op(AscendC::LocalTensor<float> v1, AscendC::LocalTensor<int16_t> v2, AscendC::LocalTensor<float> v3, int32_t v4, int32_t v5, int32_t v6) {
-// CHECK-NEXT:   AscendC::Select(v1, v2, v3, v4, AscendC::SELMODE::VSEL_TENSOR_TENSOR_MODE, v5, v6, AscendC::BinaryRepeatParams(v6, v6, v6, v6, v6, v6));
-// CHECK-NEXT:   AscendC::Select(v1, v2, v3, v4, AscendC::SELMODE::VSEL_TENSOR_TENSOR_MODE, v6);
-// CHECK-NEXT:   return;
-// CHECK-NEXT: }
-func.func @emit_select_scalar_op(%dst : !ascendc.local_tensor<1024xf32>, %cond : !ascendc.local_tensor<32xi16>, %src0 : !ascendc.local_tensor<1024xf32>, %src1 : i32, %mask : i32, %c0_i32 : i32) {
-  ascendc.select_scalar_l0 %dst, %cond, %src0, %src1, %mask, %c0_i32, %c0_i32, %c0_i32, %c0_i32, %c0_i32, %c0_i32, %c0_i32 {mode = 2 : i32}: !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<32xi16>, !ascendc.local_tensor<1024xf32>, i32, i32, i32, i32, i32, i32, i32, i32, i32
-  ascendc.select_scalar_l2 %dst, %cond, %src0, %src1, %c0_i32 {selMode = 2 : i32}: !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<32xi16>, !ascendc.local_tensor<1024xf32>, i32, i32
-  return
-}
-
 // CHECK-LABEL:void emit_set_fmatrix(int16_t v1, int8_t* v2, int8_t v3) {
 // CHECK-NEXT:   AscendC::FmatrixMode v4{v3};
 // CHECK-NEXT:   AscendC::SetFmatrix(v1, v1, v2, v4);

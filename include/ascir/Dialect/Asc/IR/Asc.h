@@ -61,6 +61,9 @@ void registerExternalModels(DialectRegistry &registry);
 ParseResult parsePrettyCmpMode(AsmParser &odsParser, CMPMODEAttr &attr);
 void printPrettyCmpMode(AsmPrinter &odsPrinter, const CMPMODEAttr &attr);
 
+ParseResult parsePrettySelMode(AsmParser &odsParser, SELMODEAttr &attr);
+void printPrettySelMode(AsmPrinter &odsPrinter, const SELMODEAttr &attr);
+
 } // namespace ascendc
 } // namespace mlir
 

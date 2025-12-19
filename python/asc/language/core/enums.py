@@ -273,3 +273,9 @@ class CMPMODE(IntEnum):
     LE = 3
     GE = 4
     NE = 5
+
+
+class SelMode(IntEnum):
+    VSEL_CMPMASK_SPR = 0, 
+    VSEL_TENSOR_SCALAR_MODE = 1,
+    VSEL_TENSOR_TENSOR_MODE = 2,

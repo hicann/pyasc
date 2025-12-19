@@ -45,6 +45,7 @@ Common operations
     proposal_concat
     proposal_extract
     scatter
+    select
     set_aipp_functions
     set_atomic_add
     set_atomic_max

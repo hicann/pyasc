@@ -179,6 +179,14 @@ void pyasc_bind_enums(py::module &m)
         .def_static("symbolize", [](uint8_t cmp_mode) -> ascendc::CMPMODE {
             return static_cast<ascendc::CMPMODE>(cmp_mode);
         });
+
+    py::enum_<ascendc::SELMODE>(m, "SELMODE", py::module_local())
+        .value("VSEL_CMPMASK_SPR", ascendc::SELMODE::VSEL_CMPMASK_SPR)
+        .value("VSEL_TENSOR_SCALAR_MODE", ascendc::SELMODE::VSEL_TENSOR_SCALAR_MODE)
+        .value("VSEL_TENSOR_TENSOR_MODE", ascendc::SELMODE::VSEL_TENSOR_TENSOR_MODE)
+        .def_static("symbolize", [](uint8_t sel_mode) -> ascendc::SELMODE {
+            return static_cast<ascendc::SELMODE>(sel_mode);
+        });
 }
 
 void pyasc_bind_context_and_dialect(py::module &m)

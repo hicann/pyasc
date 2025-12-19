@@ -95,7 +95,7 @@ from .basic.vec_binary_scalar import (
     shift_left,
     shift_right,
 )
-from .basic.vec_cmpsel import compare, compare_scalar, get_cmp_mask, set_cmp_mask
+from .basic.vec_cmpsel import compare, compare_scalar, get_cmp_mask, select, set_cmp_mask
 from .basic.vec_duplicate import duplicate
 from .basic.vec_brcb import brcb
 from .basic.vec_gather import gather, gatherb
@@ -187,6 +187,7 @@ from .core.enums import (
     MaskMode,
     QuantModes,
     MatmulConfigMode,
+    SelMode,
 )
 from .core.ir_value import GlobalAddress
 from .core.ops import inline, number

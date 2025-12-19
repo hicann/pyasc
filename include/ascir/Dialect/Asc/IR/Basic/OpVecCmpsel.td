@@ -93,11 +93,12 @@ def AscendC_SelectL0Op : VectorOp<"select_l0", "Select", [OpWithDstInterface]> {
                          AnyType:$src1RepStride);
 }
 
-def AscendC_SelectL2Op : VectorOp<"select_l2", "Select", [OpWithDstInterface]> {
+def AscendC_SelectL2Op : VectorOp<"select_l2", "Select", [OpWithDstInterface, AscFunc]> {
     let description = "Select elements from two source tensors (L2 API)";
     let arguments = (ins AscendC_LocalTensor:$dst, AscendC_LocalTensor:$selMask,
-                         AscendC_LocalTensor:$src0, AnyType:$src1,
+                         AscendC_LocalTensor:$src0, AscendC_LocalTensor:$src1,
                          AscendC_SelModeAttr:$selMode, AnyType:$calCount);
+    let paramTypeLists = [0, 0, 0, 0, -1, 0];
 }
 
 def AscendC_SelectScalarL0Op : VectorOp<"select_scalar_l0", "Select", [OpWithDstInterface]> {
@@ -111,11 +112,21 @@ def AscendC_SelectScalarL0Op : VectorOp<"select_scalar_l0", "Select", [OpWithDst
                          AnyType:$src1RepStride);
 }
 
-def AscendC_SelectScalarL2Op : VectorOp<"select_scalar_l2", "Select", [OpWithDstInterface]> {
+def AscendC_SelectScalarL1Op : VectorOp<"select_scalar_l1", "Select", [OpWithDstInterface]> {
+    let description = "Select elements from source tensor and a scalar (L1 API)";
+    let arguments = (ins AscendC_LocalTensor:$dst, AscendC_LocalTensor:$selMask,
+                         AscendC_LocalTensor:$src0, AnyType:$src1,
+                         AscendC_SelModeAttr:$selMode, Variadic<UI64>:$mask, 
+                         AnyType:$repeatTimes, AscendC_BinaryRepeatParams:$repeatParams, 
+                         UnitAttr:$isSetMask);
+}
+
+def AscendC_SelectScalarL2Op : VectorOp<"select_scalar_l2", "Select", [OpWithDstInterface, AscFunc]> {
     let description = "Select elements from source tensor and a scalar (L2 API)";
     let arguments = (ins AscendC_LocalTensor:$dst, AscendC_LocalTensor:$selMask,
                          AscendC_LocalTensor:$src0, AnyType:$src1,
                          AscendC_SelModeAttr:$selMode, AnyType:$calCount);
+    let paramTypeLists = [0, 0, 0, 0, -1, 0];
 }
 
 def AscendC_SetCmpMaskOp : VectorOp<"set_cmp_mask", "SetCmpMask", [AscFunc]> {

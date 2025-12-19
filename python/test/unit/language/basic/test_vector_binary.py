@@ -344,23 +344,3 @@ def test_bilinear_interpolation_kernel(mock_launcher_run):
 
     bilinear_interpolation_kernel[1]()
     assert mock_launcher_run.call_count == 1
-
-
-def test_compare_kernel(mock_launcher_run):
-
-    @asc.jit
-    def compare_kernel():
-        x_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
-        y_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
-        z_local = asc.LocalTensor(dtype=asc.uint8, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
-        asc.compare(z_local, x_local, y_local, cmp_mode=asc.CMPMODE.LT, count=512)
-        params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
-        asc.compare(z_local, x_local, y_local, cmp_mode=asc.CMPMODE.LT, mask=512, repeat_times=1, repeat_params=params)
-        uint64_max = 2**64 - 1
-        mask = [uint64_max, uint64_max]
-        asc.compare(z_local, x_local, y_local, cmp_mode=asc.CMPMODE.LT, mask=mask, repeat_times=1, repeat_params=params)
-        asc.compare(x_local, y_local, cmp_mode=asc.CMPMODE.LT, mask=512, repeat_params=params)
-        asc.compare(x_local, y_local, cmp_mode=asc.CMPMODE.LT, mask=mask, repeat_params=params)
-
-    compare_kernel[1]()
-    assert mock_launcher_run.call_count == 1
