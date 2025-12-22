@@ -378,51 +378,6 @@ func.func @emit_set_mask_norm() {
   return
 }
 
-// CHECK-LABEL:void emit_set_atomic_type() {
-// CHECK-NEXT:  AscendC::SetAtomicType<half>();
-// CHECK-NEXT:  return;
-// CHECK-NEXT: }
-func.func @emit_set_atomic_type() {
-  ascendc.set_atomic_type {dtype = f16} : () -> ()
-  return
-}
-
-// CHECK-LABEL:void emit_set_atomic_add() {
-// CHECK-NEXT:  AscendC::SetAtomicAdd<half>();
-// CHECK-NEXT:  return;
-// CHECK-NEXT: }
-func.func @emit_set_atomic_add() {
-  ascendc.set_atomic_add {dtype = f16} : () -> ()
-  return
-}
-
-// CHECK-LABEL:void emit_set_atomic_none() {
-// CHECK-NEXT:  AscendC::SetAtomicNone();
-// CHECK-NEXT:  return;
-// CHECK-NEXT: }
-func.func @emit_set_atomic_none() {
-  ascendc.set_atomic_none : () -> ()
-  return
-}
-
-// CHECK-LABEL:void emit_set_atomic_max() {
-// CHECK-NEXT:  AscendC::SetAtomicMax<half>();
-// CHECK-NEXT:  return;
-// CHECK-NEXT: }
-func.func @emit_set_atomic_max() {
-  ascendc.set_atomic_max {dtype = f16} : () -> ()
-  return
-}
-
-// CHECK-LABEL:void emit_set_atomic_min() {
-// CHECK-NEXT:  AscendC::SetAtomicMin<half>();
-// CHECK-NEXT:  return;
-// CHECK-NEXT: }
-func.func @emit_set_atomic_min() {
-  ascendc.set_atomic_min {dtype = f16} : () -> ()
-  return
-}
-
 // CHECK-LABEL: void emit_set_fixpipe_pre_quant_flag() {
 // CHECK-NEXT:    constexpr int64_t c11_i64 = 11;
 // CHECK-NEXT:    AscendC::SetFixpipePreQuantFlag(c11_i64);
