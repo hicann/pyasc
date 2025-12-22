@@ -4185,6 +4185,37 @@ def select_docstring() -> Callable[[T], T]:
     return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
+def set_fix_pipe_pre_quant_flag_docstring():
+    func_introduction = """
+    DataCopy（CO1->GM、CO1->A1）过程中进行随路量化时，通过调用该接口设置量化流程中标量量化参数。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void SetFixpipePreQuantFlag(uint64_t config)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - config: 量化过程中使用到的标量量化参数，类型为uint64_t。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        deq_scalar = 11
+        asc.set_fix_pipe_pre_quant_flag(deq_scalar)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", "", py_example]
+
+
 DOC_HANDLES = {
     "copy": copy_docstring,
     "set_flag": set_wait_flag_docstring,
@@ -4223,6 +4254,7 @@ DOC_HANDLES = {
     "scatter": scatter_docstring,
     "set_aipp_functions": set_aipp_functions_docstring,
     "set_deq_scale": set_deq_scale_docstring,
+    "set_fix_pipe_pre_quant_flag": set_fix_pipe_pre_quant_flag_docstring,
     "transpose": transpose_docstring,
     "trans_data_to_5hd": trans_data_to_5hd_docstring,
     "proposal_concat": proposal_concat_docstring,

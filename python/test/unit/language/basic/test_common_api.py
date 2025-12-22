@@ -742,6 +742,17 @@ def test_set_atomic_type_kernel(mock_launcher_run):
     assert mock_launcher_run.call_count == 1
 
 
+def test_set_fix_pipe_pre_quant_flag_kernel(mock_launcher_run):
+
+    @asc.jit
+    def set_fix_pipe_pre_quant_flag_kernel():
+        deq_scalar = 11
+        asc.set_fix_pipe_pre_quant_flag(deq_scalar)
+
+    set_fix_pipe_pre_quant_flag_kernel[1]()
+    assert mock_launcher_run.call_count == 1
+
+
 def test_set_vector_mask_kernel(mock_launcher_run):
 
     @asc.jit

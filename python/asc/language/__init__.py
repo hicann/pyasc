@@ -31,6 +31,7 @@ from .basic.common import (
     get_sys_workspace,
     reset_mask,
     set_aipp_functions,
+    set_fix_pipe_pre_quant_flag,
     set_hccl_context,
     set_hf32_mode,
     set_hf32_trans_mode,

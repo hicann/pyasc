@@ -53,6 +53,7 @@ Common operations
     set_atomic_none
     set_atomic_type
     set_cmp_mask
+    set_fix_pipe_pre_quant_flag
     set_flag
     set_deq_scale
     set_load_data_boundary
