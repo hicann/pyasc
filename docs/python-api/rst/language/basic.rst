@@ -55,6 +55,9 @@ Common operations
     set_cmp_mask
     set_flag
     set_deq_scale
+    set_load_data_boundary
+    set_load_data_padding_value
+    set_load_data_repeat
     set_vector_mask
     transpose
     trans_data_to_5hd

@@ -88,3 +88,37 @@ def test_mmad(mock_launcher_run):
 
     kernel_mmad[1]()
     assert mock_launcher_run.call_count == 1
+
+
+def test_set_load_data_boundary(mock_launcher_run):
+    @asc.jit
+    def set_load_data_boundary_kernel():
+        asc.set_load_data_boundary(1024)   
+
+    set_load_data_boundary_kernel[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_set_load_data_padding_value(mock_launcher_run):
+
+    @asc.jit
+    def kernel_set_load_data_padding_value() -> None: 
+        asc.set_load_data_padding_value(10)    
+        asc.set_load_data_padding_value(2.0)  
+
+    kernel_set_load_data_padding_value[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_set_load_data_repeat(mock_launcher_run):
+    @asc.jit
+    def set_load_data_repeat_kernel():
+        static_param = asc.LoadDataRepeatParam(
+            repeat_time=4, 
+            repeat_stride=8, 
+            repeat_mode=0,
+        )
+        asc.set_load_data_repeat(static_param)
+        
+    set_load_data_repeat_kernel[1]()
+    assert mock_launcher_run.call_count == 1

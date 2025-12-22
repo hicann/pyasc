@@ -1193,6 +1193,50 @@ class LoadData2dTransposeParams(IRValue):
 
     def to_ir(self) -> IRHandle:
         return self.handle
+    
+
+class LoadDataRepeatParam(IRValue):
+
+    @overload
+    def __init__(self, repeat_time: int = 1, repeat_stride: int = 0, repeat_mode: int = 0) -> None:
+        ...
+
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+        ...
+
+    @require_jit
+    def __init__(self,
+                 repeat_time: RuntimeInt = 1,
+                 repeat_stride: RuntimeInt = 0,
+                 repeat_mode: RuntimeInt = 0,
+                 handle: Optional[IRHandle] = None) -> None:
+        if handle is not None:
+            self.handle = handle
+            return
+
+        builder = global_builder.get_ir_builder()
+
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_LoadDataRepeatParamType(),
+            [
+                _mat(repeat_time).to_ir(),
+                _mat(repeat_stride).to_ir(),
+                _mat(repeat_mode).to_ir(),
+            ],
+            builder.get_type_array_attr([
+                builder.get_ui8_type(),
+                builder.get_ui16_type(),
+                builder.get_ui8_type()
+            ]),
+        )
+
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> 'LoadDataRepeatParam':
+        return cls(handle=handle)
+
+    def to_ir(self) -> IRHandle:
+        return self.handle
 
 
 class LoadData2dTransposeParamsV2(IRValue):
