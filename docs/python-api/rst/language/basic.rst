@@ -31,8 +31,10 @@ Common operations
     get_data_block_size_in_bytes
     get_icache_preload_status
     get_program_counter
+    get_sub_block_idx
     get_system_cycle
     get_sys_workspace
+    get_task_ratio
     icache_preload
     load_data
     load_data_with_transpose

@@ -1092,6 +1092,49 @@ def get_program_counter_docstring():
     return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
+def get_sub_block_idx_docstring():
+    func_introduction = """
+    获取 AI Core 上 Vector 核的 ID。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline int64_t GetSubBlockIdx();
+    """
+
+    param_list = """
+    **参数说明**
+
+    无。
+    """
+
+    return_list = """
+    **返回值说明**
+
+    返回 Vector 核 ID。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    无。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        import asc
+        sub_block_id = asc.get_sub_block_idx()
+    """
+
+    return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
+
+
 def get_system_cycle_docstring():
     func_introduction = """
     获取当前系统cycle数，若换算成时间需要按照50MHz的频率，时间单位为us，换算公式为：time = (cycle数/50) us 。
@@ -1128,6 +1171,77 @@ def get_system_cycle_docstring():
     """
 
     return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def get_task_ratio_docstring():
+    func_introduction = """
+    分离模式下，获取一个AI Core上Cube Core（AIC）或者Vector Core（AIV）的数量与AI Core数量的比例。耦合模式下，固定返回1。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline int64_t GetTaskRatio();
+    """
+
+    param_list = """
+    **参数说明**
+
+    无。
+    """
+
+    return_list = """
+    **返回值说明**
+
+    针对分离模式，不同Kernel类型下（通过设置Kernel类型设置），在AIC和AIV上调用该接口的返回值如下：
+
+    表1 返回值列表
+    .. list-table::
+       :header-rows: 1
+
+       * - Kernel 类型
+         - KERNEL_TYPE_AIV_ONLY
+         - KERNEL_TYPE_AIC_ONLY
+         - KERNEL_TYPE_MIX_AIC_1_2
+         - KERNEL_TYPE_MIX_AIC_1_1
+         - KERNEL_TYPE_MIX_AIC_1_0
+         - KERNEL_TYPE_MIX_AIV_1_0
+       * - AIV
+         - 1
+         - －
+         - 2
+         - 1
+         - －
+         - 1
+       * - AIC
+         - －
+         - 1
+         - 1
+         - 1
+         - 1
+         - －
+
+    针对耦合模式，固定返回 1。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    无。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        import asc
+        ratio = asc.get_task_ratio()
+    """
+
+    return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
 
 def icache_preload_docstring():
@@ -4223,7 +4337,9 @@ DOC_HANDLES = {
     "get_block_idx": get_block_idx_docstring,
     "get_data_block_size_in_bytes": get_data_block_size_in_bytes_docstring,
     "get_program_counter": get_program_counter_docstring,
+    "get_sub_block_idx": get_sub_block_idx_docstring,
     "get_system_cycle": get_system_cycle_docstring,
+    "get_task_ratio": get_task_ratio_docstring,
     "trap": trap_docstring,
     "data_cache_clean_and_invalid": data_cache_clean_and_invalid_docstring,
     "data_copy": data_copy_docstring,

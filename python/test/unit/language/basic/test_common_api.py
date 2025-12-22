@@ -340,6 +340,16 @@ def test_get_data_block_size_in_bytes(mock_launcher_run):
     assert mock_launcher_run.call_count == 1
     
 
+def test_get_sub_block_idx(mock_launcher_run):
+
+    @asc.jit
+    def kernel_get_sub_block_idx() -> None:
+        idx = asc.get_sub_block_idx()
+
+    kernel_get_sub_block_idx[1]()
+    assert mock_launcher_run.call_count == 1
+
+
 def test_get_sub_block_num(mock_launcher_run):
 
     @asc.jit
@@ -357,6 +367,16 @@ def test_get_sys_workspace(mock_launcher_run):
         x = asc.get_sys_workspace()
 
     kernel_get_sys_workspace[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_get_task_ratio(mock_launcher_run):
+
+    @asc.jit
+    def kernel_get_task_ratio() -> None:
+        ratio = asc.get_task_ratio()
+
+    kernel_get_task_ratio[1]()
     assert mock_launcher_run.call_count == 1
 
 
