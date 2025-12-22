@@ -25,4 +25,10 @@ def AscendC_FixpipeOp : APIOp<"fixpipe", "Fixpipe", [AscFunc]> {
                     Optional<AscendC_LocalTensor>:$workspace,
                     AnyType:$intriParams);
 }
+
+def AscendC_SetFixpipePreQuantFlagOp : APIOp<"set_fixpipe_pre_quant_flag", "SetFixpipePreQuantFlag", [AscFunc]> {
+  let description = "Set scalar quantization parameters in fixpipe quantization process";
+  let arguments = (ins AnyType:$config);
+  let assemblyFormat = "$config attr-dict `:` type($config)";
+}
 #endif // ASC_BASIC_OP_FIXPIPE_TD
