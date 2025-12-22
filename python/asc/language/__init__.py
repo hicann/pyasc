@@ -72,9 +72,11 @@ from .basic.sys_var import (
     get_block_idx,
     get_block_num,
     get_data_block_size_in_bytes,
-    get_sub_block_num,
     get_program_counter,
+    get_sub_block_idx,
+    get_sub_block_num,
     get_system_cycle,
+    get_task_ratio,
     trap,
 )
 from .basic.vec_binary import (

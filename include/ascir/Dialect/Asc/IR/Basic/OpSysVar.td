@@ -50,9 +50,10 @@ def AscendC_GetProgramCounterOp : APIOp<"get_program_counter", "GetProgramCounte
   let assemblyFormat = "attr-dict `:` type($value)";
 }
 
-def AscendC_GetSystemCycleOp : APIOp<"get_system_cycle", "GetSystemCycle", [AscFunc]> {
-  let description = "Get the current system cycle count";
-  let results = (outs AnySignlessIntegerOrIndex:$value);
+def AscendC_GetSubBlockIdxOp
+    : APIOp<"get_sub_block_idx", "GetSubBlockIdx", [AscFunc]> {
+  let description = "Get the vector core ID in AI Core";
+  let results = (outs I64:$value);
   let assemblyFormat = "attr-dict `:` type($value)";
 }
 
@@ -62,6 +63,18 @@ def AscendC_GetSubBlockNumOp : APIOp<"get_sub_block_num", "GetSubBlockNum", [Asc
   let assemblyFormat = "attr-dict `:` type($value)";
 }
 
+def AscendC_GetSystemCycleOp : APIOp<"get_system_cycle", "GetSystemCycle", [AscFunc]> {
+  let description = "Get the current system cycle count";
+  let results = (outs AnySignlessIntegerOrIndex:$value);
+  let assemblyFormat = "attr-dict `:` type($value)";
+}
+
+def AscendC_GetTaskRatioOp
+    : APIOp<"get_task_ratio", "GetTaskRatio", [AscFunc]> {
+  let description = "Get the ratio of task cores to AI Core, return 1 in coupled mode";
+  let results = (outs I64:$value);
+  let assemblyFormat = "attr-dict `:` type($value)";
+}
 
 def AscendC_TrapOp : APIOp<"trap", "Trap", [AscFunc]> {
   let description = "Interrupt AI Core execution in NPU mode, equivalent to assert in CPU mode";

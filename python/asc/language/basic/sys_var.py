@@ -71,6 +71,17 @@ def get_program_counter() -> RuntimeInt:
 
 
 @overload
+def get_sub_block_idx() -> int:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="get_sub_block_idx")
+def get_sub_block_idx() -> RuntimeInt:
+    return PlainValue(global_builder.get_ir_builder().create_asc_GetSubBlockIdxOp(KnownTypes.int64.to_ir()))
+
+
+@overload
 def get_system_cycle() -> int:
     ...
 
@@ -79,6 +90,17 @@ def get_system_cycle() -> int:
 @set_common_docstring(api_name="get_system_cycle")
 def get_system_cycle() -> RuntimeInt:
     return PlainValue(global_builder.get_ir_builder().create_asc_GetSystemCycleOp(KnownTypes.int64.to_ir()))
+
+
+@overload
+def get_task_ratio() -> int:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="get_task_ratio")
+def get_task_ratio() -> RuntimeInt:
+    return PlainValue(global_builder.get_ir_builder().create_asc_GetTaskRatioOp(KnownTypes.int64.to_ir()))
 
 
 @require_jit

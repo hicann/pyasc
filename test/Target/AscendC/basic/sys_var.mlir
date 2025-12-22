@@ -57,6 +57,17 @@ func.func @emit_get_program_counter() {
   return
 }
 
+// CHECK-LABEL:void emit_get_sub_block_idx(__gm__ uint64_t* v1) {
+// CHECK-NEXT:  set_ffts_base_addr(*v1);
+// CHECK-NEXT:  int64_t v2 = AscendC::GetSubBlockIdx();
+// CHECK-NEXT:  return;
+// CHECK-NEXT:}
+func.func @emit_get_sub_block_idx(%arg0: memref<?xui64, 22>){
+  ascendc.set_ffts_base_addr %arg0 : memref<?xui64, 22>
+  %0 = ascendc.get_sub_block_idx : i64
+  return
+}
+
 // CHECK-LABEL:void emit_get_system_cycle() {
 // CHECK-NEXT:  int32_t v1 = AscendC::GetSystemCycle();
 // CHECK-NEXT:  int64_t v2 = AscendC::GetSystemCycle();
@@ -65,6 +76,17 @@ func.func @emit_get_program_counter() {
 func.func @emit_get_system_cycle() {
   %0 = ascendc.get_system_cycle : i32
   %1 = ascendc.get_system_cycle : i64
+  return
+}
+
+// CHECK-LABEL:void emit_get_task_ratio(__gm__ uint64_t* v1) {
+// CHECK-NEXT:  set_ffts_base_addr(*v1);
+// CHECK-NEXT:  int64_t v2 = AscendC::GetTaskRatio();
+// CHECK-NEXT:  return;
+// CHECK-NEXT:}
+func.func @emit_get_task_ratio(%arg0: memref<?xui64, 22>){
+  ascendc.set_ffts_base_addr %arg0 : memref<?xui64, 22>
+  %0 = ascendc.get_task_ratio : i64
   return
 }
 
