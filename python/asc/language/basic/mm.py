@@ -13,7 +13,7 @@ from ..core.tensor import BaseTensor, GlobalTensor, LocalTensor
 from ..core.types import LoadData2DParams, LoadData2DParamsV2, \
                          LoadData2dTransposeParamsV2, LoadData2dTransposeParams, \
                          LoadData3DParamsV2Pro, LoadData2dTransposeParams, \
-                         MmadParams
+                         LoadDataRepeatParam, MmadParams
 from ..core.utils import OverloadDispatcher, require_jit, global_builder
 from .utils import set_common_docstring
 
@@ -179,3 +179,42 @@ def mmad(dst: BaseTensor, fm: BaseTensor, filter: BaseTensor, *args, **kwargs) -
         return
 
     dispatcher(*args, **kwargs)
+
+
+@overload
+def set_load_data_boundary(boundary: int) -> None:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="set_load_data_boundary")
+def set_load_data_boundary(boundary: RuntimeInt) -> None:
+    builder = global_builder.get_ir_builder()
+    boundary_ir = _mat(boundary).to_ir()
+    builder.create_asc_SetLoadDataBoundaryOp(boundary_ir)
+
+
+@overload
+def set_load_data_padding_value(pad_value: int) -> None:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="set_load_data_padding_value")
+def set_load_data_padding_value(pad_value: RuntimeInt) -> None:
+    builder = global_builder.get_ir_builder()
+    pad_value_ir = _mat(pad_value).to_ir()
+    builder.create_asc_SetLoadDataPaddingValueOp(pad_value_ir)
+
+
+@overload
+def set_load_data_repeat(param: LoadDataRepeatParam) -> None:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="set_load_data_repeat")
+def set_load_data_repeat(param: LoadDataRepeatParam) -> None:
+    builder = global_builder.get_ir_builder()
+    param_ir = param.to_ir()
+    builder.create_asc_SetLoadDataRepeatOp(param_ir)

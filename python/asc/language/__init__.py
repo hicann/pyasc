@@ -41,6 +41,7 @@ from .basic.common import (
     set_vector_mask,
 )
 from .basic.data_copy import copy, data_copy, data_copy_pad, load_image_to_local
+from .basic.mm import set_load_data_boundary, set_load_data_padding_value, set_load_data_repeat
 from .basic.dump_tensor import (
     dump_acc_chk_point, 
     dump_tensor, 
@@ -49,7 +50,14 @@ from .basic.dump_tensor import (
     metrics_prof_start, 
     metrics_prof_stop,
 )
-from .basic.mm import load_data, load_data_with_transpose, mmad
+from .basic.mm import (
+    load_data,
+    load_data_with_transpose,
+    mmad,
+    set_load_data_boundary,
+    set_load_data_padding_value,
+    set_load_data_repeat,
+) 
 from .basic.scalar import scalar_cast, scalar_get_sff_value
 from .basic.set_atomic import (
     set_atomic_add,
@@ -226,6 +234,7 @@ from .core.types import (
     LoadData2dTransposeParams,
     LoadData2dTransposeParamsV2,
     LoadData3DParamsV2Pro,
+    LoadDataRepeatParam,
     MmadParams,
 )
 from .core.aipp_types import (

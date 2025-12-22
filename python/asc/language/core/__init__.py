@@ -103,6 +103,7 @@ from .types import (
     LoadData2dTransposeParams,
     LoadData2dTransposeParamsV2,
     LoadData3DParamsV2Pro,
+    LoadDataRepeatParam,
     MmadParams,
 )
 from .utils import ceildiv, static_assert
@@ -211,6 +212,7 @@ __all__ = [
     "LoadData2dTransposeParams",
     "LoadData2dTransposeParamsV2",
     "LoadData3DParamsV2Pro",
+    "LoadDataRepeatParam",
     "MmadParams",
     # .core.utils
     "ceildiv",

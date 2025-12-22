@@ -3677,6 +3677,143 @@ def set_atomic_type_docstring():
     return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
+def set_load_data_boundary_docstring():
+    func_introduction = """
+    设置 Load3D 时 A1/B1 边界值。
+    如果 Load3D 指令在处理源操作数时，源操作数在 A1/B1 上的地址超出设置的边界，则会从 A1/B1 起始地址开始读取数据。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void SetLoadDataBoundary(uint32_t boundaryValue)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - boundaryValue 
+        边界值。
+        Load3Dv1 指令：单位是 32 字节。
+        Load3Dv2 指令：单位是字节。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 用于 Load3Dv1 时， boundaryValue 的最小值是 16 （单位： 32 字节）；用于 Load3Dv2 时， boundaryValue 的最小值是 1024 （单位：字节）。
+    - 如果使用 SetLoadDataBoundary 接口设置了边界值，配合 Load3D 指令使用时， Load3D 指令的 A1/B1 初始地址要在设置的边界内。
+    - 如果 boundaryValue 设置为 0 ，则表示无边界，可使用整个 A1/B1 。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        import asc
+        asc.set_load_data_boundary(1024)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def set_load_data_padding_value_docstring():
+    func_introduction = """
+    用于调用 Load3Dv1接口/Load3Dv2 接口时设置 Pad 填充的数值。 Load3Dv1/Load3Dv2 的模板参数 isSetPadding 设置为 true 时，用户需要通过本接口设置 Pad 填充的数值，设置为 false 时，本接口设置的填充值不生效。
+    """ 
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        _template <typename T>
+        __aicore__ inline void SetLoadDataPaddingValue(const T padValue)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - padValue 
+        输入， Pad 填充值的数值。
+    """
+
+    constraint_list = """
+    **约束说明**
+        无
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        import asc
+        asc.set_load_data_padding_value(10)    
+        asc.set_load_data_padding_value(2.0)  
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def set_load_data_repeat_docstring():
+    func_introduction = """
+    用于设置 Load3Dv2 接口的 repeat 参数。设置 repeat 参数后，可以通过调用一次 Load3Dv2 接口完成多个迭代的数据搬运。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void SetLoadDataRepeat(const LoadDataRepeatParam& repeatParams)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - repeatParams 
+        设置Load3Dv2接口的repeat参数，类型为LoadDataRepeatParam。
+
+    - repeatParams 
+        height/width方向上的迭代次数，取值范围：repeatTime ∈[0, 255] 。默认值为1
+
+    - repeatStride 
+        height/width方向上的前一个迭代与后一个迭代起始地址的距离，取值范围：n∈[0, 65535]，默认值为0。
+        repeatMode为0，repeatStride的单位为16个元素。
+        repeatMode为1，repeatStride的单位和具体型号有关。
+
+    - repeatMode 
+        控制repeat迭代的方向，取值范围：k∈[0, 1] 。默认值为0。
+        0：迭代沿height方向；
+        1：迭代沿width方向。
+    """
+
+    constraint_list = """
+    **约束说明**
+        无
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        import asc
+        static_param = asc.LoadDataRepeatParam(
+            repeatTime=4,
+            repeatStride=8,
+            repeatMode=0
+        )
+        asc.set_load_data_repeat(static_param)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
 def compare_docstring() -> Callable[[T], T]:
     func_introduction = """
     逐元素比较两个tensor大小，如果比较后的结果为真，则输出的结果的对应比特位为1，否则为0。可将结果存入寄存器中。
@@ -4100,6 +4237,9 @@ DOC_HANDLES = {
     "get_cmp_mask": get_cmp_mask_docstring,
     "set_cmp_mask": set_cmp_mask_docstring,
     "select": select_docstring,
+    "set_load_data_boundary": set_load_data_boundary_docstring,
+    "set_load_data_padding_value": set_load_data_padding_value_docstring,
+    "set_load_data_repeat": set_load_data_repeat_docstring,
 }
 
 
