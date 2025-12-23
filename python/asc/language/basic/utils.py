@@ -4419,3 +4419,211 @@ def set_common_docstring(api_name: Optional[str] = None) -> Callable[[T], T]:
         return fn
 
     return decorator
+
+
+class TensorDescDocstring:
+
+    def __init__(self) -> None:
+        ...
+
+    @staticmethod
+    def get_dim_docstring():
+        func_introduction = """
+        获取Tensor的维度。
+        """
+
+        cpp_signature = """
+        **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            uint64_t GetDim()
+        """
+
+        return_list = """
+        **返回值说明**
+
+        返回Tensor的维度。
+        """
+
+        py_example = """
+        **调用示例**
+
+        .. code-block:: python
+
+            tensor_desc = asc.TensorDesc()
+            dim = tensor_desc.get_dim()
+        """
+
+        return [func_introduction, cpp_signature, "", return_list, "", py_example]
+
+    @staticmethod
+    def get_index_docstring():
+        func_introduction = """
+        获取TensorDesc在ListTensorDesc中对应的索引值。
+        """
+
+        cpp_signature = """
+        **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            uint64_t GetIndex()
+        """
+
+        return_list = """
+        **返回值说明**
+
+        返回TensorDesc在ListTensorDesc中对应的索引值。
+        """
+
+        py_example = """
+        **调用示例**
+
+        .. code-block:: python
+
+            tensor_desc = asc.TensorDesc()
+            index = tensor_desc.get_index()
+        """
+
+        return [func_introduction, cpp_signature, "", return_list, "", py_example]
+
+    @staticmethod
+    def get_shape_docstring():
+        func_introduction = """
+        获取对应维度的shape信息。
+        """
+
+        cpp_signature = """
+        **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            uint64_t GetShape(uint32_t offset)
+        """
+
+        param_list = """
+        **参数说明**
+
+        - offset：输入索引值。
+        """
+
+        return_list = """
+        **返回值说明**
+
+        返回对应维度的shape信息。
+        """
+
+        py_example = """
+        **调用示例**
+
+        .. code-block:: python
+
+            tensor_desc = asc.TensorDesc()
+            offset = 0
+            shape = tensor_desc.get_shape
+        """
+
+        return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
+
+    @staticmethod
+    def get_data_ptr_docstring():
+        func_introduction = """
+        获取储存Tensor数据地址。
+        """
+
+        cpp_signature = """
+        **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            T* GetDataPtr()
+        """
+
+        return_list = """
+        **返回值说明**
+
+        返回储存Tensor数据地址。T数据类型。。
+        """
+
+        py_example = """
+        **调用示例**
+
+        .. code-block:: python
+
+            tensor_desc = asc.TensorDesc()
+            data_ptr = tensor_desc.get_data_ptr()
+        """
+
+        return [func_introduction, cpp_signature, "", return_list, "", py_example]
+
+    @staticmethod
+    def get_data_obj_docstring():
+        func_introduction = """
+        将数据指针置于GlobalTensor中并返回该GlobalTensor。
+        """
+
+        cpp_signature = """
+        **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            GlobalTensor<T> GetDataObj()
+        """
+
+        return_list = """
+        **返回值说明**
+
+        返回设置了数据指针的GlobalTensor。
+        """
+
+        py_example = """
+        **调用示例**
+
+        .. code-block:: python
+
+            tensor_desc = asc.TensorDesc()
+            data_obj = tensor_desc.get_data_obj()
+        """
+
+        return [func_introduction, cpp_signature, "", return_list, "", py_example]
+
+
+TENSOR_DOC_HANDLERS = {
+    "TensorDesc": {
+        "get_dim": TensorDescDocstring.get_dim_docstring,
+        "get_index": TensorDescDocstring.get_index_docstring, 
+        "get_shape": TensorDescDocstring.get_shape_docstring,
+        "get_data_ptr": TensorDescDocstring.get_data_ptr_docstring,
+        "get_data_obj": TensorDescDocstring.get_data_obj_docstring,
+    },
+}
+
+
+def set_tensor_docstring(tensor_name: Optional[str] = None, api_name: Optional[str] = None) -> Callable[[T], T]:
+    func_introduction = ""
+    cpp_signature = ""
+    param_list = ""
+    return_list = ""
+    constraint_list = ""
+    py_example = ""
+    if TENSOR_DOC_HANDLERS.get(tensor_name) is None:
+        raise RuntimeError(f"Invalid tensor name {tensor_name}")
+    if TENSOR_DOC_HANDLERS.get(tensor_name, {}).get(api_name) is None:
+        raise RuntimeError(f"Unsupported API [{api_name}] for tensor type [{tensor_name}]")
+    handler = TENSOR_DOC_HANDLERS.get(tensor_name, {}).get(api_name)
+    func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example = handler()
+    docstr = f"""
+    {func_introduction}
+    {cpp_signature}
+    {param_list}
+    {return_list}
+    {constraint_list}
+    {py_example}
+    """
+
+    def decorator(fn: T) -> T:
+        fn.__doc__ = docstr
+        return fn
+
+    return decorator

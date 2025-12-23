@@ -51,6 +51,7 @@ from .basic.dump_tensor import (
     metrics_prof_start, 
     metrics_prof_stop,
 )
+from .basic.list_tensor import TensorDesc
 from .basic.mm import (
     load_data,
     load_data_with_transpose,
@@ -59,6 +60,7 @@ from .basic.mm import (
     set_load_data_padding_value,
     set_load_data_repeat,
 ) 
+from .basic.mm import load_data, load_data_with_transpose, mmad
 from .basic.scalar import scalar_cast, scalar_get_sff_value
 from .basic.set_atomic import (
     set_atomic_add,

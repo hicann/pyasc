@@ -39,6 +39,10 @@ class GenerateBoilerplatePass : public ascendc::impl::GenerateBoilerplateBase<Ge
         if (hasMatmul) {
             builder.create<emitc::IncludeOp>("lib/matmul_intf.h");
         }
+        bool hasTensorDesc = mod.walk([](ascendc::TensorDescOp) { return WalkResult::interrupt(); }).wasInterrupted();
+        if (hasTensorDesc) {
+            builder.create<emitc::IncludeOp>("kernel_operator_list_tensor_intf.h");
+        }
     }
 };
 

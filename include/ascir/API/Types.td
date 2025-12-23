@@ -360,6 +360,11 @@ def TCubeTiling : APIType<"TCubeTiling"> {
   let apiName = "TCubeTiling";
 }
 
+def TensorDesc : APIType<"TensorDesc"> {
+  let mnemonic = "tensor_desc";
+  let apiName = "AscendC::TensorDesc";
+}
+
 def TPipe : APIType<"Pipe"> {
   let mnemonic = "pipe";
   let apiName = "AscendC::TPipe";

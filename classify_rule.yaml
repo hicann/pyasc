@@ -27,6 +27,7 @@ pyasc:
       - python/asc/lib/host/bindings/MatmulApiTiling.cpp
       - lib/Dialect/Asc/IR/OpInterfaces.cpp
       - lib/Dialect/Asc/IR/TypeInterfaces.cpp
+      - lib/Dialect/Asc/Transforms/GenerateBoilerplatePass.cpp
       - bin/ascir-lsp.cpp
 
   llt:
