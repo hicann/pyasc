@@ -42,10 +42,13 @@ Common operations
     metrics_prof_start
     metrics_prof_stop
     mmad
+    mrg_sort
+    mrg_sort4
     pipe_barrier
     printf
     proposal_concat
     proposal_extract
+    rp_sort16
     scatter
     select
     set_aipp_functions
@@ -62,6 +65,8 @@ Common operations
     set_load_data_padding_value
     set_load_data_repeat
     set_vector_mask
+    sort
+    sort32
     transpose
     trans_data_to_5hd
     trap

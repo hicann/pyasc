@@ -702,3 +702,83 @@ def test_set_vector_mask_kernel(mock_launcher_run):
 
     set_vector_mask_kernel[1]()
     assert mock_launcher_run.call_count == 1
+
+
+def test_mrg_sort_kernel(mock_launcher_run):
+
+    @asc.jit
+    def mrg_sort_kernel():
+        src1 = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+        src2 = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=512, tile_size=512)
+        src3 = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=1024, tile_size=512)
+        src4 = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=1536, tile_size=512)
+        dst = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=2048)
+        sort_list = asc.MrgSortSrcList(asc.float16, src1, src2, src3, src4)
+        element_count_list = [128, 128, 128, 128]
+        sorted_num = [0, 0, 0, 0]
+        asc.mrg_sort(dst, sort_list, element_count_list, sorted_num, valid_bit=15, repeat_time=1)
+        asc.mrg_sort(dst, sort_list, element_count_list, sorted_num, valid_bit=15, 
+                    repeat_time=1, is_exhausted_suspension=True)
+        mrg_sort4_info = asc.MrgSort4Info(element_count_list, if_exhausted_suspension=False, 
+                                          valid_bit=7, repeat_times=1)
+        asc.mrg_sort(dst, sort_list, mrg_sort4_info)
+
+    mrg_sort_kernel[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_mrg_sort4_kernel(mock_launcher_run):
+
+    @asc.jit
+    def mrg_sort4_kernel():
+        src1 = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+        src2 = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=512, tile_size=512)
+        src3 = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=1024, tile_size=512)
+        src4 = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=1536, tile_size=512)
+        dst = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=2048)
+        src_list = asc.MrgSortSrcList(asc.float16, src1, src2, src3, src4)
+        element_lengths = [16, 16, 16, 16]
+        mrg_sort4_info = asc.MrgSort4Info(element_lengths, if_exhausted_suspension=False, valid_bit=7, repeat_times=1)
+        asc.mrg_sort4(dst, src_list, mrg_sort4_info)
+
+    mrg_sort4_kernel[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_rp_sort16_kernel(mock_launcher_run):
+
+    @asc.jit
+    def rp_sort16_kernel():
+        src = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+        dst = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
+        asc.rp_sort16(dst, src, repeat_time=2)
+
+    rp_sort16_kernel[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_sort32_kernel(mock_launcher_run):
+
+    @asc.jit
+    def sort32_kernel():
+        src0 = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+        src1 = asc.LocalTensor(dtype=asc.uint32, pos=asc.TPosition.VECIN, addr=512, tile_size=512)
+        dst = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=1024)
+        asc.sort32(dst, src0, src1, repeat_time=4)
+
+    sort32_kernel[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_sort_kernel(mock_launcher_run):
+
+    @asc.jit
+    def sort_kernel():
+        concat = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+        index = asc.LocalTensor(dtype=asc.uint32, pos=asc.TPosition.VECIN, addr=512, tile_size=512)
+        tmp = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=1024, tile_size=512)
+        dst = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=1024)
+        asc.sort(dst, concat, index, tmp, repeat_time=4)
+
+    sort_kernel[1]()
+    assert mock_launcher_run.call_count == 1

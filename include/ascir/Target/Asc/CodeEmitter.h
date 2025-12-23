@@ -181,6 +181,8 @@ struct CodeEmitter {
 
     LogicalResult emitAscMatmulType(Location loc, Type type, bool emitAsUnsigned);
 
+    LogicalResult emitAscMrgSortSrcListType(Location loc, Type type, bool emitAsUnsigned);
+
     LogicalResult emitIntegerType(IntegerType &iType, Location loc, Type type, bool emitAsUnsigned);
 
     LogicalResult emitFloatType(FloatType &fType, Location loc, Type type, bool emitAsUnsigned);

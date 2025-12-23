@@ -76,7 +76,7 @@ from .properties import (
     TOTAL_L1_SIZE,
 )
 from .range import range, static_range
-from .tensor import GlobalTensor, LocalTensor, LocalTensorAuto
+from .tensor import GlobalTensor, LocalTensor, LocalTensorAuto, MrgSortSrcList
 from .types import (
     BinaryRepeatParams,
     BrcbRepeatParams,
@@ -89,6 +89,7 @@ from .types import (
     GatherMaskParams,
     GatherRepeatParams,
     LoadImageToLocalParams,
+    MrgSort4Info,
     Nd2NzParams,
     ShapeInfo,
     SliceInfo,
@@ -186,6 +187,7 @@ __all__ = [
     "GlobalTensor",
     "LocalTensor",
     "LocalTensorAuto",
+    "MrgSortSrcList",
     # .core.types
     "BinaryRepeatParams",
     "BrcbRepeatParams",
@@ -198,6 +200,7 @@ __all__ = [
     "GatherMaskParams",
     "GatherRepeatParams",
     "LoadImageToLocalParams",
+    "MrgSort4Info",
     "Nd2NzParams",
     "ShapeInfo",
     "SliceInfo",

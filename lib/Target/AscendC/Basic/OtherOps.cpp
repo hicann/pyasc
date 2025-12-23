@@ -172,6 +172,48 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::FftsC
     return success();
 }
 
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::MrgSortOp op)
+{
+   static int elementCountListCounter = 0;
+   auto uniqueId = std::to_string(elementCountListCounter++);
+   auto& os = emitter.ostream();
+   auto elementCountListName = (emitter.getOrCreateName(op.getDst()) + "_element_count_list_" + uniqueId).str();
+   auto sortedNumName = (emitter.getOrCreateName(op.getDst()) + "_sorted_num_" + uniqueId).str();
+   os << "uint16_t " << elementCountListName << "[] = {";
+   llvm::interleaveComma(op.getElementCountList(), os, [&](Value operand) { os << emitter.getOrCreateName(operand); });
+   os << "};\n";
+   os << "uint32_t " << sortedNumName << "[] = {";
+   llvm::interleaveComma(op.getSortedNum(), os, [&](Value operand) { os << emitter.getOrCreateName(operand); });
+   os << "};\n";  
+   os << ascNamespace << "::" << op.getAPIName();
+   auto tensorType = cast<ascendc::LocalTensorType>(op.getDst().getType()).getElementType();
+   os << "<";
+   FAIL_OR(emitter.emitType(op.getLoc(), tensorType));
+   os << ", " << op.getIsExhaustedSuspension() << ">"
+      << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+      << emitter.getOrCreateName(op.getSortList()) << ", "
+      << elementCountListName << ", " << sortedNumName << ", "
+      << emitter.getOrCreateName(op.getValidBit()) << ", "
+      << emitter.getOrCreateName(op.getRepeatTime()) << ")";
+    return success();
+}
+
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::SortOp op)
+{
+   auto& os = emitter.ostream();
+   os << ascNamespace << "::" << op.getAPIName();
+   auto tensorType = cast<ascendc::LocalTensorType>(op.getDst().getType()).getElementType();
+   os << "<";
+   FAIL_OR(emitter.emitType(op.getLoc(), tensorType));
+   os << ", " << op.getIsFullSort() << ">"
+      << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+      << emitter.getOrCreateName(op.getConcat()) << ", "
+      << emitter.getOrCreateName(op.getIndex()) << ", "
+      << emitter.getOrCreateName(op.getTmp()) << ", "
+      << emitter.getOrCreateName(op.getRepeatTime()) << ")";
+    return success();
+}
+
 LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::PopStackBufferOp op)
 {
     auto &os = emitter.ostream();

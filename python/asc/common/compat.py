@@ -33,9 +33,13 @@ else:
 
     def isinstance(obj, constraint: Union[Type, Tuple[Type]]) -> bool:
         if builtins.isinstance(constraint, tuple):
-            return any(isinstance(obj, t) for t in constraint)
-        if typing.get_origin(constraint) is Union:
-            return any(isinstance(obj, t) for t in typing.get_args(constraint))
+            return any(builtins.isinstance(obj, t) for t in constraint)
+        origin = typing.get_origin(constraint)
+        if origin is not None:
+            if origin is Union:
+                return any(builtins.isinstance(obj, t) for t in typing.get_args(constraint))
+            else:
+                return builtins.isinstance(obj, origin)
         return builtins.isinstance(obj, constraint)
 
 

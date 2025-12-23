@@ -7,7 +7,7 @@
 # See LICENSE in the root of the software repository for the full text of the License.
 
 from __future__ import annotations
-from typing import Any, Iterable, Optional, Tuple, Union, overload
+from typing import Any, Iterable, List, Optional, Tuple, Union, overload
 
 from ..._C import ir
 from ...common.compat import isinstance
@@ -1363,5 +1363,55 @@ class MmadParams(IRValue):
     def from_ir(cls, handle: IRHandle) -> "MmadParams":
         return cls(handle=handle)
 
+    def to_ir(self) -> IRHandle:
+        return self.handle
+
+
+
+class MrgSort4Info(IRValue):
+    
+    @overload
+    def __init__(self, element_lengths: List[int], if_exhausted_suspension: bool = False,
+                 valid_bit: int = 15, repeat_times: int = 1) -> None:
+        ...
+    
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+        """This constructor should not be called by user"""
+        ...
+    
+    @require_jit
+    def __init__(self, element_lengths: List[int], if_exhausted_suspension: bool = False,
+                 valid_bit: int = 15, repeat_times: int = 1,
+                 handle: Optional[IRHandle] = None) -> None:
+        if handle is not None:
+            self.handle = handle
+            return
+            
+        builder = global_builder.get_ir_builder()
+
+        if_exhausted_suspension_ir = _mat(if_exhausted_suspension, KnownTypes.bool_).to_ir()
+        valid_bit_ir = _mat(valid_bit, KnownTypes.uint16).to_ir()
+        repeat_times_ir = _mat(repeat_times, KnownTypes.uint16).to_ir()
+        
+        from .array import array
+        
+        element_lengths_array = array(KnownTypes.uint16, element_lengths)
+        
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_MrgSort4InfoType(),
+            [element_lengths_array.to_ir(), if_exhausted_suspension_ir, valid_bit_ir, repeat_times_ir],
+            builder.get_type_array_attr([
+                element_lengths_array.to_ir().get_type(),
+                builder.get_i1_type(),
+                builder.get_ui16_type(),
+                builder.get_ui16_type()
+            ])
+        )
+    
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> MrgSort4Info:
+        return cls([], False, 15, 1, handle)
+    
     def to_ir(self) -> IRHandle:
         return self.handle

@@ -127,6 +127,12 @@ def AscendC_Matmul : AscendC_Type<"Matmul", "matmul"> {
   }];
 }
 
+def AscendC_MrgSortSrcList : AscendC_Type<"MrgSortSrcList", "mrg_sort_src_list"> {
+  let description = "Represents AscendC::MrgSortSrcList";
+  let parameters = (ins "Type":$elementType);
+  let assemblyFormat = "`<` $elementType `>`";
+}
+
 def AscendC_QueBind : AscendC_BaseQueueType<"QueBind", "que_bind"> {
   let description = "Represents AscendC::TQueBind";
   let parameters = (ins "TPositionAttr":$srcPositionAttr,

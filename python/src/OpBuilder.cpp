@@ -411,6 +411,10 @@ void bind_get_special_type(py::class_<PyOpBuilder> &clss)
              [](PyOpBuilder &self, Type elementType) -> Type {
                  return self->getType<ascendc::DataCopyPadExtParamsType>(elementType);
              })
+        .def("get_asc_MrgSortSrcListType",
+			[](PyOpBuilder &self, Type elementType) -> Type {
+				return self->getType<ascendc::MrgSortSrcListType>(elementType);
+			})
 #include "ascir/API/AscTypeBindings.h.inc"
         ;
 }
