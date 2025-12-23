@@ -115,8 +115,13 @@ from .basic.vec_gather import gather, gatherb
 from .basic.vec_gather_mask import gather_mask, get_gather_mask_remain_count
 from .basic.vec_transpose import transpose, trans_data_to_5hd
 from .basic.proposal import (
+    mrg_sort,
+    mrg_sort4,
     proposal_concat,
     proposal_extract,
+    rp_sort16,
+    sort32,
+    sort,
 )
 from .basic.vec_reduce import (
     block_reduce_sum, 
@@ -212,7 +217,7 @@ from .core.properties import (
     TOTAL_L1_SIZE,
 )
 from .core.range import range, static_range
-from .core.tensor import GlobalTensor, LocalTensor, LocalTensorAuto
+from .core.tensor import GlobalTensor, LocalTensor, LocalTensorAuto, MrgSortSrcList
 from .core.types import (
     BinaryRepeatParams,
     BrcbRepeatParams,
@@ -225,6 +230,7 @@ from .core.types import (
     GatherMaskParams,
     GatherRepeatParams,
     LoadImageToLocalParams,
+    MrgSort4Info,    
     Nd2NzParams,
     ShapeInfo,
     SliceInfo,

@@ -173,6 +173,9 @@ void CodeEmitter::createTypeEmitMapper()
     emitTypeMapper[TypeID::get<ascendc::DataCopyPadExtParamsType>()] = [this](Location loc, Type type, bool flag) {
         return this->emitAscDataCopyPadExtParamsType(loc, type, flag);
     };
+    emitTypeMapper[TypeID::get<ascendc::MrgSortSrcListType>()] = [this](Location loc, Type type, bool flag) {
+        return this->emitAscMrgSortSrcListType(loc, type, flag);
+    };
 }
 
 void CodeEmitter::createAttributeEmitMapper()
@@ -922,6 +925,16 @@ LogicalResult CodeEmitter::emitAscDataCopyPadExtParamsType(Location loc, Type ty
 {
     auto ldType = dyn_cast<ascendc::DataCopyPadExtParamsType>(type);
     os << ascNamespace << "::DataCopyPadExtParams<";
+    if (failed(emitType(loc, ldType.getElementType())))
+        return failure();
+    os << '>';
+    return success();
+}
+
+LogicalResult CodeEmitter::emitAscMrgSortSrcListType(Location loc, Type type, bool emitAsUnsigned)
+{
+    auto ldType = dyn_cast<ascendc::MrgSortSrcListType>(type);
+    os << ascNamespace << "::MrgSortSrcList<";
     if (failed(emitType(loc, ldType.getElementType())))
         return failure();
     os << '>';

@@ -4047,6 +4047,277 @@ def compare_docstring() -> Callable[[T], T]:
     return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
 
 
+def mrg_sort_docstring():
+    func_introduction = """
+    将已经排好序的多个队列合并成一条队列，结果按照指定顺序排序。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void MrgSort(const LocalTensor<T>& dst, const MrgSortSrcList<T>& src,
+                                     const uint16_t elementCountList[], uint32_t sortedNum[],
+                                     uint16_t validBit, uint16_t repeatTime,
+                                     bool isExhaustedSuspension = false)
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void MrgSort(const LocalTensor<T>& dst, const MrgSortSrcList<T>& src,
+                                     const MrgSort4Info& params)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst (asc.LocalTensor): 目的操作数，存储经过排序后的结果。支持的TPosition为VECIN/VECCALC/VECOUT。
+    - src (asc.MrgSortSrcList): 源操作数，多个已经排好序的队列。具体定义如下：
+
+    .. code-block:: python
+
+        class MrgSortSrcList:
+            src1: LocalTensor  # 第一个已经排好序的Region Proposals队列
+            src2: LocalTensor  # 第二个已经排好序的Region Proposals队列
+            src3: LocalTensor  # 第三个已经排好序的Region Proposals队列
+            src4: LocalTensor  # 第四个已经排好序的Region Proposals队列
+
+    - element_count_list: 各个源队列的长度（元素数目），类型为uint16_t数组。
+    - sorted_num: 输出参数，存储各个队列排序后的元素数目，类型为uint32_t数组。
+    - valid_bit: 有效队列个数位掩码。
+    - repeat_time: 迭代次数。
+    - is_exhausted_suspension: 某条队列耗尽后，指令是否需要停止，类型为bool，默认false。
+    - params (asc.MrgSort4Info)：排序所需参数。
+      - element_lengths: 四个源Region Proposals队列的长度（Region Proposal数目），类型为长度为4的uint16_t数组，每个元素取值范围[0, 4095]。
+      - is_exhausted_suspension: 某条队列耗尽后，指令是否需要停止，类型为bool，默认false。
+      - valid_bit：有效队列个数。
+      - repeat_times：迭代次数，每一次源操作数和目的操作数跳过四个队列总长度。取值范围[1,255]。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 不支持源操作数与目的操作数之间存在地址重叠。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        src_list = asc.MrgSortSrcList(queue1, queue2, queue3, queue4)
+        element_counts = [16, 16, 16, 16]
+        sorted_nums = [0, 0, 0, 0]
+        valid_bit = 15  # 所有4个队列都有效
+        repeat_time = 1
+        asc.mrg_sort(dst, src_list, element_counts, sorted_nums, valid_bit, repeat_time)
+
+        src_list = asc.MrgSortSrcList(queue1, queue2, queue3, queue4)
+        element_lengths = [16, 16, 16, 16]
+        params = asc.MrgSort4Info(element_lengths, False, 15, 1)
+        asc.mrg_sort(dst, src_list, params)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def mrg_sort4_docstring():
+    func_introduction = """
+    将已经排好序的最多4条Region Proposals队列，排列并合并成1条队列，结果按照score域由大到小排序。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void MrgSort4(const LocalTensor<T>& dst, const MrgSortSrcList<T>& src, const MrgSort4Info& params)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst (asc.LocalTensor): 目的操作数，存储经过排序后的Region Proposals。支持的TPosition为VECIN/VECCALC/VECOUT。
+    - src (asc.MrgSortSrcList): 源操作数，多个已经排好序的队列。具体定义如下：
+    .. code-block:: python
+
+        class MrgSortSrcList:
+            src1: LocalTensor
+            src2: LocalTensor
+            src3: LocalTensor
+            src4: LocalTensor
+
+    - params (asc.MrgSort4Info)
+        排序所需参数。
+        - element_lengths: 四个源Region Proposals队列的长度（Region Proposal数目），类型为长度为4的uint16_t数组，每个元素取值范围[0, 4095]。
+        - is_exhausted_suspension: 某条队列耗尽后，指令是否需要停止，类型为bool，默认false。
+        - valid_bit：有效队列个数。
+        - repeat_times：迭代次数，每一次源操作数和目的操作数跳过四个队列总长度。取值范围[1,255]。
+
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 当存在proposal[i]与proposal[j]的score值相同时，如果i>j，则proposal[j]将首先被选出来，排在前面。
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 不支持源操作数与目的操作数之间存在地址重叠。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        # vconcat_work_local为已经创建并且完成排序的4个Region Proposals，每个Region Proposal数目是16个
+        src_list = asc.MrgSortSrcList(vconcat_work_local[0], vconcat_work_local[1], vconcat_work_local[2], vconcat_work_local[3])
+        element_lengths = [16, 16, 16, 16]
+        src_info = asc.MrgSort4Info(element_lengths, False, 15, 1)
+        asc.mrg_sort4(dst_local, src_list, src_info)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def rp_sort16_docstring():
+    func_introduction = """
+    根据Region Proposals中的score域对其进行排序（score大的排前面），每次排16个Region Proposals。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void RpSort16(const LocalTensor<T>& dst, const LocalTensor<T>& src, const int32_t repeatTime)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst: 目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。
+    - src0: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。
+    - repeat_time: 重复迭代次数。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 用户需保证src和dst中存储的Region Proposal数目大于实际所需数据，否则会存在tensor越界错误。
+    - 当存在proposal[i]与proposal[j]的score值相同时，如果i>j，则proposal[j]将首先被选出来，排在前面。
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        # repeat_time = 2, 对2个Region Proposal进行排序
+        asc.rp_sort16(dst_local, src_local, 2)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def sort32_docstring():
+    func_introduction = """
+    排序函数，一次迭代可以完成32个数的排序。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void Sort32(const LocalTensor<T>& dst, const LocalTensor<T>& src0,
+                                     const LocalTensor<uint32_t>& src1, const int32_t repeatTime)
+    """
+
+    param_list = """
+    **参数说明**
+    - dst: 目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。
+    - src0: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。
+    - src1: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。
+    - repeat_time: 重复迭代次数。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 当存在score[i]与score[j]相同时，如果i>j，则score[j]将首先被选出来，排在前面。
+    - 每次迭代内的数据会进行排序，不同迭代间的数据不会进行排序。
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        # repeat_time = 4, 对128个数分成4组进行排序，每次完成1组32个数的排序
+        asc.sort32(dst_local, src_local0, src_local1, 4)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def sort_docstring():
+    func_introduction = """
+    排序函数，按照数值大小进行降序排序。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T, bool isFullSort>
+        __aicore__ inline void Sort(const LocalTensor<T> &dst, const LocalTensor<T> &concat,
+                                   const LocalTensor<uint32_t> &index, LocalTensor<T> &tmp,
+                                   const int32_t repeatTime)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst (asc.LocalTensor): 目的操作数，shape为[2n]。
+    - concat (asc.LocalTensor): 源操作数，shape为[n]，数据类型与目的操作数保持一致。
+    - index (asc.LocalTensor): 源操作数，shape为[n]。固定为uint32_t数据类型。
+    - tmp (asc.LocalTensor): 临时空间。接口内部复杂计算时用于存储中间变量，由开发者提供。数据类型与源操作数保持一致。
+    - repeat_time (int): 重复迭代次数，int32_t类型。
+    - is_full_sort (bool, 可选): 模板参数，是否开启全排序模式。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 当存在score[i]与score[j]相同时，如果i>j，则score[j]将首先被选出来，排在前面，即index的顺序与输入顺序一致。
+    - 非全排序模式下，每次迭代内的数据会进行排序，不同迭代间的数据不会进行排序。
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        # 处理128个half类型数据
+        element_count = 128
+        sort_repeat_times = element_count // 32
+        extract_repeat_times = element_count // 32
+        asc.sort(dst_local, concat_local, index_local, tmp_local, sort_repeat_times, is_full_sort=True)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
 def compare_scalar_docstring() -> Callable[[T], T]:
     func_introduction = """
     逐元素比较一个tensor中的元素和另一个Scalar的大小，如果比较后的结果为真，则输出的结果的对应比特位为1，否则为0。
@@ -4383,11 +4654,16 @@ DOC_HANDLES = {
     "compare": compare_docstring,
     "compare_scalar": compare_scalar_docstring,
     "get_cmp_mask": get_cmp_mask_docstring,
+    "mrg_sort": mrg_sort_docstring,
+    "mrg_sort4": mrg_sort4_docstring,
+    "rp_sort16": rp_sort16_docstring,
     "set_cmp_mask": set_cmp_mask_docstring,
     "select": select_docstring,
     "set_load_data_boundary": set_load_data_boundary_docstring,
     "set_load_data_padding_value": set_load_data_padding_value_docstring,
     "set_load_data_repeat": set_load_data_repeat_docstring,
+    "sort": sort_docstring,
+    "sort32": sort32_docstring,
 }
 
 

@@ -137,6 +137,7 @@ using PrintableOpTypes = std::tuple<
     // Other operations
     ascendc::ConstructOp, ascendc::AscendIsAICOp, ascendc::AscendIsAIVOp, LLVM::UndefOp, ascendc::FftsCrossCoreSyncOp,
     ascendc::SetFftsBaseAddrOp, ascendc::PopStackBufferOp,
+    ascendc::MrgSortOp, ascendc::SortOp,
     // Scalar operations
     ascendc::ScalarCastOp,
     // Swap and workspace operations

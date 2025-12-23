@@ -38,6 +38,10 @@ LogicalResult printOperation(CodeEmitter &emitter, ascendc::ConstructOp op);
 
 LogicalResult printOperation(CodeEmitter &emitter, ascendc::FftsCrossCoreSyncOp op);
 
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::MrgSortOp op);
+
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::SortOp op);
+
 LogicalResult printOperation(CodeEmitter &emitter, ascendc::PopStackBufferOp op);
 
 LogicalResult printOperation(CodeEmitter &emitter, ascendc::SetFftsBaseAddrOp op);

@@ -43,6 +43,10 @@ class AscendC_InterfaceMethods {
   InterfaceMethod getSrc1BlkStride = GetMethod<"src1BlkStride", "getSrc1BlkStride">;
   InterfaceMethod getSrc1RepStride = GetMethod<"src1RepStride", "getSrc1RepStride">;
   InterfaceMethod getIsReuseSource = GetMethod<"isReuseSource", "getIsReuseSource">;
+  InterfaceMethod getIsExhaustedSuspension = GetMethod<"isExhaustedSuspension", 
+    "getIsExhaustedSuspension", "bool">;
+  InterfaceMethod getIsFullSort = GetMethod<"isFullSort", 
+    "getIsFullSort", "bool">;
 }
 
 class AscendC_OpInterface<string name, list<Interface> baseInterfaces = []>

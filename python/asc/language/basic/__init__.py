@@ -106,8 +106,13 @@ from .vec_gather import (
 )
 from .vec_gather_mask import gather_mask, get_gather_mask_remain_count
 from .proposal import (
+    mrg_sort,
+    mrg_sort4,
     proposal_concat,
     proposal_extract,
+    rp_sort16,
+    sort32,
+    sort,
 )
 from .vec_reduce import (
     block_reduce_sum,
@@ -271,6 +276,12 @@ __all__ = [
     "reduce_sum",
     # .vec_scatter
     "scatter",
+    # .vec_sort
+    "mrg_sort",
+    "mrg_sort4",
+    "rp_sort16",
+    "sort",
+    "sort32",
     # .vec_ternary_scalar
     "axpy",
     # .vec_unary

@@ -20,6 +20,36 @@ include "mlir/Interfaces/CastInterfaces.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 include "mlir/IR/OpBase.td"
 
+def AscendC_MrgSortSrcListOp : AscendC_Op<"mrg_sort_src_list", [AscConstructor]> {
+  let summary = "Instantiate MrgSortSrcList";
+  let results = (outs AscendC_MrgSortSrcList:$params);
+  let assemblyFormat = "attr-dict `:` qualified(type($params))";
+}
+
+def AscendC_MrgSortOp : APIOp<"mrg_sort", "MrgSort", [AttrSizedOperandSegments]> {
+  let summary = "Call `AscendC::MrgSort` method";
+  let description = "`AscendC::MrgSort` merges sorted queues into one queue.\n";
+  let arguments = (ins AnyType:$dst, AscendC_MrgSortSrcList:$sortList, 
+                   Variadic<UI16>:$elementCountList,
+                   Variadic<UI32>:$sortedNum,
+                   AnyType:$validBit, AnyType:$repeatTime,
+                   UnitAttr:$isExhaustedSuspension);
+}
+
+def AscendC_MrgSort4Op : APIOp<"mrg_sort4", "MrgSort4", [AscFunc]> {
+  let summary = "Call `AscendC::MrgSort4` method";
+  let description = "`AscendC::MrgSort4` merges sorted Region Proposals queues into one queue.\n";
+  let arguments = (ins AnyType:$dst, AscendC_MrgSortSrcList:$src, 
+                   AscendC_MrgSort4Info:$params);
+}
+
+def AscendC_MrgSortWithInfoOp : APIOp<"mrg_sort_with_info", "MrgSort", [AscFunc]> {
+  let summary = "Call `AscendC::MrgSort` method with MrgSort4Info parameter";
+  let description = "`AscendC::MrgSort` merges sorted queues into one queue using MrgSort4Info parameter.\n";
+  let arguments = (ins AnyType:$dst, AscendC_MrgSortSrcList:$src,
+                   AscendC_MrgSort4Info:$params);
+}
+
 def AscendC_ProposalConcatOp : VectorOp<"proposal_concat", "ProposalConcat", [AscFunc]> {
   let description = "Merge continuous elements into the corresponding positions within the Region Proposal";
   let arguments = (ins
@@ -38,6 +68,27 @@ def AscendC_ProposalExtractOp : VectorOp<"proposal_extract", "ProposalExtract", 
     AnyType:$repeatTime,
     AnyType:$modeNumber
   );
+}
+
+def AscendC_RpSort16Op : APIOp<"rp_sort16", "RpSort16", [AscFunc]> {
+  let summary = "Call `AscendC::RpSort16` method";
+  let description = "`AscendC::RpSort16` sorts Region Proposals by score field (higher scores first), 16 proposals at a time.\n";
+  let arguments = (ins AnyType:$dst, AnyType:$src, AnyType:$repeatTime);
+}
+
+def AscendC_Sort32Op : APIOp<"sort32", "Sort32", [AscFunc]> {
+  let summary = "Call `AscendC::Sort32` method";
+  let description = "`AscendC::Sort32` sorts 32 elements per iteration, storing results as (score, index) pairs.\n";
+  let arguments = (ins AnyType:$dst, AnyType:$src0, AnyType:$src1, AnyType:$repeatTime);
+}
+
+def AscendC_SortOp : APIOp<"sort", "Sort"> {
+  let summary = "Call `AscendC::Sort` method";
+  let description = "`AscendC::Sort` performs descending sort with different data layouts for different platforms.\n";
+  let arguments = (ins AnyType:$dst, AnyType:$concat, 
+                   AnyType:$index, AnyType:$tmp,
+                   AnyType:$repeatTime,
+                   UnitAttr:$isFullSort);
 }
 
 #endif //ASC_BASIC_OP_PROPOSAL_TD

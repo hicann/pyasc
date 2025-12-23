@@ -280,6 +280,16 @@ def MmadParams : APIType<"MmadParams"> {
   let apiName = "AscendC::MmadParams";
 }
 
+def MrgSortSrcList : APIType {
+  let mnemonic = "mrg_sort_src_list";
+  let apiName = "AscendC::MrgSortSrcList";
+}
+
+def MrgSort4Info : APIType<"MrgSort4Info"> {
+  let mnemonic = "mrg_sort4_info";
+  let apiName = "AscendC::MrgSort4Info";
+}
+
 def Nd2NzParams : APIType<"Nd2NzParams"> {
   let mnemonic = "nd2nz_params";
   let apiName = "AscendC::Nd2NzParams";
