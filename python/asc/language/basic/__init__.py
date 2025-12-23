@@ -40,6 +40,7 @@ from .dump_tensor import (
     metrics_prof_start, 
     metrics_prof_stop,
 )
+from .list_tensor import TensorDesc
 from .mm import (
     load_data,
     load_data_with_transpose,
@@ -48,6 +49,7 @@ from .mm import (
     set_load_data_padding_value,
     set_load_data_repeat,
 )  
+from .mm import load_data, load_data_with_transpose, mmad
 from .scalar import scalar_cast, scalar_get_sff_value
 from .set_atomic import (
     set_atomic_add,
@@ -181,6 +183,8 @@ __all__ = [
     "print_time_stamp",
     "metrics_prof_start",
     "metrics_prof_stop",
+    # .list_tensor
+    "TensorDesc",
     # .mm
     "load_data",
     "load_data_with_transpose",

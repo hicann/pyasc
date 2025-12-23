@@ -68,6 +68,21 @@ Common operations
     wait_flag
 
 
+TensorDesc operations
+-------------------
+
+.. autoclass:: TensorDesc
+.. autosummary::
+    :toctree: generated
+    :nosignatures:
+
+    TensorDesc.get_dim
+    TensorDesc.get_index
+    TensorDesc.get_shape
+    TensorDesc.get_data_ptr
+    TensorDesc.get_data_obj
+
+
 Scalar operations
 -----------------
 

@@ -21,6 +21,7 @@
 #include "ascir/Target/Asc/Basic/DataConversion.h"
 #include "ascir/Target/Asc/Basic/DataCopy.h"
 #include "ascir/Target/Asc/Basic/DumpTensor.h"
+#include "ascir/Target/Asc/Basic/ListTensor.h"
 #include "ascir/Target/Asc/Basic/OtherOps.h"
 #include "ascir/Target/Asc/Basic/Scalar.h"
 #include "ascir/Target/Asc/Basic/SwapMem.h"
@@ -131,6 +132,8 @@ using PrintableOpTypes = std::tuple<
     ascendc::DataCopyNz2NdOp, ascendc::DataCopySliceOp, ascendc::DataCopyCO12DstOp,
     // Dump tensor operations
     ascendc::PrintfOp,
+    // TensorDesc operations
+    ascendc::TensorDescOp,
     // Other operations
     ascendc::ConstructOp, ascendc::AscendIsAICOp, ascendc::AscendIsAIVOp, LLVM::UndefOp, ascendc::FftsCrossCoreSyncOp,
     ascendc::SetFftsBaseAddrOp, ascendc::PopStackBufferOp,
