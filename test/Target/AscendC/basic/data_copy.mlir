@@ -123,3 +123,18 @@ func.func @emit_load_image_to_local(%arg0: memref<?xui64, 22>) {
   ascendc.load_image_to_local %2, %3 : !ascendc.local_tensor<*xf16>, !ascendc.load_image_to_local_params 
   return 
 }
+
+// CHECK-LABEL:void emit_set_pad_value(__gm__ uint64_t* v1) {
+// CHECK-NEXT:  set_ffts_base_addr(*v1);
+// CHECK-NEXT:  constexpr int32_t c37_i32 = 37;
+// CHECK-NEXT:  AscendC::SetPadValue<int32_t, AscendC::TPosition::MAX>(c37_i32);
+// CHECK-NEXT:  AscendC::SetPadValue<int32_t, AscendC::TPosition::VECIN>(c37_i32);
+// CHECK-NEXT:  return;
+// CHECK-NEXT:}
+func.func @emit_set_pad_value(%arg0: memref<?xui64, 22>) {
+  ascendc.set_ffts_base_addr %arg0 : memref<?xui64, 22> 
+  %c37_i32 = arith.constant 37 : i32
+  ascendc.set_pad_value %c37_i32 {pos = 12 : i32} : i32
+  ascendc.set_pad_value %c37_i32 {pos = 9 : i32} : i32
+  return 
+}

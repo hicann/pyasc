@@ -6,9 +6,11 @@
 # INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
 # See LICENSE in the root of the software repository for the full text of the License.
 
-from typing import overload, Union, List
+from typing import overload, Union, List, Optional
 
+from ..._C import ir
 from ..core.dtype import KnownTypes
+from ..core.enums import TPosition  
 from ..core.ir_value import RuntimeInt, materialize_ir_value as _mat
 from ..core.tensor import BaseTensor, GlobalTensor, LocalTensor
 from ..core.types import (CopyRepeatParams, DataCopyEnhancedParams, DataCopyParams, DataCopyCO12DstParams,
@@ -281,3 +283,23 @@ def load_image_to_local(dst: LocalTensor, load_data_params: LoadImageToLocalPara
         dst.to_ir(),  
         load_data_params.to_ir() 
     )
+
+
+@overload
+def set_pad_value(padding_value: Union[int, float], pos: Optional[TPosition] = TPosition.MAX) -> None:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="set_pad_value")
+def set_pad_value(padding_value: Union[int, float], pos: Optional[TPosition] = TPosition.MAX) -> None:
+    if pos is not None and pos not in (
+        TPosition.MAX,
+        TPosition.VECIN,
+        TPosition.VECOUT,
+    ):
+        raise ValueError(
+            "set_pad_value(): pos must be one of [TPosition.MAX, TPosition.VECIN, TPosition.VECOUT]"       
+        )
+    builder = global_builder.get_ir_builder()
+    builder.create_asc_SetPadValueOp(_mat(padding_value).to_ir(), ir.TPosition.symbolize(pos))
