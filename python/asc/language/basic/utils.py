@@ -394,6 +394,278 @@ def pipe_barrier_docstring():
     return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
+def ib_set_docstring():
+    func_introduction = """
+    当不同核之间操作同一块全局内存且可能存在读后写、写后读以及写后写等数据依赖问题时，通过调用该函数来插入同步语句来避免上述数据依赖时可能出现的数据读写错误问题。
+    调用ib_set设置某一个核的标志位，与ib_wait成对出现配合使用，表示核之间的同步等待指令，等待某一个核操作完成。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <bool isAIVOnly = true>
+        __aicore__ inline void IBSet(
+            const GlobalTensor<int32_t>& gmWorkspace,
+            const LocalTensor<int32_t>&  ubWorkspace,
+            int32_t blockIdx,
+            int32_t eventID)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - gmWorkspace: 外部存储核状态的公共缓存，类型为GlobalTensor。
+    - ubWorkspace: 存储当前核状态的公共缓存。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。
+    - blockIdx: 表示等待核的idx号，取值范围：[0, 核数-1]。
+    - eventID: 用来控制当前核的set、wait事件。
+    - isAIVOnly:控制是否为AIVOnly模式，默认为true。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - gmWorkspace申请的空间最少要求为：核数 * 32Bytes * eventID_max + blockIdx_max * 32Bytes + 32Bytes。（eventID_max和blockIdx_max分别指eventID、blockIdx的最大值 ）；
+    - 注意：如果是AIVOnly模式，核数 = GetBlockNum()；如果是MIX模式，核数 = GetBlockNum() * 2；
+    - ubWorkspace申请的空间最少要求为：32Bytes；
+    - gmWorkspace缓存的值需要初始化为0。
+    - 使用该接口进行多核控制时，算子调用时指定的逻辑blockDim必须保证不大于实际运行该算子的AI处理器核数，否则框架进行多轮调度时会插入异常同步，导致Kernel“卡死”现象。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        gm = asc.GlobalTensor()
+        gm.set_global_buffer(x)
+        ub = asc.LocalTensor(dtype=asc.int32, pos=asc.TPosition.VECIN, addr=0, tile_size=32)
+        asc.ib_set(gm, ub, block_idx=0, event_id=0)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def ib_wait_docstring():
+    func_introduction = """
+    当不同核之间操作同一块全局内存且可能存在读后写、写后读以及写后写等数据依赖问题时，通过调用该函数来插入同步语句来避免上述数据依赖时可能出现的数据读写错误问题。
+    ib_wait与ib_set成对出现配合使用，表示核之间的同步等待指令，等待某一个核操作完成。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型（软同步）**
+
+    .. code-block:: c++
+
+        template <bool isAIVOnly = true>
+        __aicore__ inline void IBWait(
+            const GlobalTensor<int32_t>& gmWorkspace,
+            const LocalTensor<int32_t>&  ubWorkspace,
+            int32_t blockIdx,
+            int32_t eventID)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - gmWorkspace: 外部存储核状态的公共缓存，类型为GlobalTensor。
+    - ubWorkspace: 存储当前核状态的公共缓存。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。
+    - blockIdx: 表示等待核的idx号，取值范围：[0, 核数-1]。
+    - eventID: 用来控制当前核的set、wait事件。
+    - isAIVOnly:控制是否为AIVOnly模式，默认为true。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - gmWorkspace申请的空间最少要求为：核数 * 32Bytes * eventID_max + blockIdx_max * 32Bytes + 32Bytes。（eventID_max和blockIdx_max分别指eventID、blockIdx的最大值 ）
+    - ubWorkspace申请的空间最少要求为：32Bytes。
+    - 使用该接口进行多核控制时，算子调用时指定的逻辑blockDim必须保证不大于实际运行该算子的AI处理器核数，否则框架进行多轮调度时会插入异常同步，导致Kernel“卡死”现象。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        gm = asc.GlobalTensor()
+        gm.set_global_buffer(x)
+        ub = asc.LocalTensor(dtype=asc.int32, pos=asc.TPosition.VECIN, addr=0, tile_size=32)
+        asc.ib_wait(gm, ub, block_idx=0, event_id=0)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def sync_all_docstring():
+    func_introduction = """
+    当不同核之间操作同一块全局内存且可能存在读后写、写后读以及写后写等数据依赖问题时，通过调用该函数来插入同步语句来避免上述数据依赖时可能出现的数据读写错误问题。
+    目前多核同步分为硬同步和软同步，硬件同步是利用硬件自带的全核同步指令由硬件保证多核同步，软件同步是使用软件算法模拟实现。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        // 软同步
+        template <bool isAIVOnly = true>
+        __aicore__ inline void SyncAll(
+            const GlobalTensor<int32_t>& gmWorkspace,
+            const LocalTensor<int32_t>&  ubWorkspace,
+            const int32_t usedCores = 0)
+
+    .. code-block:: c++
+
+        // 硬同步
+        template <bool isAIVOnly = true>
+        __aicore__ inline void SyncAll()
+    """
+
+    param_list = """
+    **参数说明**
+
+    - gmWorkspace: gmWorkspace为用户定义的全局Global空间，作为所有核共用的缓存，用于保存每个核的状态标记，类型为GlobalTensor，支持的数据类型为int32_t。
+    - ubWorkspace: ubWorkspace为用户定义的局部Local空间，每个核单独自用，用于标记当前核的状态。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT，支持的数据类型为int32_t。
+    - usedCores: 指定多少个核之间的同步，传入数值不能超过算子调用时指定的逻辑blockDim。此参数为默认参数，不传此参数表示全核软同步。
+    - isAIVOnly: 控制SyncAll作用于纯Vector算子或融合（Cube和Vector融合）算子。可选值：
+      - true（默认值）：纯Vector算子的全核同步，仅执行Vector核的全核同步。
+      - false：融合算子的全核同步，先分别完成Vector核和Cube核的全核同步，再执行两者之间的同步（软同步接口不支持此功能）。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - gmWorkspace缓存申请的空间大小要求大于等于核数*32Bytes，并且缓存的值需要初始化为0。目前常见的有两种初始化方式：
+      - 通过在host侧进行初始化操作，确保传入该接口时，gmWorkspace缓存已经初始化为0；
+      - 在kernel侧初始化的时候对gmWorkspace缓存初始化，需要注意的是，每个核上都需要初始化全部的gmWorkspace缓存空间。
+    - ubWorkspace申请的空间大小要求大于等于核数*32Bytes。
+    - 使用该接口进行多核控制时，算子调用时指定的逻辑blockDim必须保证不大于实际运行该算子的AI处理器核数，否则框架进行多轮调度时会插入异常同步，导致Kernel“卡死”现象。
+    - 在分离模式下，建议使用硬同步接口而非软同步接口。软同步接口仅适用于纯Vector场景，且性能较低。使用硬同步接口时，需根据场景设置Kernel类型：
+      - 在纯Vector/Cube场景下，需设置Kernel类型为KERNEL_TYPE_MIX_AIV_1_0或KERNEL_TYPE_MIX_AIC_1_0。
+      - 对于Vector和Cube混合场景，需根据实际情况灵活配置Kernel类型。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - 软同步
+
+        .. code-block:: python
+
+            gm = asc.GlobalTensor()
+            gm.set_global_buffer(x)
+            ub = asc.LocalTensor(dtype=asc.int32, pos=asc.TPosition.VECIN, addr=0, tile_size=32)
+            asc.sync_all(gm, ub, used_cores=0)
+
+    - 硬同步
+
+        .. code-block:: python
+
+            asc.sync_all()
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def cross_core_set_flag_docstring():
+    func_introduction = """
+    面向分离架构的核间同步控制接口。
+    该接口和cross_core_wait_flag接口配合使用。使用时需传入核间同步的标记ID(flagId)，每个ID对应一个初始值为0的计数器。执行cross_core_set_flag后ID对应的计数器增加1；执行cross_core_wait_flag时如果对应的计数器数值为0则阻塞不执行；如果对应的计数器大于0，则计数器减一，同时后续指令开始执行。
+    同步控制分为以下几种模式：
+    - 模式0：AI Core核间的同步控制。对于AIC场景，同步所有的AIC核，直到所有的AIC核都执行到cross_core_set_flag时，cross_core_wait_flag后续的指令才会执行；对于AIV场景，同步所有的AIV核，直到所有的AIV核都执行到cross_core_set_flag时，cross_core_wait_flag后续的指令才会执行。
+    - 模式1：AI Core内部，AIV核之间的同步控制。如果两个AIV核都运行了cross_core_set_flag，cross_core_wait_flag后续的指令才会执行。
+    - 模式2：AI Core内部，AIC与AIV之间的同步控制。在AIC核执行cross_core_set_flag之后，两个AIV上cross_core_wait_flag后续的指令才会继续执行；两个AIV都执行cross_core_set_flag后，AIC上cross_core_wait_flag后续的指令才能执行。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <uint8_t modeId, pipe_t pipe>
+        __aicore__ inline void CrossCoreSetFlag(uint16_t flagId)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - modeId: 核间同步的模式，取值如下：
+      - 模式0：AI Core核间的同步控制。
+      - 模式1：AI Core内部，Vector核（AIV）之间的同步控制。
+      - 模式2：AI Core内部，Cube核（AIC）与Vector核（AIV）之间的同步控制。
+    - pipe: 设置这条指令所在的流水类型。
+    - flagId: 核间同步的标记，取值范围是0-10。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 使用该同步接口时，需要按照如下规则设置Kernel类型：
+      - 在纯Vector/Cube场景下，需设置Kernel类型为KERNEL_TYPE_MIX_AIV_1_0或KERNEL_TYPE_MIX_AIC_1_0。
+      - 对于Vector和Cube混合场景，需根据实际情况灵活配置Kernel类型。
+    - 因为Matmul高阶API内部实现中使用了本接口进行核间同步控制，所以不建议开发者同时使用该接口和Matmul高阶API，否则会有flagID冲突的风险。
+    - 同一flagId的计数器最多设置15次。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.cross_core_set_flag(flag_id=0, mode_id=0, pipe=asc.PipeID.PIPE_V)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def cross_core_wait_flag_docstring():
+    func_introduction = """
+    面向分离架构的核间同步控制接口。该接口和cross_core_set_flag接口配合使用。具体使用方法请参考cross_core_set_flag。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <uint8_t modeId, pipe_t pipe>
+        __aicore__ inline void CrossCoreWaitFlag(uint16_t flagId)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - modeId: 核间同步的模式，取值如下：
+      - 模式0：AI Core核间的同步控制。
+      - 模式1：AI Core内部，Vector核（AIV）之间的同步控制。
+      - 模式2：AI Core内部，Cube核（AIC）与Vector核（AIV）之间的同步控制。
+    - pipe: 设置这条指令所在的流水类型。
+    - flagId: 核间同步的标记。取值范围是0-10。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 使用该同步接口时，需要按照如下规则设置Kernel类型：
+      - 在纯Vector/Cube场景下，需设置Kernel类型为KERNEL_TYPE_MIX_AIV_1_0或KERNEL_TYPE_MIX_AIC_1_0。
+      - 对于Vector和Cube混合场景，需根据实际情况灵活配置Kernel类型。
+    - CrossCoreWaitFlag必须与CrossCoreSetFlag接口配合使用，避免计算核一直处于阻塞阶段。
+    - 如果执行CrossCoreWaitFlag时该flagId的计数器的值为0，则CrossCoreWaitFlag之后的所有指令都将被阻塞，直到该flagId的计数器的值不为0。同一个flagId的计数器最多设置15次。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.cross_core_wait_flag(flag_id=0, mode_id=0, pipe=asc.PipeID.PIPE_V)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
 def data_cache_clean_and_invalid_docstring():
     func_introduction = """
     用来刷新Cache，保证Cache与Global Memory之间的数据一致性。
@@ -2815,6 +3087,87 @@ def set_vector_mask_docstring():
     return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
+def get_hccl_context_docstring():
+    func_introduction = """
+    获取指定Index通信域的context（消息区）地址。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <uint32_t index>
+        __aicore__ inline __gm__ uint8_t* __gm__ GetHcclContext(void)
+    """
+
+    param_list = """
+    **参数说明**
+    
+    - index: 模板参数，用来表示要设置的通信域ID，当前只支持2个通信域，index只能为0/1。
+    """
+
+    return_list = """
+    **返回值说明**
+
+    指定通信域的context（消息区）地址。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    当前最多只支持2个通信域。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        ctx = asc.get_hccl_context(1)
+    """
+
+    return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
+
+
+def set_hccl_context_docstring():
+    func_introduction = """
+    设置通算融合算子每个通信域对应的context（消息区）地址。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <uint32_t index>
+        __aicore__ inline void SetHcclContext(__gm__ uint8_t* context)
+    """
+
+    param_list = """
+    **参数说明**
+    
+    - index: 模板参数，用来表示要设置的通信域ID，当前只支持2个通信域，index只能为0/1。
+    - context: 对应通信域的context（消息区）地址。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    当前最多只支持2个通信域。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.set_hccl_context(0, x)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
 def get_sys_workspace_docstring():
     func_introduction = """
     获取系统workspace指针。
@@ -4654,6 +5007,8 @@ def set_fix_pipe_pre_quant_flag_docstring():
 
 DOC_HANDLES = {
     "copy": copy_docstring,
+    "cross_core_set_flag": cross_core_set_flag_docstring,
+    "cross_core_wait_flag": cross_core_wait_flag_docstring,
     "set_flag": set_wait_flag_docstring,
     "get_block_num": get_block_num_docstring,
     "get_block_idx": get_block_idx_docstring,
@@ -4668,7 +5023,10 @@ DOC_HANDLES = {
     "data_copy_pad": data_copy_pad_docstring,
     "duplicate": duplicate_docstring,
     "get_icache_preload_status": get_icache_preload_status_docstring,
+    "get_hccl_context": get_hccl_context_docstring,
     "get_sys_workspace": get_sys_workspace_docstring,
+    "ib_set": ib_set_docstring,
+    "ib_wait": ib_wait_docstring,
     "icache_preload": icache_preload_docstring,
     "load_data": load_data_docstring,
     "load_data_with_transpose": load_data_with_transpose_docstring,
@@ -4716,6 +5074,8 @@ DOC_HANDLES = {
     "set_load_data_repeat": set_load_data_repeat_docstring,
     "sort": sort_docstring,
     "sort32": sort32_docstring,
+    "set_hccl_context": set_hccl_context_docstring,
+    "sync_all": sync_all_docstring,
 }
 
 

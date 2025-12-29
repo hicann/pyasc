@@ -32,3 +32,23 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::WaitF
        << emitter.getOrCreateName(op.getEventId()) << ")";
     return success();
 }
+
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CrossCoreSetFlagOp op)
+{
+    auto &os = emitter.ostream();
+    os << ascNamespace << "::CrossCoreSetFlag<"
+       << static_cast<unsigned>(op.getModeId()) << ", "
+       << ascendc::stringifyEnum(op.getPipe()).upper()
+       << ">(" << emitter.getOrCreateName(op.getFlagId()) << ")";
+    return success();
+}
+
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CrossCoreWaitFlagOp op)
+{
+    auto &os = emitter.ostream();
+    os << ascNamespace << "::CrossCoreWaitFlag<"
+       << static_cast<unsigned>(op.getModeId()) << ", "
+       << ascendc::stringifyEnum(op.getPipe()).upper()
+       << ">(" << emitter.getOrCreateName(op.getFlagId()) << ")";
+    return success();
+}

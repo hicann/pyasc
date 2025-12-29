@@ -823,6 +823,22 @@ void bind_create_asc_pipe_operations(py::class_<PyOpBuilder> &clss)
                  auto eventAttr = get_hard_event(event, "WaitFlagOp");
                  self.create<ascendc::WaitFlagOp>(eventAttr, eventId);
              })
+        .def("create_asc_CrossCoreSetFlagOp",
+			[](PyOpBuilder &self, Value flagId, uint8_t modeId, uint8_t pipe) {
+				auto pipeAttr = ascendc::symbolizePipe(pipe);
+				if (!pipeAttr) {
+					throw std::runtime_error("Unknown pipe for CrossCoreSetFlagOp");
+				}
+				self.create<ascendc::CrossCoreSetFlagOp>(flagId, modeId, *pipeAttr);
+			})
+		.def("create_asc_CrossCoreWaitFlagOp",
+			[](PyOpBuilder &self, Value flagId, uint8_t modeId, uint8_t pipe) {
+				auto pipeAttr = ascendc::symbolizePipe(pipe);
+				if (!pipeAttr) {
+					throw std::runtime_error("Unknown pipe for CrossCoreWaitFlagOp");
+				}
+				self.create<ascendc::CrossCoreWaitFlagOp>(flagId, modeId, *pipeAttr);
+			})
         .def("create_asc_TPipeAllocEventIDOp",
              [](PyOpBuilder &self, const Type &event_id, const Value &pipe, uint8_t event) -> Value {
                  auto eventAttr = get_hard_event(event, "TPipeAllocEventIDOp");

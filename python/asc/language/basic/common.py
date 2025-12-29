@@ -34,6 +34,7 @@ def ascend_is_aiv() -> PlainValue:
 
 
 @require_jit
+@set_common_docstring(api_name="get_hccl_context")
 def get_hccl_context(index: int) -> GlobalAddress:
     builder = global_builder.get_ir_builder()
     idx_ir = _mat(index, KnownTypes.uint32).to_ir()
@@ -107,11 +108,13 @@ def set_fix_pipe_pre_quant_flag(config: RuntimeInt) -> None:
 
 
 @overload
+@require_jit
 def set_hccl_context(index: int, context: GlobalAddress) -> None:
     ...
 
 
 @require_jit
+@set_common_docstring(api_name="set_hccl_context")
 def set_hccl_context(index: RuntimeInt, context: GlobalAddress) -> None:
     builder = global_builder.get_ir_builder()
     idx_ir = _mat(index, KnownTypes.uint32).to_ir()

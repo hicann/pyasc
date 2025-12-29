@@ -80,6 +80,81 @@ func.func @emit_reset_mask() {
   return
 }
 
+// CHECK-LABEL: void emit_ib_set(AscendC::GlobalTensor<uint8_t> v1, AscendC::LocalTensor<uint8_t> v2, int32_t v3, int32_t v4) {
+// CHECK-NEXT:   AscendC::IBSet(v1, v2, v3, v4);
+// CHECK-NEXT:   return;
+// CHECK-NEXT: }
+func.func @emit_ib_set(
+  %gm: !ascendc.global_tensor<*xui8>,
+  %ub: !ascendc.local_tensor<*xui8>,
+  %bid: i32,
+  %eid: i32
+) {
+  ascendc.ib_set %gm, %ub, %bid, %eid {isAIVOnly} :
+      !ascendc.global_tensor<*xui8>, !ascendc.local_tensor<*xui8>, i32, i32
+  return
+}
+
+// CHECK-LABEL: void emit_ib_wait(AscendC::GlobalTensor<uint8_t> v1, AscendC::LocalTensor<uint8_t> v2, int32_t v3, int32_t v4) {
+// CHECK-NEXT:   AscendC::IBWait(v1, v2, v3, v4);
+// CHECK-NEXT:   return;
+// CHECK-NEXT: }
+func.func @emit_ib_wait(
+  %gm: !ascendc.global_tensor<*xui8>,
+  %ub: !ascendc.local_tensor<*xui8>,
+  %bid: i32,
+  %eid: i32
+) {
+  ascendc.ib_wait %gm, %ub, %bid, %eid {isAIVOnly} :
+      !ascendc.global_tensor<*xui8>, !ascendc.local_tensor<*xui8>, i32, i32
+  return
+}
+
+// CHECK-LABEL: void emit_sync_all_soft(AscendC::GlobalTensor<uint8_t> v1, AscendC::LocalTensor<uint8_t> v2, int32_t v3) {
+// CHECK-NEXT:   AscendC::SyncAll(v1, v2, v3);
+// CHECK-NEXT:   return;
+// CHECK-NEXT: }
+func.func @emit_sync_all_soft(
+  %gm: !ascendc.global_tensor<*xui8>,
+  %ub: !ascendc.local_tensor<*xui8>,
+  %cores: i32
+) {
+  ascendc.sync_all_soft %gm, %ub, %cores {isAIVOnly} :
+      !ascendc.global_tensor<*xui8>, !ascendc.local_tensor<*xui8>, i32
+  return
+}
+
+// CHECK-LABEL: void emit_sync_all_hard() {
+// CHECK-NEXT:   AscendC::SyncAll();
+// CHECK-NEXT:   return;
+// CHECK-NEXT: }
+func.func @emit_sync_all_hard() {
+  ascendc.sync_all_hard {isAIVOnly}
+  return
+}
+
+// CHECK-LABEL: void emit_cross_core_set_flag(int32_t v1, int32_t v2)
+// CHECK-NEXT:   AscendC::CrossCoreSetFlag<0, PIPE_V>(v1);
+// CHECK-NEXT:   AscendC::CrossCoreSetFlag<1, PIPE_S>(v2);
+// CHECK-NEXT:   return;
+// CHECK-NEXT: }
+func.func @emit_cross_core_set_flag(%flag1: i32, %flag2: i32) {
+  ascendc.cross_core_set_flag %flag1, 0, pipe_v : i32
+  ascendc.cross_core_set_flag %flag2, 1, pipe_s : i32
+  return
+}
+
+// CHECK-LABEL: void emit_cross_core_wait_flag(int32_t v1, int32_t v2)
+// CHECK-NEXT:   AscendC::CrossCoreWaitFlag<0, PIPE_V>(v1);
+// CHECK-NEXT:   AscendC::CrossCoreWaitFlag<2, PIPE_S>(v2);
+// CHECK-NEXT:   return;
+// CHECK-NEXT: }
+func.func @emit_cross_core_wait_flag(%flag1: i32, %flag2: i32) {
+  ascendc.cross_core_wait_flag %flag1, 0, pipe_v : i32
+  ascendc.cross_core_wait_flag %flag2, 2, pipe_s : i32
+  return
+}
+
 // CHECK-LABEL:void emit_set_flag(int32_t v1) {
 // CHECK-NEXT:  AscendC::SetFlag<AscendC::HardEvent::MTE2_MTE1>(v1);
 // CHECK-NEXT:  AscendC::SetFlag<AscendC::HardEvent::MTE1_MTE2>(v1);
