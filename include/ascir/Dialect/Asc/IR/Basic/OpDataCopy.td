@@ -147,4 +147,10 @@ def AscendC_LoadImageToLocalOp : APIOp<"load_image_to_local", "LoadImageToLocal"
   );
 }
 
+def AscendC_SetPadValueOp : APIOp<"set_pad_value", "SetPadValue", [AscFunc]> {
+  let description = "Set padding value for DataCopyPad";
+  let arguments = (ins AnyType:$paddingValue,
+                   AscendC_TPositionAttr:$pos);
+  let paramTypeLists = [1, 3];
+}
 #endif // ASC_BASIC_OP_DATACOPY_TD

@@ -64,6 +64,7 @@ Common operations
     set_load_data_boundary
     set_load_data_padding_value
     set_load_data_repeat
+    set_pad_value
     set_vector_mask
     sort
     sort32

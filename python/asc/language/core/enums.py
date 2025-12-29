@@ -246,6 +246,7 @@ class TPosition(IntEnum):
     VECIN = 9
     VECOUT = 10
     VECCALC = 11
+    MAX = 12
 
 
 class pad_t(IntEnum):
