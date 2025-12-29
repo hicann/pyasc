@@ -20,6 +20,8 @@ Common operations
     :nosignatures:
 
     copy
+    cross_core_set_flag
+    cross_core_wait_flag
     data_cache_clean_and_invalid
     data_copy
     data_copy_pad
@@ -29,12 +31,15 @@ Common operations
     get_block_num
     get_cmp_mask
     get_data_block_size_in_bytes
+    get_hccl_context
     get_icache_preload_status
     get_program_counter
     get_sub_block_idx
     get_system_cycle
     get_sys_workspace
     get_task_ratio
+    ib_set
+    ib_wait
     icache_preload
     load_data
     load_data_with_transpose
@@ -58,9 +63,10 @@ Common operations
     set_atomic_none
     set_atomic_type
     set_cmp_mask
+    set_deq_scale
     set_fix_pipe_pre_quant_flag
     set_flag
-    set_deq_scale
+    set_hccl_context
     set_load_data_boundary
     set_load_data_padding_value
     set_load_data_repeat
@@ -68,6 +74,7 @@ Common operations
     set_vector_mask
     sort
     sort32
+    sync_all
     transpose
     trans_data_to_5hd
     trap

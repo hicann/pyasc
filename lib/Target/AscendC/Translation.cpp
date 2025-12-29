@@ -123,7 +123,7 @@ using PrintableOpTypes = std::tuple<
     // AIPP operations
     ascendc::SetAippFunctionsOp,
     // Block synchronization operations
-    ascendc::PipeBarrierOp, ascendc::WaitFlagOp,
+    ascendc::PipeBarrierOp, ascendc::WaitFlagOp, ascendc::CrossCoreSetFlagOp, ascendc::CrossCoreWaitFlagOp,
     // DataConversion operations
     ascendc::TransposeOp, ascendc::TransposeExtOp, ascendc::TransDataTo5HDTensorListOp,
     ascendc::TransDataTo5HDUintListOp, ascendc::TransDataTo5HDOp,

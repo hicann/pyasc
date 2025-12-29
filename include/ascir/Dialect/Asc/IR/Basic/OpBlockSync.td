@@ -54,4 +54,52 @@ def WaitFlagOp : APIOp<"wait_flag", "WaitFlag"> {
   let arguments = (ins AscendC_HardEventAttr:$event, AnyType:$eventId);
   let assemblyFormat = "$event `,` $eventId attr-dict `:` type($eventId)";
 }
+
+def IBSetOp : APIOp<"ib_set", "IBSet", [AscFunc]> {
+  let arguments = (ins
+    AscendC_GlobalTensor:$gmWorkspace,
+    AscendC_LocalTensor:$ubWorkspace,
+    AnyType:$blockIdx,
+    AnyType:$eventId,
+    UnitAttr:$isAIVOnly
+  );
+  let paramTypeLists = [0, 0, 0, 0];
+}
+
+def IBWaitOp : APIOp<"ib_wait", "IBWait", [AscFunc]> {
+  let arguments = (ins
+    AscendC_GlobalTensor:$gmWorkspace,
+    AscendC_LocalTensor:$ubWorkspace,
+    AnyType:$blockIdx,
+    AnyType:$eventId,
+    UnitAttr:$isAIVOnly
+  );
+  let paramTypeLists = [0, 0, 0, 0];
+}
+
+def SyncAllSoftOp : APIOp<"sync_all_soft", "SyncAll", [AscFunc]> {
+  let arguments = (ins
+    AscendC_GlobalTensor:$gmWorkspace,
+    AscendC_LocalTensor:$ubWorkspace,
+    AnyType:$usedCores,
+    UnitAttr:$isAIVOnly
+  );
+  let paramTypeLists = [0, 0, 0];
+}
+
+def SyncAllHardOp : APIOp<"sync_all_hard", "SyncAll", [AscFunc]> {
+  let arguments = (ins UnitAttr:$isAIVOnly);
+  let paramTypeLists = [];
+  let assemblyFormat = "attr-dict";
+}
+
+def CrossCoreSetFlagOp : APIOp<"cross_core_set_flag", "CrossCoreSetFlag"> {
+  let arguments = (ins AnyType:$flagId, UI8Attr:$modeId, AscendC_PipeAttr:$pipe);
+  let assemblyFormat = "$flagId `,` $modeId `,` $pipe attr-dict `:` type($flagId)";
+}
+
+def CrossCoreWaitFlagOp : APIOp<"cross_core_wait_flag", "CrossCoreWaitFlag"> {
+  let arguments = (ins AnyType:$flagId, UI8Attr:$modeId, AscendC_PipeAttr:$pipe);
+  let assemblyFormat = "$flagId `,` $modeId `,` $pipe attr-dict `:` type($flagId)";
+}
 #endif // ASC_BASIC_OP_BLOCKSYNC_TD

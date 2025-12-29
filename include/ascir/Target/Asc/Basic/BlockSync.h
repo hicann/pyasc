@@ -24,6 +24,10 @@ LogicalResult printOperation(CodeEmitter &emitter, ascendc::PipeBarrierOp op);
 
 LogicalResult printOperation(CodeEmitter &emitter, ascendc::WaitFlagOp op);
 
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::CrossCoreSetFlagOp op);
+
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::CrossCoreWaitFlagOp op);
+
 } // namespace ascendc
 } // namespace mlir
 

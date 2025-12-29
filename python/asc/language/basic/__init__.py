@@ -12,6 +12,11 @@ from .block_sync import (
     pipe_barrier,
     set_flag,
     wait_flag,
+    cross_core_set_flag,
+    cross_core_wait_flag,
+    ib_set,
+    ib_wait,
+    sync_all,
 )
 from .cache import data_cache_clean_and_invalid, get_icache_preload_status, icache_preload
 from .common import (
@@ -153,6 +158,11 @@ __all__ = [
     "pipe_barrier",
     "set_flag",
     "wait_flag",
+    "cross_core_set_flag",
+    "cross_core_wait_flag",
+    "ib_set",
+    "ib_wait",
+    "sync_all",
     # .common
     "ascend_is_aic",
     "ascend_is_aiv",

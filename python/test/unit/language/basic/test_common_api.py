@@ -442,6 +442,78 @@ def test_set_wait_flag(mock_launcher_run):
     assert mock_launcher_run.call_count == 1
 
 
+def test_ib_set(mock_launcher_run):
+
+    @asc.jit
+    def kernel_ib_set(x: asc.GlobalAddress) -> None:
+        gm = asc.GlobalTensor()
+        gm.set_global_buffer(x)
+        ub = asc.LocalTensor(dtype=asc.int32, pos=asc.TPosition.VECIN, addr=0, tile_size=32)
+        asc.ib_set(gm, ub, block_idx=0, event_id=0)
+
+    x = MockTensor(asc.int32)
+    kernel_ib_set[1](x)
+    assert mock_launcher_run.call_count == 1
+
+
+def test_ib_wait(mock_launcher_run):
+
+    @asc.jit
+    def kernel_ib_wait(x: asc.GlobalAddress) -> None:
+        gm = asc.GlobalTensor()
+        gm.set_global_buffer(x)
+        ub = asc.LocalTensor(dtype=asc.int32, pos=asc.TPosition.VECIN, addr=0, tile_size=32)
+        asc.ib_wait(gm, ub, block_idx=0, event_id=0)
+
+    x = MockTensor(asc.int32)
+    kernel_ib_wait[1](x)
+    assert mock_launcher_run.call_count == 1
+
+
+def test_sync_all_soft(mock_launcher_run):
+
+    @asc.jit
+    def kernel_sync_all_soft(x: asc.GlobalAddress) -> None:
+        gm = asc.GlobalTensor()
+        gm.set_global_buffer(x)
+        ub = asc.LocalTensor(dtype=asc.int32, pos=asc.TPosition.VECIN, addr=0, tile_size=32)
+        asc.sync_all(gm, ub, used_cores=0)
+
+    x = MockTensor(asc.int32)
+    kernel_sync_all_soft[1](x)
+    assert mock_launcher_run.call_count == 1
+
+
+def test_sync_all_hard(mock_launcher_run):
+
+    @asc.jit
+    def kernel_sync_all_hard() -> None:
+        asc.sync_all()
+
+    kernel_sync_all_hard[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_cross_core_set_flag(mock_launcher_run):
+
+    @asc.jit
+    def kernel_cross_core_set_flag() -> None:
+        asc.cross_core_set_flag(flag_id=0, mode_id=0, pipe=asc.PipeID.PIPE_V)
+
+    kernel_cross_core_set_flag[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_cross_core_wait_flag(mock_launcher_run):
+
+    @asc.jit
+    def kernel_cross_core_wait_flag() -> None:
+        asc.cross_core_wait_flag(flag_id=0, mode_id=0, pipe=asc.PipeID.PIPE_V)
+
+    kernel_cross_core_wait_flag[1]()
+    assert mock_launcher_run.call_count == 1
+
+
 def test_printf(mock_launcher_run):
 
     @asc.jit
