@@ -118,7 +118,7 @@ def op_impl(callee: str, dst: LocalTensor, src0: LocalTensor, src1: LocalTensor,
                         is_set_mask=DefaultValued(bool, True))
     def _(mask: RuntimeInt, repeat_times: RuntimeInt, repeat_params: BinaryRepeatParams, is_set_mask: bool = True):
         build_l0(dst.to_ir(), src0.to_ir(), src1.to_ir(),
-                 _mat(mask, KT.uint64).to_ir(), _mat(repeat_times, KT.int8).to_ir(), 
+                 _mat(mask, KT.int64).to_ir(), _mat(repeat_times, KT.int8).to_ir(), 
                 repeat_params.to_ir(), is_set_mask)
 
     @dispatcher.register(mask=list, repeat_times=RuntimeInt, repeat_params=BinaryRepeatParams, 
@@ -148,7 +148,7 @@ def vec_binary_scalar_op_impl(callee: str, dst: LocalTensor, src: LocalTensor, s
                         is_set_mask=DefaultValued(bool, True))
     def _(mask: RuntimeInt, repeat_times: RuntimeInt, repeat_params: UnaryRepeatParams, is_set_mask: bool = True):
         build_l0(dst.to_ir(), src.to_ir(), scalar,
-                 _mat(mask, KT.uint64).to_ir(),
+                 _mat(mask, KT.int64).to_ir(),
                  _mat(repeat_times, KT.int8).to_ir(), repeat_params.to_ir(), is_set_mask)
     
     @dispatcher.register(mask=list, repeat_times=RuntimeInt, repeat_params=UnaryRepeatParams, 
@@ -178,7 +178,7 @@ def vec_ternary_scalar_op_impl(callee: str, dst: LocalTensor, src: LocalTensor, 
                         is_set_mask=DefaultValued(bool, True))
     def _(mask: RuntimeInt, repeat_times: RuntimeInt, repeat_params: UnaryRepeatParams, is_set_mask: bool = True):
         build_l0(dst.to_ir(), src.to_ir(), scalar,
-                 _mat(mask, KT.uint64).to_ir(),
+                 _mat(mask, KT.int64).to_ir(),
                  _mat(repeat_times, KT.int8).to_ir(), repeat_params.to_ir(), is_set_mask)
     
     @dispatcher.register(mask=list, repeat_times=RuntimeInt, repeat_params=UnaryRepeatParams, 
@@ -3588,7 +3588,7 @@ def set_binary_docstring(cpp_name: Optional[str] = None, append_text: str = "") 
           # dst_blk_stride, src0_blk_stride, src1_blk_stride = 1，单次迭代内数据连续读取和写入
           # dst_rep_stride, src0_rep_stride, src1_rep_stride = 8，相邻迭代间数据连续读取和写入
           params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
-          asc.{api_name}(dst, src0, src1, mask=mask, repeat_times=4, params=params)
+          asc.{api_name}(dst, src0, src1, mask=mask, repeat_times=4, repeat_params=params)
 
     - tensor高维切分计算样例-mask逐bit模式
 
@@ -3599,7 +3599,7 @@ def set_binary_docstring(cpp_name: Optional[str] = None, append_text: str = "") 
           # dst_blk_stride, src0_blk_stride, src1_blk_stride = 1，单次迭代内数据连续读取和写入
           # dst_rep_stride, src0_rep_stride, src1_rep_stride = 8，相邻迭代间数据连续读取和写入
           params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
-          asc.{api_name}(dst, src0, src1, mask=mask, repeat_times=4, params=params)
+          asc.{api_name}(dst, src0, src1, mask=mask, repeat_times=4, repeat_params=params)
 
     - tensor前n个数据计算样例
 
@@ -3624,7 +3624,7 @@ def set_binary_docstring(cpp_name: Optional[str] = None, append_text: str = "") 
           params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
           scale = 0.1
           asc.set_deq_scale(scale)
-          asc.{api_name}(dst, src0, src1, mask=mask, repeat_times=4, params=params)
+          asc.{api_name}(dst, src0, src1, mask=mask, repeat_times=4, repeat_params=params)
 
     - tensor高维切分计算样例-mask逐bit模式
 
@@ -3637,7 +3637,7 @@ def set_binary_docstring(cpp_name: Optional[str] = None, append_text: str = "") 
           params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
           scale = 0.1
           asc.set_deq_scale(scale)
-          asc.{api_name}(dst, src0, src1, mask=mask, repeat_times=4, params=params)
+          asc.{api_name}(dst, src0, src1, mask=mask, repeat_times=4, repeat_params=params)
 
     - tensor前n个数据计算样例
 
@@ -3729,7 +3729,7 @@ def set_binary_scalar_docstring(cpp_name: Optional[str] = None, append_text: str
           # dst_blk_stride, src_blk_stride = 1，单次迭代内数据连续读取和写入
           # dst_rep_stride, src_rep_stride = 8，相邻迭代间数据连续读取和写入
           params = asc.UnaryRepeatParams(1, 1, 8, 8)
-          asc.{api_name}(dst, src, scalar, mask=mask, repeat_times=4, params=params)
+          asc.{api_name}(dst, src, scalar, mask=mask, repeat_times=4, repeat_params=params)
 
     - tensor高维切分计算样例-mask逐bit模式
 
@@ -3741,7 +3741,7 @@ def set_binary_scalar_docstring(cpp_name: Optional[str] = None, append_text: str
           # dst_blk_stride, src_blk_stride = 1，单次迭代内数据连续读取和写入
           # dst_rep_stride, src_rep_stride = 8，相邻迭代间数据连续读取和写入
           params = asc.UnaryRepeatParams(1, 1, 8, 8)
-          asc.{api_name}(dst, src, scalar, mask=mask, repeat_times=4, params=params)
+          asc.{api_name}(dst, src, scalar, mask=mask, repeat_times=4, repeat_params=params)
 
     - tensor前n个数据计算样例
 
@@ -4013,7 +4013,7 @@ def set_unary_docstring(cpp_name: Optional[str] = None, append_text: str = "") -
           # dst_blk_stride, src_blk_stride = 1，单次迭代内数据连续读取和写入
           # dst_rep_stride, src_rep_stride = 8，相邻迭代间数据连续读取和写入
           params = asc.UnaryRepeatParams(1, 1, 8, 8)
-          asc.{api_name}(dst, src, mask=mask, repeat_times=4, params=params)
+          asc.{api_name}(dst, src, mask=mask, repeat_times=4, repeat_params=params)
 
     - tensor高维切分计算样例-mask逐bit模式
 
@@ -4024,7 +4024,7 @@ def set_unary_docstring(cpp_name: Optional[str] = None, append_text: str = "") -
           # dst_blk_stride, src_blk_stride = 1，单次迭代内数据连续读取和写入
           # dst_rep_stride, src_rep_stride = 8，相邻迭代间数据连续读取和写入
           params = asc.UnaryRepeatParams(1, 1, 8, 8)
-          asc.{api_name}(dst, src, mask=mask, repeat_times=4, params=params)
+          asc.{api_name}(dst, src, mask=mask, repeat_times=4, repeat_params=params)
 
     - tensor前n个数据计算样例
 

@@ -56,7 +56,7 @@ __aicore__ inline void Adds(const LocalTensor<T>& dstLocal, const LocalTensor<T>
   # dst_blk_stride, src_blk_stride = 1，单次迭代内数据连续读取和写入
   # dst_rep_stride, src_rep_stride = 8，相邻迭代间数据连续读取和写入
   params = asc.UnaryRepeatParams(1, 1, 8, 8)
-  asc.adds(dst, src, scalar, mask=mask, repeat_times=4, params=params)
+  asc.adds(dst, src, scalar, mask=mask, repeat_times=4, repeat_params=params)
   ```
 - tensor高维切分计算样例-mask逐bit模式
   ```python
@@ -66,7 +66,7 @@ __aicore__ inline void Adds(const LocalTensor<T>& dstLocal, const LocalTensor<T>
   # dst_blk_stride, src_blk_stride = 1，单次迭代内数据连续读取和写入
   # dst_rep_stride, src_rep_stride = 8，相邻迭代间数据连续读取和写入
   params = asc.UnaryRepeatParams(1, 1, 8, 8)
-  asc.adds(dst, src, scalar, mask=mask, repeat_times=4, params=params)
+  asc.adds(dst, src, scalar, mask=mask, repeat_times=4, repeat_params=params)
   ```
 - tensor前n个数据计算样例
   ```python

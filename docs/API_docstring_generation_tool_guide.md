@@ -132,7 +132,7 @@
               # dst_blk_stride, src0_blk_stride, src1_blk_stride = 1，单次迭代内数据连续读取和写入
               # dst_rep_stride, src0_rep_stride, src1_rep_stride = 8，相邻迭代间数据连续读取和写入
               params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
-              asc.add(dst, src0, src1, mask=mask, repeat_times=4, params=params)
+              asc.add(dst, src0, src1, mask=mask, repeat_times=4, repeat_params=params)
 
         - tensor高维切分计算样例-mask逐bit模式
 
@@ -143,7 +143,7 @@
               # dst_blk_stride, src0_blk_stride, src1_blk_stride = 1，单次迭代内数据连续读取和写入
               # dst_rep_stride, src0_rep_stride, src1_rep_stride = 8，相邻迭代间数据连续读取和写入
               params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
-              asc.add(dst, src0, src1, mask=mask, repeat_times=4, params=params)
+              asc.add(dst, src0, src1, mask=mask, repeat_times=4, repeat_params=params)
 
         - tensor前n个数据计算样例
 

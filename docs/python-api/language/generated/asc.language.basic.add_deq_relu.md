@@ -57,7 +57,7 @@ __aicore__ inline void AddDeqRelu(const LocalTensor<T>& dst, const LocalTensor<T
   params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
   scale = 0.1
   asc.set_deq_scale(scale)
-  asc.add_deq_relu(dst, src0, src1, mask=mask, repeat_times=4, params=params)
+  asc.add_deq_relu(dst, src0, src1, mask=mask, repeat_times=4, repeat_params=params)
   ```
 - tensor高维切分计算样例-mask逐bit模式
   ```python
@@ -68,7 +68,7 @@ __aicore__ inline void AddDeqRelu(const LocalTensor<T>& dst, const LocalTensor<T
   params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
   scale = 0.1
   asc.set_deq_scale(scale)
-  asc.add_deq_relu(dst, src0, src1, mask=mask, repeat_times=4, params=params)
+  asc.add_deq_relu(dst, src0, src1, mask=mask, repeat_times=4, repeat_params=params)
   ```
 - tensor前n个数据计算样例
   ```python
