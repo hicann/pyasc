@@ -8,7 +8,7 @@
  * See LICENSE in the root of the software repository for the full text of the License.
  */
 
-#include "experiment/runtime/runtime/rt.h"
+#include "runtime/rt.h"
 
 extern "C" {
 /**

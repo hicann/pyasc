@@ -55,11 +55,11 @@ class PrintInterface(object):
         dir_name = os.path.dirname(os.path.realpath(__file__))
         src_path = os.path.join(dir_name, "print_utils.cpp")
         src = Path(src_path).read_text()
+        version_cfg_info = ""
         version_cfg = get_ascend_path() / "version.cfg"
-        suffix_key = ""
         if version_cfg.exists():
-            suffix_key += version_cfg.read_text()
-        key = hashlib.sha256((src + suffix_key).encode("utf-8")).hexdigest()
+            version_cfg_info += version_cfg.read_text()
+        key = hashlib.sha256((src + version_cfg_info).encode("utf-8")).hexdigest()
         cache_manager = get_cache_manager(key)
         rt_lib = cache_manager.get_file(f"{PRINT_INTERFACE_NAME}.so")
         if rt_lib is None:

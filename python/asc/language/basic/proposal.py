@@ -9,7 +9,7 @@
 from typing import List, overload
 from ..core.ir_value import RuntimeBool, RuntimeInt, materialize_ir_value as _mat
 from ..core.tensor import LocalTensor, MrgSortSrcList
-from ..core.types import KnownTypes, MrgSort4Info, RuntimeInt
+from ..core.types import KnownTypes, MrgSort4Info
 from ..core.utils import DefaultValued, require_jit, global_builder, OverloadDispatcher
 from .utils import set_common_docstring
 

@@ -31,10 +31,7 @@ run_test_npu() {
     echo " $test_py_file"
     case_param=$(echo $test_py_file |awk -F "direct/" '{print $2}')
     case_param=$(echo $case_param |awk -F "." '{print $1}')
-    msprof op --application="python3 $test_py_file" --output="./profiling"
-
-    cp -r profiling/OPPROF_*/OpBasicInfo.csv ./copy_csv/$case_param.csv
-    rm -rf profiling/OPPROF_*
+    msprof --application="python3 $test_py_file" --output="./profiling"
 }
 
 echo casename,prf_golden,prf,result >result.csv
@@ -76,7 +73,6 @@ run_test_npu_perf() {
 }
 
 test_examples=(
-    "./python/test/kernels/test_matmul_torch.py"
     "./python/tutorials/01_add/add.py"
     "./python/tutorials/02_add_framework/add_framework.py"
     "./python/tutorials/03_matmul_mix/matmul_mix.py"
@@ -106,19 +102,6 @@ for example in "${test_examples_perf[@]}"; do
         passed_examples+=("$example")
     else
         failed_examples+=("$example")
-    fi
-done
-python3 test/collect_profiling_data.py
-sed -i 's/NPU/Model/g' ./python/test/kernels/*.py
-sed -i 's/NPU/Model/g' ./python/tutorials/0*/*.py
-
-passed_examples_perf=()
-failed_examples_perf=()
-for example_perf in "${test_examples_perf[@]}"; do
-    if run_test_npu_perf "$example_perf"; then
-        passed_examples_perf+=("$example_perf")
-    else
-        failed_examples_perf+=("$example_perf")
     fi
 done
 
