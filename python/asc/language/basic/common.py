@@ -127,6 +127,7 @@ def set_hf32_mode(hf32_mode: bool) -> None:
 
 
 @require_jit
+@set_common_docstring(api_name="set_hf32_mode")
 def set_hf32_mode(hf32_mode: RuntimeBool) -> None:
     builder = global_builder.get_ir_builder()
     hf32_mode = _mat(hf32_mode)
@@ -139,6 +140,7 @@ def set_hf32_trans_mode(trans_mode: bool) -> None:
 
 
 @require_jit
+@set_common_docstring(api_name="set_hf32_trans_mode")
 def set_hf32_trans_mode(trans_mode: RuntimeBool) -> None:
     builder = global_builder.get_ir_builder()
     trans_mode = _mat(trans_mode)
@@ -151,6 +153,7 @@ def set_mm_layout_transform(mm_layout_mode: bool) -> None:
 
 
 @require_jit
+@set_common_docstring(api_name="set_mm_layout_transform")
 def set_mm_layout_transform(mm_layout_mode: RuntimeBool) -> None:
     builder = global_builder.get_ir_builder()
     mm_layout_mode = _mat(mm_layout_mode)
@@ -163,6 +166,7 @@ def set_mask_count() -> None:
 
 
 @require_jit
+@set_common_docstring(api_name="set_mask_count")
 def set_mask_count() -> None:
     builder = global_builder.get_ir_builder()
     builder.create_asc_SetMaskCountOp()
@@ -174,6 +178,7 @@ def set_mask_norm() -> None:
 
 
 @require_jit
+@set_common_docstring(api_name="set_mask_norm")
 def set_mask_norm() -> None:
     builder = global_builder.get_ir_builder()
     builder.create_asc_SetMaskNormOp()

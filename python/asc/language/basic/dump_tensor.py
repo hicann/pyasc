@@ -84,6 +84,7 @@ def dump_acc_chk_point(tensor: GlobalTensor, index: int, count_off: int, dump_si
 
 
 @require_jit
+@set_common_docstring(api_name="dump_acc_chk_point")
 def dump_acc_chk_point(tensor: BaseTensor, index: RuntimeInt, count_off: RuntimeInt, dump_size: RuntimeInt) -> None:
     check_type("index", index, RuntimeInt)
     check_type("count_off", count_off, RuntimeInt)

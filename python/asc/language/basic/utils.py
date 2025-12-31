@@ -984,6 +984,80 @@ def data_copy_pad_docstring():
     return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
+def dump_acc_chk_point_docstring():
+    func_introduction = """
+    基于算子工程开发的算子，可以使用该接口 Dump 指定 Tensor 的内容。
+    同时支持打印自定义的附加信息（仅支持 uint32_t 类型的信息），
+    例如用于打印当前执行位置、行号等调试信息。
+    与 dump_tensor 不同的是，该接口支持指定 Tensor 的偏移位置进行 Dump，适用于精细化调试和问题定位。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void DumpAccChkPoint(
+            const LocalTensor<T>& tensor,
+            uint32_t index,
+            uint32_t countOff,
+            uint32_t dumpSize);
+
+        template <typename T>
+        __aicore__ inline void DumpAccChkPoint(
+            const GlobalTensor<T>& tensor,
+            uint32_t index,
+            uint32_t countOff,
+            uint32_t dumpSize);
+    """
+
+    param_list = """
+    **参数说明**
+
+    - tensor：
+      需要 Dump 的 Tensor，支持 LocalTensor 和 GlobalTensor。
+
+    - index：
+      Dump 检查点索引编号，用于区分不同 Dump 位置。
+
+    - count_off：
+      自定义附加信息，仅支持 uint32_t 类型，通常用于记录行号、
+      步骤编号等调试信息。
+
+    - dump_size：
+      Dump 的元素个数，从 Tensor 指定偏移位置开始连续 Dump。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 该接口主要用于调试和问题定位，建议仅在 Debug 场景下使用。
+    - 附加信息 count_off 仅支持 uint32_t 类型。
+    - Dump 行为可能影响性能，不建议在性能敏感路径中频繁调用。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        x_local = asc.LocalTensor(
+            dtype=asc.float16,
+            pos=asc.TPosition.VECIN,
+            addr=0,
+            tile_size=512,
+        )
+        x_gm = asc.GlobalTensor()
+        x_gm.set_global_buffer(x)
+
+        asc.dump_acc_chk_point(tensor=x_local, index=0, count_off=1, dump_size=5)
+        asc.dump_acc_chk_point(tensor=x_gm, index=0, count_off=1, dump_size=5)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
 def dump_tensor_docstring_docstring():
     func_introduction = """
     基于算子工程开发的算子，可以使用该接口Dump指定Tensor的内容。
@@ -1751,7 +1825,7 @@ def load_data_docstring():
               asc.load_data(y_local, x_local, params_3d_v2_pro)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def load_data_with_transpose_docstring():
@@ -1861,7 +1935,7 @@ def load_data_with_transpose_docstring():
               asc.load_data_with_transpose(y_local, x_local, params_v2)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def mmad_docstring():
@@ -1989,7 +2063,7 @@ def mmad_docstring():
               asc.mmad(dst, fm, filter, bias, params)
     """
 
-    return func_introduction, cpp_signature, param_list, "", constraint_list, py_example
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
 def load_image_to_local_docstring():
@@ -3699,6 +3773,192 @@ def set_binary_scalar_docstring(cpp_name: Optional[str] = None, append_text: str
     return decorator
 
 
+def set_hf32_mode_docstring():
+    func_introduction = """
+    调用该接口后，可设置 Mmad 计算是否开启 HF32 模式。
+    开启 HF32 模式后，L0A/L0B 中的 FP32 数据在参与矩阵乘法计算之前将被舍入为 HF32 精度。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void SetHF32Mode(bool hf32Mode);
+    """
+
+    param_list = """
+    **参数说明**
+
+    - hf32_mode：
+      Mmad HF32 模式控制参数，bool 类型。
+      - True：L0A/L0B 中的 FP32 数据将在矩阵乘法之前被舍入为 HF32。
+      - False：执行常规的 FP32 矩阵乘法计算。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 无特殊约束。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.set_hf32_mode(True)
+        asc.set_hf32_mode(False)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def set_hf32_trans_mode_docstring():
+    func_introduction = """
+    调用该接口后，可设置 MMAD 的 HF32 取整模式，仅在 HF32 模式开启时有效。
+    在 HF32 模式下，将按照给定模式对 FP32 数据进行舍入。
+    """
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void SetHF32TransMode(bool hf32TransMode);
+    """
+    param_list = """
+    **参数说明**
+
+    - hf32_trans_mode：
+      MMAD HF32 取整模式控制参数，bool 类型。
+      - True：FP32 将以向零靠近的方式舍入为 HF32。
+      - False：FP32 将以最接近偶数的方式舍入为 HF32。
+    """
+    constraint_list = """
+    **约束说明**
+
+    - 无特殊约束。
+    """
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.set_hf32_trans_mode(True)
+        asc.set_hf32_trans_mode(False)
+    """
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def set_mask_count_docstring():
+    func_introduction = """
+    设置掩码模式为 Counter 模式。在该模式下，
+    矢量计算时不需要开发者显式指定迭代次数和处理非对齐尾块，只需调用 SetMaskCount 即可自动推断。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void SetMaskCount();
+    """
+
+    param_list = """
+    **参数说明**
+
+    - 无
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 设置为 Counter 模式后，建议在矢量计算完成后调用 set_mask_norm 恢复 Normal 模式。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.set_mask_count()
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def set_mask_norm_docstring():
+    func_introduction = """
+    设置掩码模式为 Normal 模式，这是掩码操作的默认模式。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void SetMaskNorm();
+    """
+
+    param_list = """
+    **参数说明**
+
+    - 无
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 无
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.set_mask_norm()
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def set_mm_layout_transform_docstring():
+    func_introduction = """
+    调用该接口后，可设置 MMAD 的 M/N 方向优先顺序，
+    控制矩阵乘加计算时先按 N 再按 M 方向还是先按 M 再按 N 方向。
+    """
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void SetMMLayoutTransform(bool mmLayoutMode);
+    """
+    param_list = """
+    **参数说明**
+
+    - mm_layout_mode：
+      MMAD M/N 方向控制参数，bool 类型。
+      - True：代表 CUBE 将首先通过 N 方向，然后通过 M 方向产生结果。
+      - False：代表 CUBE 将首先通过 M 方向，然后通过 N 方向产生结果。
+    """
+    constraint_list = """
+    **约束说明**
+
+    - 无特殊约束。
+    """
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.set_mm_layout_transform(True)
+        asc.set_mm_layout_transform(False)
+    """
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
 def set_unary_docstring(cpp_name: Optional[str] = None, append_text: str = "") -> Callable[[T], T]:
     func_introduction = f"""
     {append_text}
@@ -5039,6 +5299,7 @@ DOC_HANDLES = {
     "printf": printf_docstring,
     "scalar_cast": scalar_cast_docstring,
     "scalar_get_sff_value": scalar_get_sff_value_docstring,
+    "dump_acc_chk_point": dump_acc_chk_point_docstring,
     "dump_tensor": dump_tensor_docstring_docstring,
     "gather_mask": gather_mask_docstring,
     "set_vector_mask": set_vector_mask_docstring,
@@ -5075,6 +5336,11 @@ DOC_HANDLES = {
     "sort": sort_docstring,
     "sort32": sort32_docstring,
     "set_hccl_context": set_hccl_context_docstring,
+    "set_hf32_mode": set_hf32_mode_docstring,
+    "set_hf32_trans_mode": set_hf32_trans_mode_docstring,
+    "set_mask_count": set_mask_count_docstring,
+    "set_mask_norm": set_mask_norm_docstring,
+    "set_mm_layout_transform": set_mm_layout_transform_docstring,
     "sync_all": sync_all_docstring,
 }
 

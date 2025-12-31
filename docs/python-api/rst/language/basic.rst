@@ -25,6 +25,7 @@ Common operations
     data_cache_clean_and_invalid
     data_copy
     data_copy_pad
+    dump_acc_chk_point
     dump_tensor
     duplicate
     get_block_idx
@@ -65,11 +66,16 @@ Common operations
     set_cmp_mask
     set_deq_scale
     set_fix_pipe_pre_quant_flag
+    set_hf32_mode
+    set_hf32_trans_mode
     set_flag
     set_hccl_context
     set_load_data_boundary
     set_load_data_padding_value
     set_load_data_repeat
+    set_mask_count
+    set_mask_norm
+    set_mm_layout_transform
     set_pad_value
     set_vector_mask
     sort
