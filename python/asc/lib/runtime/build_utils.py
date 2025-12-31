@@ -8,6 +8,7 @@
 
 import functools
 import os
+import platform
 import shutil
 import subprocess
 import sysconfig
@@ -52,12 +53,14 @@ def build_npu_ext(obj_name: str, is_model: bool, soc: config.Platform, src_path:
     py_include_dir = sysconfig.get_paths(scheme=scheme)["include"]
     cc_cmd += [f"-I{py_include_dir}"]
 
+    arch = platform.machine()
     # find the ascend library
     asc_path = get_ascend_path()
     cc_cmd += [
         f"-I{os.path.join(asc_path, 'include')}",
-        f"-I{os.path.join(asc_path, 'include/experiment')}",
-        f"-I{os.path.join(asc_path, 'include/experiment/msprof')}",
+        f"-I{os.path.join(asc_path, f'{arch}-linux', 'pkg_inc')}",
+        f"-I{os.path.join(asc_path, f'{arch}-linux', 'pkg_inc/profiling')}",
+        f"-I{os.path.join(asc_path, f'{arch}-linux', 'pkg_inc/runtime')}",
         f"-I{pybind11.get_include()}",
         f"-L{os.path.join(asc_path, 'lib64')}", 
     ]

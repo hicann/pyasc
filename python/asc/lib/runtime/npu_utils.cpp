@@ -14,9 +14,10 @@
 #include <sys/syscall.h>
 
 #include "acl/acl.h"
-#include "experiment/msprof/toolchain/prof_api.h"
-#include "experiment/msprof/toolchain/prof_data_config.h"
-#include "experiment/runtime/runtime/rt.h"
+#include "profiling/prof_api.h"
+#include "profiling/prof_common.h"
+#include "profiling/aprof_pub.h"
+#include "runtime/rt.h"
 
 static unsigned int moduleId = 8;
 static unsigned int msprofFlagL0 = 0;
@@ -33,11 +34,11 @@ int ProfCtrlHandle(unsigned int ctrlType, void *ctrlData, unsigned int dataLen)
     const uint64_t profSwitch = handle->profSwitch;
     const uint64_t profType = handle->type;
     if (profType == PROF_COMMANDHANDLE_TYPE_START) {
-        if ((profSwitch & PROF_TASK_TIME) == PROF_TASK_TIME) {
+        if ((profSwitch & PROF_TASK_TIME_MASK) == PROF_TASK_TIME_MASK) {
             msprofFlagL0 = 1;
         }
 
-        if ((profSwitch & PROF_TASK_TIME_L1) == PROF_TASK_TIME_L1) {
+        if ((profSwitch & PROF_TASK_TIME_L1_MASK) == PROF_TASK_TIME_L1_MASK) {
             msprofFlagL1 = 1;
         }
     }

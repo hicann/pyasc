@@ -7,7 +7,7 @@
 # See LICENSE in the root of the software repository for the full text of the License.
 
 from __future__ import annotations
-from typing import overload, Optional
+from typing import overload
 
 from ..._C import ir
 from .utils import set_tensor_docstring

@@ -12,7 +12,7 @@ from ..core.ir_value import RuntimeInt, materialize_ir_value as _mat
 from ..core.tensor import BaseTensor, GlobalTensor, LocalTensor
 from ..core.types import LoadData2DParams, LoadData2DParamsV2, \
                          LoadData2dTransposeParamsV2, LoadData2dTransposeParams, \
-                         LoadData3DParamsV2Pro, LoadData2dTransposeParams, \
+                         LoadData3DParamsV2Pro, \
                          LoadDataRepeatParam, MmadParams
 from ..core.utils import OverloadDispatcher, require_jit, global_builder
 from .utils import set_common_docstring

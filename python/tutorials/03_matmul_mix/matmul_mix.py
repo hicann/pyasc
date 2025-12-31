@@ -122,17 +122,18 @@ def matmul_mix_custom(backend: config.Backend, platform: config.Platform):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", type=str, default="Model", help="backend to run")
-    parser.add_argument("-v", type=str, default="Ascend910B1", help="platform to run")
+    parser.add_argument("-v", type=str, default=None, help="platform to run")
     args = parser.parse_args()
     backend = args.r
     platform = args.v
     if backend not in config.Backend.__members__:
         raise ValueError("Unsupported Backend! Supported: ['Model', 'NPU']")
-    platform_values = [platform.value for platform in config.Platform]
-    if platform not in platform_values:
-        raise ValueError(f"Unsupported Platform! Supported: {platform_values}")
     backend = config.Backend(backend)
-    platform = config.Platform(platform)
+    if platform is not None:
+        platform_values = [platform.value for platform in config.Platform]
+        if platform not in platform_values:
+            raise ValueError(f"Unsupported Platform! Supported: {platform_values}")
+        platform = config.Platform(platform)
     logging.info("[INFO] start process sample matmul_mix.")
     matmul_mix_custom(backend, platform)
     logging.info("[INFO] Sample matmul_mix run success.")

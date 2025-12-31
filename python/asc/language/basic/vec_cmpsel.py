@@ -6,7 +6,7 @@
 # INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
 # See LICENSE in the root of the software repository for the full text of the License.
 
-from typing import Callable, List, TypeVar, Union, overload
+from typing import List, Union, overload
 
 from ..._C import ir
 from ..core.dtype import KnownTypes as KT
