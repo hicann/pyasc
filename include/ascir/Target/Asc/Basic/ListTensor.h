@@ -18,7 +18,13 @@ namespace ascendc {
 
 LogicalResult printOperation(CodeEmitter &emitter, ascendc::TensorDescOp op);
 
-}
-}
+LogicalResult printOperation(CodeEmitter& emitter, ascendc::TensorDescSetShapeAddrOp op);
+
+LogicalResult printOperation(CodeEmitter& emitter, ascendc::ListTensorDescV2Op op);
+
+LogicalResult printOperation(CodeEmitter& emitter, ascendc::ListTensorDescGetDataPtrOp op);
+
+} // namespace ascendc
+} // namespace mlir
 
 #endif // ASCIR_TARGET_ASC_BASIC_LIST_TENSOR_H

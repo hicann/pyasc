@@ -35,6 +35,15 @@ class GenerateBoilerplatePass : public ascendc::impl::GenerateBoilerplateBase<Ge
         auto mod = getOperation();
         auto builder = ImplicitLocOpBuilder::atBlockBegin(mod->getLoc(), mod.getBody());
         builder.create<emitc::IncludeOp>("kernel_operator.h");
+        bool hasListTensorDesc = mod.walk([](ascendc::ListTensorDescOp) {
+                                    return WalkResult::interrupt();
+                                }).wasInterrupted();
+        bool hasListTensorDescV2 = mod.walk([](ascendc::ListTensorDescV2Op) {
+                                    return WalkResult::interrupt();
+                                }).wasInterrupted();
+        if (hasListTensorDesc || hasListTensorDescV2) {
+            builder.create<emitc::IncludeOp>("kernel_operator_list_tensor_intf.h");
+        }
         bool hasMatmul = mod.walk([](ascendc::RegistMatmulObjOp) { return WalkResult::interrupt(); }).wasInterrupted();
         if (hasMatmul) {
             builder.create<emitc::IncludeOp>("lib/matmul_intf.h");

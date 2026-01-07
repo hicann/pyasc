@@ -45,7 +45,7 @@ from .dump_tensor import (
     metrics_prof_start, 
     metrics_prof_stop,
 )
-from .list_tensor import TensorDesc
+from .list_tensor import TensorDesc, ListTensorDesc
 from .mm import (
     load_data,
     load_data_with_transpose,
@@ -201,6 +201,7 @@ __all__ = [
     "metrics_prof_stop",
     # .list_tensor
     "TensorDesc",
+    "ListTensorDesc",
     # .mm
     "load_data",
     "load_data_with_transpose",

@@ -21,6 +21,54 @@ include "mlir/Interfaces/SideEffectInterfaces.td"
 include "mlir/IR/OpBase.td"
 
 //===----------------------------------------------------------------------===//
+// ListTensorDesc operations
+//===----------------------------------------------------------------------===//
+
+def AscendC_ListTensorDescOp
+    : AscendC_Op<"list_tensor_desc", [AscConstructor]> {
+  let summary = "Constructs a ListTensorDesc object";
+  let results = (outs AscendC_ListTensorDesc:$result);
+  let assemblyFormat = "attr-dict `:` qualified(type($result))";
+}
+
+def AscendC_ListTensorDescV2Op
+    : AscendC_Op<"list_tensor_desc_v2"> {
+  let summary = "Constructs a ListTensorDesc object";
+  let arguments = (ins AnyType:$data, UI32:$length, UI32:$shapeSize); 
+  let results = (outs AscendC_ListTensorDesc:$result);
+  let assemblyFormat = "$data `,` $length `,` $shapeSize attr-dict `:` qualified(type($result)) `,` type($data) `,` type($length) `,` type($shapeSize)";
+}
+
+def AscendC_ListTensorDescInitOp 
+    : APIOp<"list_tensor_desc_init", "Init", [AscMemberFunc]> {
+  let summary = "Call `AscendC::ListTensorDesc::Init` method";
+  let arguments = (ins AscendC_ListTensorDesc:$tensor, AnyType:$data, UI32:$length, UI32:$shapeSize);
+}
+
+def AscendC_ListTensorDescGetDescOp 
+    : APIOp<"list_tensor_desc_get_desc", "GetDesc", [AscMemberFunc]> {
+  let summary = "Call `AscendC::ListTensorDesc::GetDesc` method";
+  let arguments = (ins AscendC_ListTensorDesc:$tensor, AscendC_TensorDesc:$desc, UI32:$index);
+}
+
+def AscendC_ListTensorDescGetDataPtrOp 
+    : APIOp<"list_tensor_desc_get_data_ptr", "GetDataPtr"> {
+  let summary = "Call `AscendC::ListTensorDesc::GetDataPtr` method";
+  let arguments = (ins AscendC_ListTensorDesc:$tensor, UI32:$index, TypeAttr:$dtype);
+  let results = (outs AnyRankedOrUnrankedMemRef:$result);
+  let assemblyFormat = [{
+    $tensor `,` $index attr-dict `:` qualified(type($result))
+  }];
+}
+
+def AscendC_ListTensorDescGetSizeOp 
+    : APIOp<"list_tensor_desc_get_size", "GetSize", [AscMemberFunc]> {
+  let summary = "Call `AscendC::ListTensorDesc::GetSize` method";
+  let arguments = (ins AscendC_ListTensorDesc:$tensor);
+  let results = (outs UI32:$result);
+}
+
+//===----------------------------------------------------------------------===//
 // TensorDesc operations
 //===----------------------------------------------------------------------===//
 
@@ -28,6 +76,15 @@ def AscendC_TensorDescOp : AscendC_Op<"tensor_desc"> {
   let arguments = (ins TypeAttr:$elementType);
   let results = (outs AscendC_TensorDesc:$tensorDesc);
   let assemblyFormat = "$elementType attr-dict `:` qualified(type($tensorDesc))";
+}
+
+def AscendC_TensorDescSetShapeAddrOp 
+    : APIOp<"tensor_desc_set_shape_addr", "SetShapeAddr"> {
+  let summary = "Call `AscendC::TensorDesc::SetShapeAddr` method";
+  let arguments = (ins AscendC_TensorDesc:$tensorDesc, UI64:$shapePtr);
+  let assemblyFormat = [{
+    $tensorDesc `,` $shapePtr attr-dict `:` qualified(type($tensorDesc)) `,` qualified(type($shapePtr))
+  }];
 }
 
 def AscendC_TensorDescGetDimOp : APIOp<"tensor_desc_get_dim", "GetDim", [AscMemberFunc]> {
