@@ -5148,6 +5148,161 @@ def set_cmp_mask_docstring() -> Callable[[T], T]:
     return func_introduction, cpp_signature, param_list, "", "", py_example
 
 
+class ListTensorDescDocstring:
+
+    def __init__(self) -> None:
+        ...
+    
+    @staticmethod
+    def init_docstring():
+        func_introduction = """
+        初始化函数，用于解析对应的内存排布。
+        """
+
+        cpp_signature = """
+        **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            __aicore__ inline void Init(__gm__ void* data, uint32_t length = 0xffffffff, uint32_t shapeSize = 0xffffffff)
+
+        """
+
+        param_list = """
+        **参数说明**
+
+        - data: 待解析数据的首地址。
+        - length: 待解析内存的长度。
+        - shapeSize: 数据指针的个数。
+        """
+
+        py_example = """
+        **调用示例**
+
+        .. code-block:: python
+
+            x_desc = asc.ListTensorDesc()
+            x_desc.init(data=x, length=0xffffffff, shape_size=0xffffffff)
+
+        """
+
+        return [func_introduction, cpp_signature, param_list, "", "", py_example]
+    
+    @staticmethod
+    def get_desc_docstring():
+        func_introduction = """
+        根据index获得功能说明图中对应的TensorDesc信息。
+        """
+
+        cpp_signature = """
+        **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            template<class T> void GetDesc(TensorDesc<T>& desc, uint32_t index);
+
+        """
+
+        param_list = """
+        **参数说明**
+
+        - desc: 出参，解析后的Tensor描述信息。
+        - index: 索引值。
+        """
+
+        py_example = """
+        **调用示例**
+
+        .. code-block:: python
+
+            x_desc = asc.ListTensorDesc(data=x, length=0xffffffff, shape_size=0xffffffff)
+            y = asc.TensorDesc()
+            x_desc.get_desc(y, index=0)
+
+        """
+
+        return [func_introduction, cpp_signature, param_list, "", "", py_example]
+
+    @staticmethod
+    def get_data_ptr_docstring():
+        func_introduction = """
+        根据index获取储存对应数据的地址。
+        """
+
+        cpp_signature = """
+        **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            template<class T> __aicore__ inline __gm__ T* GetDataPtr(uint32_t index)
+
+        """
+
+        param_list = """
+        **参数说明**
+
+        - index: 索引值。
+        - dtype: 输出的指针地址指向的数据的数据类型。
+        """
+
+        return_list = """
+        **返回值说明**
+
+        储存对应数据的地址。
+        """
+
+        py_example = """
+        **调用示例**
+
+        .. code-block:: python
+
+            x_desc = asc.ListTensorDesc(data=x, length=0xffffffff, shape_size=0xffffffff)
+            x_ptr = x_desc.get_data_ptr(index=0, dtype=asc.float16)
+
+        """
+
+        return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
+
+    @staticmethod
+    def get_size_docstring():
+        func_introduction = """
+        获取ListTensor中包含的数据指针的个数。
+        """
+
+        cpp_signature = """
+        **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            __aicore__ inline uint32_t GetSize()
+
+        """
+
+        param_list = """
+        **参数说明**
+
+        无。
+        """
+
+        return_list = """
+        **返回值说明**
+
+        数据指针的个数。
+        """
+
+        py_example = """
+        **调用示例**
+
+        .. code-block:: python
+
+            x_desc = asc.ListTensorDesc(data=x, length=0xffffffff, shape_size=0xffffffff)
+            x_size = x_desc.get_size()
+
+        """
+
+        return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
+
+
 def select_docstring() -> Callable[[T], T]:
     func_introduction = """
     给定两个源操作数src0和src1，根据sel_mask（用于选择的Mask掩码）的比特位值选取元素，得到目的操作数dst。
@@ -5381,6 +5536,37 @@ class TensorDescDocstring:
         ...
 
     @staticmethod
+    def set_shape_addr_docstring():
+        func_introduction = """
+        配置用于储存shape信息的地址。
+        """
+
+        cpp_signature = """
+        **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            void SetShapeAddr(uint64_t* shapePtr)
+        """
+
+        param_list = """
+        **参数说明**
+
+        - shape_ptr：用于储存shape信息的地址。
+        """
+
+        py_example = """
+        **调用示例**
+
+        .. code-block:: python
+
+            tensor_desc = asc.TensorDesc()
+            tensor_desc.set_shape_addr(0)
+        """
+
+        return [func_introduction, cpp_signature, param_list, "", "", py_example]
+
+    @staticmethod
     def get_dim_docstring():
         func_introduction = """
         获取Tensor的维度。
@@ -5545,12 +5731,19 @@ class TensorDescDocstring:
 
 TENSOR_DOC_HANDLERS = {
     "TensorDesc": {
+        "set_shape_addr": TensorDescDocstring.set_shape_addr_docstring,
         "get_dim": TensorDescDocstring.get_dim_docstring,
         "get_index": TensorDescDocstring.get_index_docstring, 
         "get_shape": TensorDescDocstring.get_shape_docstring,
         "get_data_ptr": TensorDescDocstring.get_data_ptr_docstring,
         "get_data_obj": TensorDescDocstring.get_data_obj_docstring,
     },
+    "ListTensorDesc": {
+        "init": ListTensorDescDocstring.init_docstring,
+        "get_desc": ListTensorDescDocstring.get_desc_docstring,
+        "get_data_ptr": ListTensorDescDocstring.get_data_ptr_docstring,
+        "get_size": ListTensorDescDocstring.get_size_docstring,
+    }
 }
 
 

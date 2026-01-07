@@ -95,11 +95,22 @@ TensorDesc operations
     :toctree: generated
     :nosignatures:
 
+    TensorDesc.set_shape_addr
     TensorDesc.get_dim
     TensorDesc.get_index
     TensorDesc.get_shape
     TensorDesc.get_data_ptr
     TensorDesc.get_data_obj
+
+.. autoclass:: ListTensorDesc
+.. autosummary::
+    :toctree: generated
+    :nosignatures:
+
+    ListTensorDesc.init
+    ListTensorDesc.get_desc
+    ListTensorDesc.get_data_ptr
+    ListTensorDesc.get_size
 
 
 Scalar operations

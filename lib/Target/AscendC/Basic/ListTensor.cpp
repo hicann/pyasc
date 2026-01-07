@@ -26,3 +26,34 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::Tenso
     os << ">()";
     return success();
 }
+
+
+LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::TensorDescSetShapeAddrOp op)
+{
+    auto& os = emitter.ostream();
+    os << emitter.getOrCreateName(op.getTensorDesc()) << "." << op.getAPIName() << "(" 
+    << "(uint64_t* )" << emitter.getOrCreateName(op.getShapePtr()) << ")";
+    return success();
+}
+
+
+LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::ListTensorDescV2Op op)
+{
+    FAIL_OR(emitter.emitVariableDeclaration(op->getResult(0), false));
+    auto& os = emitter.ostream();
+    os << " = " << "AscendC::ListTensorDesc(" << emitter.getOrCreateName(op.getData()) 
+    << ", " << emitter.getOrCreateName(op.getLength())
+    << ", " << emitter.getOrCreateName(op.getShapeSize()) << ")";
+    return success();
+}
+
+
+LogicalResult mlir::ascendc::printOperation(CodeEmitter& emitter, ascendc::ListTensorDescGetDataPtrOp op)
+{
+    auto& os = emitter.ostream();
+    FAIL_OR(emitter.emitVariableDeclaration(op->getResult(0), false));
+    os << " = " << emitter.getOrCreateName(op.getTensor()) << "." << op.getAPIName() << "<";
+    FAIL_OR(emitter.emitType(op.getLoc(), op.getDtype()));
+    os << ">(" << emitter.getOrCreateName(op.getIndex()) << ")";
+    return success();
+}

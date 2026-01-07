@@ -209,6 +209,11 @@ def KfcServer : APIType<"KfcServer"> {
   let apiName = "AscendC::KfcServer";
 }
 
+def ListTensorDesc : APIType<"ListTensorDesc"> {
+  let mnemonic = "list_tensor_desc";
+  let apiName = "AscendC::ListTensorDesc";
+}
+
 def LoadData2DParams : APIType<"LoadData2DParams"> {
   let mnemonic = "load_data_2d_params";
   let apiName = "AscendC::LoadData2DParams";

@@ -133,7 +133,9 @@ using PrintableOpTypes = std::tuple<
     // Dump tensor operations
     ascendc::PrintfOp,
     // TensorDesc operations
-    ascendc::TensorDescOp,
+    ascendc::TensorDescOp, ascendc::TensorDescSetShapeAddrOp, 
+    // ListTensorDesc operations
+    ascendc::ListTensorDescV2Op, ascendc::ListTensorDescGetDataPtrOp,
     // Other operations
     ascendc::ConstructOp, ascendc::AscendIsAICOp, ascendc::AscendIsAIVOp, LLVM::UndefOp, ascendc::FftsCrossCoreSyncOp,
     ascendc::SetFftsBaseAddrOp, ascendc::PopStackBufferOp,

@@ -55,7 +55,7 @@ from .basic.dump_tensor import (
     metrics_prof_start, 
     metrics_prof_stop,
 )
-from .basic.list_tensor import TensorDesc
+from .basic.list_tensor import TensorDesc, ListTensorDesc
 from .basic.mm import (
     load_data,
     load_data_with_transpose,

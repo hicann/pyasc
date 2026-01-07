@@ -15,6 +15,16 @@ def setup_function():
     config.set_platform(config.Backend.Model, check=False)
 
 
+def test_tensor_desc_set_shape_addr(mock_launcher_run):
+    @asc.jit
+    def kernel_tensor_desc_set_shape_addr() -> None:
+        tensor_desc = asc.TensorDesc()
+        tensor_desc.set_shape_addr(0)
+        
+    kernel_tensor_desc_set_shape_addr[1]()
+    assert mock_launcher_run.call_count == 1
+
+
 def test_tensor_desc_get_dim(mock_launcher_run):
     @asc.jit
     def kernel_tensor_desc_get_dim() -> None:
@@ -63,4 +73,65 @@ def test_tensor_desc_get_data_obj(mock_launcher_run):
         data_obj = tensor_desc.get_data_obj()
         
     kernel_tensor_desc_get_data_obj[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_init(mock_launcher_run):
+
+    @asc.jit
+    def kernel_init(x: asc.GlobalAddress) -> None:
+        x_desc = asc.ListTensorDesc(data=x, length=0xffffffff, shape_size=0xffffffff)
+        x_desc = asc.ListTensorDesc()
+
+    x = MockTensor(asc.uint8)
+    kernel_init[1](x)
+    assert mock_launcher_run.call_count == 1
+
+
+def test_init_func(mock_launcher_run):
+
+    @asc.jit
+    def kernel_init_func(x: asc.GlobalAddress) -> None:
+        x_desc = asc.ListTensorDesc()
+        x_desc.init(data=x, length=0xffffffff, shape_size=0xffffffff)
+
+    x = MockTensor(asc.uint8)
+    kernel_init_func[1](x)
+    assert mock_launcher_run.call_count == 1
+
+
+def test_get_desc(mock_launcher_run):
+
+    @asc.jit
+    def kernel_get_desc(x: asc.GlobalAddress) -> None:
+        x_desc = asc.ListTensorDesc(data=x, length=0xffffffff, shape_size=0xffffffff)
+        y = asc.TensorDesc()
+        x_desc.get_desc(y, index=0)
+
+    x = MockTensor(asc.uint8)
+    kernel_get_desc[1](x)
+    assert mock_launcher_run.call_count == 1
+
+
+def test_get_data_ptr(mock_launcher_run):
+
+    @asc.jit
+    def kernel_get_data_ptr(x: asc.GlobalAddress) -> None:
+        x_desc = asc.ListTensorDesc(data=x, length=0xffffffff, shape_size=0xffffffff)
+        x_ptr = x_desc.get_data_ptr(index=0, dtype=asc.float16)
+
+    x = MockTensor(asc.uint8)
+    kernel_get_data_ptr[1](x)
+    assert mock_launcher_run.call_count == 1
+
+
+def test_get_size(mock_launcher_run):
+
+    @asc.jit
+    def kernel_get_size(x: asc.GlobalAddress) -> None:
+        x_desc = asc.ListTensorDesc(data=x, length=0xffffffff, shape_size=0xffffffff)
+        x_size = x_desc.get_size()
+
+    x = MockTensor(asc.uint8)
+    kernel_get_size[1](x)
     assert mock_launcher_run.call_count == 1
