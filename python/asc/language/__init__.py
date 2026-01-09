@@ -160,6 +160,7 @@ from .basic.vec_unary import (
 )
 from .basic.vec_vconv import (
     add_relu_cast,
+    cast,
     cast_deq,
     set_deq_scale,
     sub_relu_cast,

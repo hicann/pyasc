@@ -6,12 +6,14 @@
 # INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
 # See LICENSE in the root of the software repository for the full text of the License.
 
-from typing import List, overload, Optional
+from typing import List, overload, Optional, Any, Callable, Dict, Tuple
 
-from ..core.dtype import KnownTypes
+from ..._C import ir
+from ..core.dtype import KnownTypes, KnownTypes as KT
+from ..core.enums import RoundMode
 from ..core.ir_value import RuntimeBool, RuntimeInt, RuntimeFloat, materialize_ir_value as _mat
 from ..core.tensor import LocalTensor
-from ..core.utils import require_jit, global_builder
+from ..core.utils import require_jit, global_builder, DefaultValued, OverloadDispatcher
 from ..core.types import BinaryRepeatParams, UnaryRepeatParams
 from .utils import op_impl, set_binary_docstring, set_common_docstring
 from .vec_unary import op_impl as unary_op_impl
@@ -40,6 +42,52 @@ def add_relu_cast(dst: LocalTensor, src0: LocalTensor, src1: LocalTensor, *args,
     builder = global_builder.get_ir_builder()
     op_impl("add_relu_cast", dst, src0, src1, args, kwargs, builder.create_asc_AddReluCastL0Op,
             builder.create_asc_AddReluCastL1Op, builder.create_asc_AddReluCastL2Op)
+
+
+@overload
+def cast(dst: LocalTensor, src: LocalTensor, round_mode: RoundMode, count: int) -> None:
+    ...
+
+
+@overload
+def cast(dst: LocalTensor, src: LocalTensor, round_mode: RoundMode, mask: int, repeat_times: int,
+        repeat_params: UnaryRepeatParams, is_set_mask: bool = True) -> None:
+    ...
+
+
+@overload
+def cast(dst: LocalTensor, src: LocalTensor, round_mode: RoundMode, mask: List[int], repeat_times: int,
+        repeat_params: UnaryRepeatParams, is_set_mask: bool = True) -> None:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="cast")
+def cast(dst: LocalTensor, src: LocalTensor, round_mode: RoundMode, *args, **kwargs) -> None:
+    builder = global_builder.get_ir_builder()
+    dispatcher = OverloadDispatcher("cast")
+
+    @dispatcher.register(mask=RuntimeInt, repeat_times=RuntimeInt, repeat_params=UnaryRepeatParams,
+                        is_set_mask=DefaultValued(bool, True))
+    def _(mask: RuntimeInt, repeat_times: RuntimeInt, repeat_params: UnaryRepeatParams, is_set_mask: bool = True):
+        builder.create_asc_CastL0Op(dst.to_ir(), src.to_ir(), ir.RoundMode.symbolize(round_mode),
+                _mat(mask, KT.uint64).to_ir(),
+                _mat(repeat_times, KT.int8).to_ir(), repeat_params.to_ir(), is_set_mask)
+
+    @dispatcher.register(mask=list, repeat_times=RuntimeInt, repeat_params=UnaryRepeatParams,
+                        is_set_mask=DefaultValued(bool, True))
+    def _(mask: list, repeat_times: RuntimeInt, repeat_params: UnaryRepeatParams, is_set_mask: bool = True):
+        mask = [_mat(v, KT.uint64).to_ir() for v in mask]
+        builder.create_asc_CastL1Op(dst.to_ir(), src.to_ir(), ir.RoundMode.symbolize(round_mode),
+                                    mask, _mat(repeat_times, KT.int8).to_ir(),
+                                    repeat_params.to_ir(), is_set_mask)
+
+    @dispatcher.register_auto
+    def _(count: RuntimeInt):
+        builder.create_asc_CastL2Op(dst.to_ir(), src.to_ir(), ir.RoundMode.symbolize(round_mode),
+                                     _mat(count, KT.int32).to_ir())
+
+    dispatcher(*args, **kwargs)
 
 
 @overload

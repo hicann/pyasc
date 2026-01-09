@@ -8,17 +8,17 @@
 
 // RUN: ascir-translate -mlir-to-ascendc %s | FileCheck %s
 
-// CHECK-LABEL:void emit_cast(AscendC::LocalTensor<float> v1, AscendC::LocalTensor<float> v2, int32_t v3, uint64_t v4, uint64_t v5) {
-// CHECK-NEXT:   AscendC::Cast(v1, v2, AscendC::RoundMode::CAST_NONE, v3, v3, AscendC::UnaryRepeatParams(v3, v3, v3, v3));
-// CHECK-NEXT:   uint64_t v1_mask_list0[] = {v4, v5};
-// CHECK-NEXT:   AscendC::Cast(v1, v2, AscendC::RoundMode::CAST_NONE, v1_mask_list0, v3, AscendC::UnaryRepeatParams(v3, v3, v3, v3));
-// CHECK-NEXT:   AscendC::Cast(v1, v2, AscendC::RoundMode::CAST_NONE, v3);
+// CHECK-LABEL:void emit_cast(AscendC::LocalTensor<float> v1, AscendC::LocalTensor<float> v2, uint8_t v3, AscendC::UnaryRepeatParams v4, uint64_t v5, uint64_t v6) {
+// CHECK-NEXT:   AscendC::Cast<float, float, 0>(v1, v2, AscendC::RoundMode::CAST_NONE, v5, v3, v4);
+// CHECK-NEXT:   uint64_t v1_mask_list0[] = {v5, v6};
+// CHECK-NEXT:   AscendC::Cast<float, float, 0>(v1, v2, AscendC::RoundMode::CAST_NONE, v1_mask_list0, v3, v4);
+// CHECK-NEXT:   AscendC::Cast<float, float>(v1, v2, AscendC::RoundMode::CAST_NONE, v3);
 // CHECK-NEXT:   return;
 // CHECK-NEXT: }
-func.func @emit_cast(%dst : !ascendc.local_tensor<1024xf32>, %src : !ascendc.local_tensor<1024xf32>, %c0_i32 : i32, %maskArray1_0: ui64, %maskArray1_1: ui64) {
-  ascendc.cast_l0 %dst, %src, %c0_i32, %c0_i32, %c0_i32, %c0_i32, %c0_i32, %c0_i32 {roundMode = 0 : i32} : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, i32, i32, i32, i32, i32, i32
-  ascendc.cast_l1 %dst, %src, %maskArray1_0, %maskArray1_1, %c0_i32, %c0_i32, %c0_i32, %c0_i32, %c0_i32 {roundMode = 0 : i32} : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, ui64, ui64, i32, i32, i32, i32, i32
-  ascendc.cast_l2 %dst, %src, %c0_i32 {roundMode = 0 : i32} : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, i32
+func.func @emit_cast(%dst : !ascendc.local_tensor<1024xf32>, %src : !ascendc.local_tensor<1024xf32>, %repeatTime : ui8, %params: !ascendc.unary_repeat_params, %maskArray1_0: ui64, %maskArray1_1: ui64) {
+  ascendc.cast_l0 %dst, %src, %maskArray1_0, %repeatTime, %params {roundMode = 0 : i32} : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, ui64, ui8, !ascendc.unary_repeat_params
+  ascendc.cast_l1 %dst, %src, %maskArray1_0, %maskArray1_1, %repeatTime, %params {roundMode = 0 : i32} : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, ui64, ui64, ui8, !ascendc.unary_repeat_params
+  ascendc.cast_l2 %dst, %src, %repeatTime {roundMode = 0 : i32} : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, ui8
   return
 }
 
