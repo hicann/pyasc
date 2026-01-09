@@ -120,7 +120,10 @@ Scalar operations
     :toctree: generated
     :nosignatures:
 
-    scalar_cast
+    count_bits_cnt_same_as_sign_bit
+    scalar_cast 
+    scalar_count_leading_zero
+    scalar_get_count_of_value
     scalar_get_sff_value
 
 

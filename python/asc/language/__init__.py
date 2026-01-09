@@ -65,7 +65,13 @@ from .basic.mm import (
     set_load_data_repeat,
 ) 
 from .basic.mm import load_data, load_data_with_transpose, mmad
-from .basic.scalar import scalar_cast, scalar_get_sff_value
+from .basic.scalar import (
+    count_bits_cnt_same_as_sign_bit,
+    scalar_cast, 
+    scalar_count_leading_zero,
+    scalar_get_count_of_value,
+    scalar_get_sff_value,
+)
 from .basic.set_atomic import (
     set_atomic_add,
     set_atomic_max,

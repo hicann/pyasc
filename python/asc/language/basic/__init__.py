@@ -55,7 +55,13 @@ from .mm import (
     set_load_data_repeat,
 )  
 from .mm import load_data, load_data_with_transpose, mmad
-from .scalar import scalar_cast, scalar_get_sff_value
+from .scalar import (
+    count_bits_cnt_same_as_sign_bit,
+    scalar_cast, 
+    scalar_count_leading_zero,
+    scalar_get_count_of_value,
+    scalar_get_sff_value,
+)
 from .set_atomic import (
     set_atomic_add,
     set_atomic_max,
@@ -210,7 +216,10 @@ __all__ = [
     "set_load_data_padding_value",
     "set_load_data_repeat",
     # .scalar
-    "scalar_cast",
+    "count_bits_cnt_same_as_sign_bit",
+    "scalar_cast", 
+    "scalar_count_leading_zero",
+    "scalar_get_count_of_value",
     "scalar_get_sff_value",
     # .set_atomic
     "set_atomic_add",
