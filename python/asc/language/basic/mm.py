@@ -12,6 +12,7 @@ from ..core.ir_value import RuntimeInt, materialize_ir_value as _mat
 from ..core.tensor import BaseTensor, GlobalTensor, LocalTensor
 from ..core.types import LoadData2DParams, LoadData2DParamsV2, \
                          LoadData2dTransposeParamsV2, LoadData2dTransposeParams, \
+                         LoadData3DParamsV1, LoadData3DParamsV2, \
                          LoadData3DParamsV2Pro, \
                          LoadDataRepeatParam, MmadParams
 from ..core.utils import OverloadDispatcher, require_jit, global_builder
@@ -35,6 +36,16 @@ def load_data(dst: LocalTensor, src: LocalTensor, params: LoadData2DParamsV2) ->
 
 @overload
 def load_data(dst: LocalTensor, src: GlobalTensor, params: LoadData2DParamsV2) -> None:
+    ...
+
+
+@overload
+def load_data(dst: LocalTensor, src: LocalTensor, params: LoadData3DParamsV1) -> None:
+    ...
+
+
+@overload
+def load_data(dst: LocalTensor, src: LocalTensor, params: LoadData3DParamsV2) -> None:
     ...
 
 
@@ -81,6 +92,28 @@ def load_data(dst: BaseTensor, src: BaseTensor, *args, **kwargs) -> None:
 
         if isinstance(dst, LocalTensor) and isinstance(src, GlobalTensor):
             builder.create_asc_LoadDataG2LV2Op(
+                dst.to_ir(),
+                src.to_ir(),
+                params.to_ir(),
+            )
+            return
+    
+    @dispatcher.register_auto
+    def _(params: LoadData3DParamsV1):
+
+        if isinstance(dst, LocalTensor) and isinstance(src, LocalTensor):
+            builder.create_asc_LoadData3DL0V1Op(
+                dst.to_ir(),
+                src.to_ir(),
+                params.to_ir(),
+            )
+            return
+
+    @dispatcher.register_auto
+    def _(params: LoadData3DParamsV2):
+
+        if isinstance(dst, LocalTensor) and isinstance(src, LocalTensor):
+            builder.create_asc_LoadData3DL0V2Op(
                 dst.to_ir(),
                 src.to_ir(),
                 params.to_ir(),

@@ -1809,6 +1809,26 @@ def load_data_docstring():
         __aicore__ inline void LoadData(const LocalTensor<T>& dst,
                                         const LocalTensor<T>& src,
                                         const LoadData3DParamsV2Pro& loadDataParams)
+    
+    .. code-block:: c++
+
+        template <typename T,
+                const IsResetLoad3dConfig &defaultConfig = IS_RESER_LOAD3D_DEFAULT_CONFIG,
+                typename U = PrimT<T>,
+                typename Std::enable_if<Std::is_same<PrimT<T>, U>::value, bool>::type = true>
+        __aicore__ inline void LoadData(const LocalTensor<T>& dst,
+                                        const LocalTensor<T>& src,
+                                        const LoadData3DParamsV1<U>& loadDataParams)
+
+    .. code-block:: c++
+
+        template <typename T,
+                const IsResetLoad3dConfig &defaultConfig = IS_RESER_LOAD3D_DEFAULT_CONFIG,
+                typename U = PrimT<T>,
+                typename Std::enable_if<Std::is_same<PrimT<T>, U>::value, bool>::type = true>
+        __aicore__ inline void LoadData(const LocalTensor<T>& dst,
+                                        const LocalTensor<T>& src,
+                                        const LoadData3DParamsV2<U>& loadDataParams)                            
     """
 
     param_list = """
@@ -1824,15 +1844,15 @@ def load_data_docstring():
       - 当为 GlobalTensor 时，表示从 Global Memory 按 2D 方式加载数据到 LocalTensor。
       - 元素数据类型需与 dst 保持一致。
 
-    - params：二维加载参数，类型为 LoadData2DParams 或 LoadData2DParamsV2 或 LoadData3DParamsV2Pro。
+    - params：类型为下面结构体
       - LoadData2DParams 结构体
-        - startIndex：分形矩阵ID，说明搬运起始位置为源操作数中第几个分形（0为源操作数中第1个分形矩阵）。取值范围：startIndex∈[0, 65535] 。单位：512B。默认为0。
-        - repeatTimes：迭代次数，每个迭代可以处理512B数据。取值范围：repeatTimes∈[1, 255]。
-        - srcStride：相邻迭代间，源操作数前一个分形与后一个分形起始地址的间隔，单位：512B。取值范围：src_stride∈[0, 65535]。默认为0。
+        - start_index：分形矩阵ID，说明搬运起始位置为源操作数中第几个分形（0为源操作数中第1个分形矩阵）。取值范围：start_index∈[0, 65535] 。单位：512B。默认为0。
+        - repeat_times：迭代次数，每个迭代可以处理512B数据。取值范围：repeat_times∈[1, 255]。
+        - src_stride：相邻迭代间，源操作数前一个分形与后一个分形起始地址的间隔，单位：512B。取值范围：src_stride∈[0, 65535]。默认为0。
         - sid：预留参数，配置为0即可。
-        - dstGap：相邻迭代间，目的操作数前一个分形结束地址与后一个分形起始地址的间隔，单位：512B。取值范围：dstGap∈[0, 65535]。默认为0。
-        - ifTranspose：是否启用转置功能，对每个分形矩阵进行转置，默认为false:
-        - addrMode：预留参数，配置为0即可。
+        - dst_gap：相邻迭代间，目的操作数前一个分形结束地址与后一个分形起始地址的间隔，单位：512B。取值范围：dst_gap∈[0, 65535]。默认为0。
+        - if_transpose：是否启用转置功能，对每个分形矩阵进行转置，默认为false。
+        - addr_mode：预留参数，配置为0即可。
 
       - LoadData2DParamsV2 结构体
         - m_start_position：M维起始位置，取值范围：m_start_position∈[0, 65535]。默认为0。
@@ -1853,6 +1873,48 @@ def load_data_docstring():
         - f_matrix_ctrl：是否启用矩阵控制，默认为false。
         - ext_config：扩展配置，取值范围：ext_config∈[0, 18446744073709551615]。默认为0。
         - filter_config：滤波器配置，取值范围：filter_config∈[0, 18446744073709551615]。默认为0x10101010101。
+    
+      - LoadData3DParamsV1 结构体
+        - pad_list：padding列表，顺序为[padding_left, padding_right, padding_top, padding_bottom]，每个元素取值范围：[0, 255]。
+        - l1_h：源操作数height，取值范围：[1, 32767]。
+        - l1_w：源操作数width，取值范围：[1, 32767]。
+        - c1_index：卷积窗口在源Tensor C1维度的起点，取值范围：[0, 4095]。
+        - fetch_filter_w：卷积窗口在filter W维度的起始位置，取值范围：[0, 254]。
+        - fetch_filter_h：卷积窗口在filter H维度的起始位置，取值范围：[0, 254]。
+        - left_top_w：卷积窗口在源Tensor W维度的起点，取值范围：[-255, 32767]。
+        - left_top_h：卷积窗口在源Tensor H维度的起点，取值范围：[-255, 32767]。
+        - stride_w：卷积核在W维的滑动步长，取值范围：[1, 63]。
+        - stride_h：卷积核在H维的滑动步长，取值范围：[1, 63]。
+        - filter_w：卷积核width，取值范围：[1, 255]。
+        - filter_h：卷积核height，取值范围：[1, 255]。
+        - dilation_filter_w：卷积核W维膨胀系数，取值范围：[1, 255]。
+        - dilation_filter_h：卷积核H维膨胀系数，取值范围：[1, 255]。
+        - jump_stride：迭代之间目的操作数地址递增步长，取值范围：[1, 127]。
+        - repeat_mode：迭代模式，取值范围：[0, 1]，默认为0。
+        - repeat_time：迭代次数，取值范围：[1, 255]。
+        - c_size：通道展开优化控制参数，取值范围：[0, 1]，默认为0。
+        - pad_value：padding填充值，需与src数据类型一致，默认为0。
+
+      - LoadData3DParamsV2 结构体
+        - pad_list：padding列表，顺序为[padding_left, padding_right, padding_top, padding_bottom]，每个元素取值范围：[0, 255]。
+        - l1_h：源操作数height，取值范围：[1, 32767]。
+        - l1_w：源操作数width，取值范围：[1, 32767]。
+        - channel_size：通道大小，不同数据类型与平台存在对齐约束。
+        - k_extension：K维扩展长度，取值范围：[1, 65535]。
+        - m_extension：M维扩展长度，取值范围：[1, 65535]。
+        - k_start_pt：K维起始位置，取值范围：[0, 65535]。
+        - m_start_pt：M维起始位置，取值范围：[0, 65535]。
+        - stride_w：卷积核在W维滑动步长，取值范围：[1, 63]。
+        - stride_h：卷积核在H维的滑动步长，取值范围：[1, 63]。
+        - filter_w：卷积核width，取值范围：[1, 255]。
+        - filter_h：卷积核height，取值范围：[1, 255]。
+        - dilation_filter_w：卷积核W维膨胀系数，取值范围：[1, 255]。
+        - dilation_filter_h：卷积核H维膨胀系数，取值范围：[1, 255]。
+        - en_transpose：是否启用转置功能，取值为bool，默认为false。
+        - pad_value：padding填充值，需与src数据类型一致，默认为0。
+        - filter_size_w：是否在filterW基础上增加256元素，默认为false。
+        - filter_size_h：是否在filterH基础上增加256元素，默认为false。
+        - f_matrix_ctrl：FeatureMap矩阵控制开关，默认为false。
       """
 
     constraint_list = """
@@ -1958,6 +2020,94 @@ def load_data_docstring():
               params_3d_v2_pro = asc.LoadData3DParamsV2Pro(16, False, False, False, False, False, 0, 0x10101010101)
 
               asc.load_data(y_local, x_local, params_3d_v2_pro)
+    
+    - Local Memory 内部 3D 搬运（LoadData3DParamsV1）
+
+        .. code-block:: python
+
+            def test_load_data_v1(mock_launcher_run):
+
+                @asc.jit
+                def kernel_load_data_v1(x: asc.GlobalAddress) -> None:
+                    x_local = asc.LocalTensor(
+                        dtype=asc.float16,
+                        pos=asc.TPosition.VECIN,
+                        addr=0,
+                        tile_size=512,
+                    )
+                    y_local = asc.LocalTensor(
+                        dtype=asc.float16,
+                        pos=asc.TPosition.VECOUT,
+                        addr=0,
+                        tile_size=512,
+                    )
+                    x_gm = asc.GlobalTensor()
+                    x_gm.set_global_buffer(x)
+
+                    params_3d_v1 = asc.LoadData3DParamsV1(
+                        [0, 0, 0, 0],
+                        16, 16,
+                        0,
+                        0, 0,
+                        0, 0,
+                        1, 1,
+                        3, 3,
+                        1, 1,
+                        1,
+                        0, 1,
+                        0,
+                        0,
+                    )
+
+                    asc.load_data(y_local, x_local, params_3d_v1)
+
+                x = MockTensor(asc.float16)
+                kernel_load_data_v1[1](x)
+                assert mock_launcher_run.call_count == 1
+
+    - Local Memory 内部 3D 搬运（LoadData3DParamsV2）
+
+        .. code-block:: python
+
+            def test_load_data_v2(mock_launcher_run):
+
+                @asc.jit
+                def kernel_load_data_v2(x: asc.GlobalAddress) -> None:
+                    x_local = asc.LocalTensor(
+                        dtype=asc.float16,
+                        pos=asc.TPosition.VECIN,
+                        addr=0,
+                        tile_size=512,
+                    )
+                    y_local = asc.LocalTensor(
+                        dtype=asc.float16,
+                        pos=asc.TPosition.VECOUT,
+                        addr=0,
+                        tile_size=512,
+                    )
+                    x_gm = asc.GlobalTensor()
+                    x_gm.set_global_buffer(x)
+
+                    params_3d_v2 = asc.LoadData3DParamsV2(
+                        [0, 0, 0, 0],
+                        16, 16,
+                        16,
+                        16, 16,
+                        0, 0,
+                        1, 1,
+                        3, 3,
+                        1, 1,
+                        False,
+                        0,
+                        False, False,
+                        False,
+                    )
+
+                    asc.load_data(y_local, x_local, params_3d_v2)
+
+                x = MockTensor(asc.float16)
+                kernel_load_data_v2[1](x)
+                assert mock_launcher_run.call_count == 1
     """
 
     return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
@@ -2001,12 +2151,12 @@ def load_data_with_transpose_docstring():
 
     - params：二维转置加载参数，类型为 LoadData2dTransposeParams 或 LoadData2dTransposeParamsV2。
       - LoadData2dTransposeParams 结构体
-        - startIndex：方块矩阵ID，搬运起始位置为源操作数中第几个方块矩阵（0 为源操作数中第1个方块矩阵）。取值范围：startIndex∈[0, 65535] 。默认为0。
-        - repeatTimes：迭代次数，取值范围：repeatTimes∈[0, 255]。默认为0。
-        - srcStride：相邻迭代间，源操作数前一个分形与后一个分形起始地址的间隔。这里的单位实际上是拼接后的方块矩阵的大小。取值范围：srcStride∈[0, 65535]。默认为0。
-        - dstGap：相邻迭代间，目的操作数前一个迭代第一个分形的结束地址到下一个迭代第一个分形起始地址的间隔，单位：512B。取值范围：dstGap∈[0, 65535]。默认为0。
-        - dstFracGap：每个迭代内目的操作数转置前一个分形结束地址与后一个分形起始地址的间隔，单位为512B，仅在数据类型为float/int32_t/uint32_t/uint8_t/int8_t/int4b_t时有效。取值范围：dstFracGap∈[0, 65535]。默认为0。
-        - addrMode：预留参数
+        - start_index：方块矩阵ID，搬运起始位置为源操作数中第几个方块矩阵（0 为源操作数中第1个方块矩阵）。取值范围：start_index∈[0, 65535] 。默认为0。
+        - repeat_times：迭代次数，取值范围：repeat_times∈[0, 255]。默认为0。
+        - src_stride：相邻迭代间，源操作数前一个分形与后一个分形起始地址的间隔。这里的单位实际上是拼接后的方块矩阵的大小。取值范围：src_stride∈[0, 65535]。默认为0。
+        - dst_gap：相邻迭代间，目的操作数前一个迭代第一个分形的结束地址到下一个迭代第一个分形起始地址的间隔，单位：512B。取值范围：dst_gap∈[0, 65535]。默认为0。
+        - dst_frac_gap：每个迭代内目的操作数转置前一个分形结束地址与后一个分形起始地址的间隔，单位：512B，仅在数据类型为float/int32_t/uint32_t/uint8_t/int8_t/int4b_t时有效。取值范围：dst_frac_gap∈[0, 65535]。默认为0。
+        - addr_mode：预留参数
 
       - LoadData2dTransposeParamsV2 结构体
         - start_index：方块矩阵ID，搬运起始位置为源操作数中第几个方块矩阵（0 为源操作数中第1个方块矩阵）。取值范围：start_index∈[0, 65535] 。默认为0。

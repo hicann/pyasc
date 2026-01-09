@@ -7,42 +7,37 @@
 # See LICENSE in the root of the software repository for the full text of the License.
 
 import asc
-from asc.runtime import config
-from asc.runtime.jit import MockTensor
 
 
 def test_load_data(mock_launcher_run):
 
     @asc.jit
     def kernel_load_data(x: asc.GlobalAddress) -> None:
-        x_local = asc.LocalTensor(
-            dtype=asc.float16,
-            pos=asc.TPosition.VECIN,
-            addr=0,
-            tile_size=512,
-        )
-        y_local = asc.LocalTensor(
-            dtype=asc.float16,
-            pos=asc.TPosition.VECOUT,
-            addr=0,
-            tile_size=512,
-        )
+        x_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+        y_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
         x_gm = asc.GlobalTensor()
         x_gm.set_global_buffer(x)
 
         params_2d = asc.LoadData2DParams(0, 4, 0, 0, 0, 0, 0)
         params_2d_v2 = asc.LoadData2DParamsV2(0, 0, 16, 16, 0, 0, False, 0)
+        params_3d_v1 = asc.LoadData3DParamsV1((0, 0, 0, 0), 16, 16, 0, 0, 0, 0, 0, 1, 1, 3, 3, 1, 1, 1, 0, 1, 0, 0)
+        params_3d_v1_ir = asc.LoadData3DParamsV1.from_ir(params_3d_v1.to_ir())
+        params_3d_v2 = asc.LoadData3DParamsV2((0, 0, 0, 0), 16, 16, 16, 16, 16, 0, 0, 1, 1, 3, 3, 1, 1, 
+                                              False, 0, False, False, False)
+        params_3d_v2_ir = asc.LoadData3DParamsV2.from_ir(params_3d_v2.to_ir())
         params_3d_v2_pro = asc.LoadData3DParamsV2Pro(16, False, False, False, False, False, 0, 0x10101010101)
 
         asc.load_data(y_local, x_local, params_2d)
         asc.load_data(x_local, x_gm, params_2d)
         asc.load_data(y_local, x_local, params_2d_v2)
         asc.load_data(x_local, x_gm, params_2d_v2)
+        asc.load_data(y_local, x_local, params_3d_v1)
+        asc.load_data(x_local, x_gm, params_3d_v1_ir)
+        asc.load_data(y_local, x_local, params_3d_v2)
+        asc.load_data(x_local, x_gm, params_3d_v2_ir)
         asc.load_data(y_local, x_local, params_3d_v2_pro)
 
-    x = MockTensor(asc.float16)
-    kernel_load_data[1](x)
-    assert mock_launcher_run.call_count == 1
+    mock_launcher_run(kernel_load_data)
 
 
 def test_load_data_with_transpose(mock_launcher_run):
