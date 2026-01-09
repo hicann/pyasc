@@ -37,3 +37,39 @@ def test_scalar_get_sff_value(mock_launcher_run):
 
     scalar_get_sff_value_kernel[1]()
     assert mock_launcher_run.call_count == 1
+
+
+def test_scalar_get_count_of_value(mock_launcher_run):
+
+    @asc.jit
+    def scalar_get_count_of_value_kernel():
+        value_in = 16 
+        zero_count = asc.scalar_get_count_of_value(value_in, 0)
+        one_count = asc.scalar_get_count_of_value(value_in, 1)
+
+    scalar_get_count_of_value_kernel[1]()
+    assert mock_launcher_run.call_count == 1    
+
+
+def test_scalar_count_leading_zero(mock_launcher_run):
+
+    @asc.jit
+    def scalar_count_leading_zero_kernel():
+        value_in = 0x0fffffffffffffff
+        leading_zeros = asc.scalar_count_leading_zero(value_in)
+
+    scalar_count_leading_zero_kernel[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_count_bits_cnt_same_as_sign_bit(mock_launcher_run):
+
+    @asc.jit
+    def count_bits_cnt_same_as_sign_bit_kernel():
+        value_in = 0x0f00000000000000
+        result = asc.count_bits_cnt_same_as_sign_bit(value_in)
+        zero_result = asc.count_bits_cnt_same_as_sign_bit(0)
+        neg_one_result = asc.count_bits_cnt_same_as_sign_bit(-1)
+
+    count_bits_cnt_same_as_sign_bit_kernel[1]()
+    assert mock_launcher_run.call_count == 1

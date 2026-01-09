@@ -55,3 +55,43 @@ def scalar_get_sff_value(value_in: RuntimeInt, count_value: RuntimeInt) -> Runti
     handle = builder.create_asc_ScalarGetSFFValueOp(KT.int64.to_ir(), _mat(value_in, KT.uint64).to_ir(),
                                                      _mat(count_value, KT.int32).to_ir())
     return PlainValue(handle)
+
+
+@overload
+def scalar_get_count_of_value(value_in: int, count_value: int) -> int:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="scalar_get_count_of_value")
+def scalar_get_count_of_value(value_in: RuntimeInt, count_value: RuntimeInt) -> RuntimeInt:
+    builder = global_builder.get_ir_builder()
+    handle = builder.create_asc_ScalarGetCountOfValueOp(KT.int64.to_ir(), _mat(value_in, KT.uint64).to_ir(),
+                                                        _mat(count_value, KT.int32).to_ir())
+    return PlainValue(handle)
+
+
+@overload
+def scalar_count_leading_zero(value_in: int) -> int:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="scalar_count_leading_zero")
+def scalar_count_leading_zero(value_in: RuntimeInt) -> RuntimeInt:
+    builder = global_builder.get_ir_builder()
+    handle = builder.create_asc_ScalarCountLeadingZeroOp(KT.int64.to_ir(), _mat(value_in, KT.uint64).to_ir())
+    return PlainValue(handle)
+
+
+@overload
+def count_bits_cnt_same_as_sign_bit(value_in: int) -> int:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="count_bits_cnt_same_as_sign_bit")
+def count_bits_cnt_same_as_sign_bit(value_in: RuntimeInt) -> RuntimeInt:
+    builder = global_builder.get_ir_builder()
+    handle = builder.create_asc_CountBitsCntSameAsSignBitOp(KT.int64.to_ir(), _mat(value_in, KT.int64).to_ir())
+    return PlainValue(handle)

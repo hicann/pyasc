@@ -42,4 +42,35 @@ def AscendC_ScalarGetSFFValueOp : APIOp<"scalar_get_sff_value", "ScalarGetSFFVal
     let paramTypeLists = [0, 4]; 
 }
 
+def AscendC_ScalarGetCountOfValueOp : APIOp<"scalar_get_count_of_value", "ScalarGetCountOfValue", [AscFunc]> {
+    let description = "Count the number of 0 or 1 bits in a uint64_t value. Returns the count of specified bit value.";
+    let arguments = (ins 
+        UI64:$valueIn,
+        I32:$countValue
+    );
+    let results = (outs I64:$count);
+    let assemblyFormat = "operands attr-dict `:` qualified(type(operands)) `->` type($count)";
+    let paramTypeLists = [0, 4]; 
+}
+
+def AscendC_ScalarCountLeadingZeroOp : APIOp<"scalar_count_leading_zero", "ScalarCountLeadingZero", [AscFunc]> {
+    let description = "Count the number of leading zeros in a uint64_t value. Returns the count of leading zeros from MSB to the first 1.";
+    let arguments = (ins 
+        UI64:$valueIn                 
+    );
+    let results = (outs I64:$count); 
+    let assemblyFormat = "operands attr-dict `:` qualified(type(operands)) `->` type($count)";
+    let paramTypeLists = [0]; 
+}
+
+def AscendC_CountBitsCntSameAsSignBitOp : APIOp<"count_bits_cnt_same_as_sign_bit", "CountBitsCntSameAsSignBit", [AscFunc]> {
+    let description = "Count the number of consecutive bits from the highest value bit that are the same as the sign bit in an int64_t value. Returns -1 if input is -1 (all 1s) or 0 (all 0s).";
+    let arguments = (ins 
+        I64:$valueIn                 
+    );
+    let results = (outs I64:$count); 
+    let assemblyFormat = "operands attr-dict `:` qualified(type(operands)) `->` type($count)";
+    let paramTypeLists = [0]; 
+}
+
 #endif //ASC_BASIC_OP_SCALAR_TD

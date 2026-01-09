@@ -4257,6 +4257,134 @@ def scalar_get_sff_value_docstring():
     return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
 
+def scalar_get_count_of_value_docstring():
+    func_introduction = """
+    获取一个 uint64_t 类型数字的二进制中 0 或者 1 的个数。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+        .. code-block:: c++
+
+            template <int countValue>
+            __aicore__ inline int64_t ScalarGetCountOfValue(uint64_t valueIn);
+    """
+
+    param_list = """
+    **参数说明**
+
+    - value_in：输入数据
+      - 被统计的二进制数字。
+
+    - count_value：指定统计 0 还是统计 1 的个数。
+      - 只能输入 0 或 1 。
+    """
+
+    return_list = """
+    **返回值说明**
+
+    - value_in 中 0 或者 1 的个数。
+
+    """
+
+    py_example = """
+    **调用示例**
+
+        .. code-block:: python
+
+            import asc
+            value_in = 0xffff
+            count_bits = 1
+            one_count = asc.scalar_get_count_of_value(value_in, count_bits)
+            # 输出数据 oneCount : 16
+    """
+
+    return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
+
+
+def scalar_count_leading_zero_docstring():
+    func_introduction = """
+    计算一个 uint64_t 类型数字前导 0 的个数
+    （二进制从最高位到第一个 1 一共有多少个 0 ）。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+        .. code-block:: c++
+
+            __aicore__ inline int64_t ScalarCountLeadingZero(uint64_t valueIn);
+    """
+
+    param_list = """
+    **参数说明**
+
+    - value_in：输入数据 
+      - 被统计的二进制数字。
+    """
+
+    return_list = """
+    **返回值说明**
+
+    - 返回 value_in 的前导 0 的个数。
+    """
+
+    py_example = """
+    **调用示例**
+
+        .. code-block:: python
+
+            import asc
+            value_in = 0x0fffffffffffffff
+            ans = asc.scalar_count_leading_zero(value_in)
+            # ans 输出: 4
+    """
+
+    return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
+
+
+def count_bits_cnt_same_as_sign_bit_docstring():
+    func_introduction = """
+    计算一个 int64_t 类型数字的二进制中，从最高数值位开始与符号位相同的连续比特位的个数。
+    当输入是 -1 （比特位全 1 ）或者 0 （比特位全 0 ）时，返回 -1 。
+    """
+
+    cpp_signature = """
+    **对应的 Ascend C 函数原型**
+
+        .. code-block:: c++
+
+            __aicore__ inline int64_t CountBitsCntSameAsSignBit(int64_t valueIn);
+    """
+
+    param_list = """
+    **参数说明**
+
+    - value_in：输入数据
+      - 数据类型 int64_t 。
+    """
+
+    return_list = """
+    **返回值说明**
+
+    - 返回从最高数值位开始和符号位相同的连续比特位的个数。
+    """
+
+    py_example = """
+    **调用示例**
+
+        .. code-block:: python
+
+            import asc
+            value_in = 0x0f00000000000000
+            ans = asc.count_bits_cnt_same_as_sign_bit(value_in)
+            # ans 输出: 3
+    """
+
+    return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
+
+
 def set_atomic_add_docstring():
     func_introduction = """
     调用该接口后，可对后续的从VECOUT/L0C/L1到GM的数据传输开启原子累加，
@@ -5452,7 +5580,10 @@ DOC_HANDLES = {
     "metrics_prof_start": metrics_prof_start_docstring,
     "metrics_prof_stop": metrics_prof_stop_docstring,
     "printf": printf_docstring,
+    "count_bits_cnt_same_as_sign_bit": count_bits_cnt_same_as_sign_bit_docstring,
     "scalar_cast": scalar_cast_docstring,
+    "scalar_count_leading_zero": scalar_count_leading_zero_docstring,
+    "scalar_get_count_of_value": scalar_get_count_of_value_docstring,
     "scalar_get_sff_value": scalar_get_sff_value_docstring,
     "dump_acc_chk_point": dump_acc_chk_point_docstring,
     "dump_tensor": dump_tensor_docstring_docstring,
