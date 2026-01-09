@@ -646,6 +646,18 @@ def test_data_cache_clean_and_invalid(mock_launcher_run):
     assert mock_launcher_run.call_count == 1
 
 
+def test_data_cache_preload(mock_launcher_run):
+    @asc.jit
+    def kernel_data_cache_preload(src_addr: asc.GlobalAddress) -> None:
+        src_gm = asc.GlobalTensor()
+        src_gm.set_global_buffer(src_addr)
+        asc.data_cache_preload(src=src_gm, cache_offset=1024)
+
+    src_mock = MockTensor(asc.uint64)
+    kernel_data_cache_preload[1](src_mock)
+    assert mock_launcher_run.call_count == 1
+
+
 def test_get_icache_preload_status(mock_launcher_run):
 
     @asc.jit

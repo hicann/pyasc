@@ -32,6 +32,7 @@ from .basic.cache import data_cache_clean_and_invalid, get_icache_preload_status
 from .basic.common import (
     ascend_is_aic,
     ascend_is_aiv,
+    data_cache_preload,
     get_hccl_context,
     get_sys_workspace,
     reset_mask,

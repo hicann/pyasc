@@ -24,6 +24,7 @@ Common operations
     cross_core_set_flag
     cross_core_wait_flag
     data_cache_clean_and_invalid
+    data_cache_preload
     data_copy
     data_copy_pad
     dump_acc_chk_point
