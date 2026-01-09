@@ -20,6 +20,16 @@ include "mlir/Interfaces/CastInterfaces.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 include "mlir/IR/OpBase.td"
 
+def AscendC_DataCachePreloadOp
+    : APIOp<"data_cache_preload", "DataCachePreload", [AscFunc]> {
+  let description = "Preload data from a specific GM address into the data cache.";
+  let arguments = (ins
+    AscendC_GlobalTensor:$src,
+    AnyInteger:$cacheOffset
+  );
+  let paramTypeLists = [0, 0];
+}
+
 def AscendC_ResetMaskOp : APIOp<"reset_mask", "ResetMask", [AscFunc]> 
 {
   let summary = "Reset mask ";

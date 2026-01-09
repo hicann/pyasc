@@ -33,6 +33,24 @@ def ascend_is_aiv() -> PlainValue:
     return PlainValue(handle)
 
 
+@overload
+def data_cache_preload(src: GlobalTensor, cache_offset: int) -> None:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="data_cache_preload")
+def data_cache_preload(src: GlobalTensor, cache_offset: RuntimeInt) -> None:
+    builder = global_builder.get_ir_builder()
+
+    offset_val = _mat(cache_offset)
+
+    builder.create_asc_DataCachePreloadOp(
+        src.to_ir(),
+        offset_val.to_ir()
+    )
+
+
 @require_jit
 @set_common_docstring(api_name="get_hccl_context")
 def get_hccl_context(index: int) -> GlobalAddress:

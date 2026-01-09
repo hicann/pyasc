@@ -30,6 +30,18 @@ func.func @emit_ascend_is_aicv() {
   return
 }
 
+// CHECK-LABEL: void emit_data_cache_preload(AscendC::GlobalTensor<uint64_t> v1, int32_t v2) {
+// CHECK-NEXT:   AscendC::DataCachePreload(v1, v2);
+// CHECK-NEXT:   return;
+// CHECK-NEXT: }
+func.func @emit_data_cache_preload(
+  %src_gm: !ascendc.global_tensor<*xui64>, 
+  %offset: i32
+) attributes {ascendc.aicore, ascendc.global} {
+  ascendc.data_cache_preload %src_gm, %offset : !ascendc.global_tensor<*xui64>, i32
+  return
+}
+
 // CHECK-LABEL: void emit_data_sync_barrier(__gm__ uint64_t* v1) {
 // CHECK-NEXT:   set_ffts_base_addr(*v1);
 // CHECK-NEXT:   AscendC::DataSyncBarrier<AscendC::MemDsbT::ALL>();

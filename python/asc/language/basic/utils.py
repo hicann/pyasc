@@ -813,6 +813,54 @@ def data_cache_clean_and_invalid_docstring():
     return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
+def data_cache_preload_docstring():
+    func_introduction = """
+    从源地址所在的特定GM地址预加载数据到data cache中。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            template <typename T>
+            __aicore__ inline void DataCachePreload(const GlobalTensor<uint64_t> &src, const T cacheOffset)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - src (asc.GlobalTensor): 源操作数，代表一个 Global Memory 地址空间。
+    - cache_offset (int): 内存偏移量，表示从 `src` 的基地址开始，偏移 `cache_offset` 个字节的位置开始预加载数据。
+    """
+
+    return_value = """
+    **返回值**
+
+    无。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    频繁调用此接口可能导致保留站拥塞，这种情况下，此指令将被视为NOP指令，阻塞Scalar流水。因此不建议频繁调用该接口。
+    """
+
+    py_example = """
+    **调用示例**
+
+        .. code-block:: python
+                
+            weight_gm = asc.GlobalTensor()
+            weight_gm.set_global_buffer(weight_gm_addr)
+
+            asc.data_cache_preload(src=weight_gm, cache_offset=0)
+                
+    """
+
+    return [func_introduction, cpp_signature, param_list, return_value, constraint_list, py_example]
+
+
 def data_copy_docstring():
     func_introduction = """
     DataCopy系列接口提供全面的数据搬运功能，支持多种数据搬运场景，并可在搬运过程中实现随路格式转换和量化激活等操作。
@@ -5650,6 +5698,7 @@ DOC_HANDLES = {
     "get_task_ratio": get_task_ratio_docstring,
     "trap": trap_docstring,
     "data_cache_clean_and_invalid": data_cache_clean_and_invalid_docstring,
+    "data_cache_preload": data_cache_preload_docstring,
     "data_copy": data_copy_docstring,
     "data_copy_pad": data_copy_pad_docstring,
     "duplicate": duplicate_docstring,
