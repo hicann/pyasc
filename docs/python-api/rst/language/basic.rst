@@ -19,6 +19,7 @@ Common operations
     :toctree: generated
     :nosignatures:
 
+    cast
     copy
     cross_core_set_flag
     cross_core_wait_flag

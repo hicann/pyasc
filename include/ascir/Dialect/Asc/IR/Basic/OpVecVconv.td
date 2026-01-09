@@ -24,18 +24,16 @@ def AscendC_CastL0Op : VectorOp<"cast_l0", "Cast", [OpWithDstInterface]> {
   let description = "Convert the input tensor to the specified data type (L0 API)";
   let arguments = (ins AscendC_LocalTensor:$dst, AscendC_LocalTensor:$src,
                        AscendC_RoundModeAttr:$roundMode, AnyType:$mask,
-                       AnyType:$repeatTimes, AnyType:$dstBlkStride,
-                       AnyType:$srcBlkStride, AnyType:$dstRepStride,
-                       AnyType:$srcRepStride);
+                       AnyType:$repeatTimes, AscendC_UnaryRepeatParams:$repeatParams,
+                       UnitAttr:$isSetMask);
 }
 
 def AscendC_CastL1Op : VectorOp<"cast_l1", "Cast", [OpWithDstInterface]> {
   let description = "Convert the input tensor to the specified data type (L1 API)";
   let arguments = (ins AscendC_LocalTensor:$dst, AscendC_LocalTensor:$src,
                        AscendC_RoundModeAttr:$roundMode, Variadic<UI64>:$mask,
-                       AnyType:$repeatTimes, AnyType:$dstBlkStride,
-                       AnyType:$srcBlkStride, AnyType:$dstRepStride,
-                       AnyType:$srcRepStride);
+                       AnyType:$repeatTimes, AscendC_UnaryRepeatParams:$repeatParams,
+                       UnitAttr:$isSetMask);
 }
 
 def AscendC_CastL2Op : VectorOp<"cast_l2", "Cast", [OpWithDstInterface]> {

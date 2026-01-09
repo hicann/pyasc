@@ -21,32 +21,41 @@ using namespace mlir::ascendc;
 LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CastL0Op op)
 {
     auto &os = emitter.ostream();
-    os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc()) << ", AscendC::RoundMode::" << stringifyRoundMode(op.getRoundMode())
+    FAIL_OR(printCastL01Template(emitter, op));
+    os << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+       << emitter.getOrCreateName(op.getSrc()) 
+       << ", AscendC::RoundMode::" << stringifyRoundMode(op.getRoundMode())
        << ", " << emitter.getOrCreateName(op.getMask()) << ", " << emitter.getOrCreateName(op.getRepeatTimes())
-       << ", AscendC::UnaryRepeatParams(" << emitter.getOrCreateName(op.getDstBlkStride()) << ", "
-       << emitter.getOrCreateName(op.getSrcBlkStride()) << ", " << emitter.getOrCreateName(op.getDstRepStride()) << ", "
-       << emitter.getOrCreateName(op.getSrcRepStride()) << "))";
+       << ", " << emitter.getOrCreateName(op.getRepeatParams()) 
+       << ")";
     return success();
 }
 
 LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CastL1Op op)
 {
-    auto maskName = printMask(emitter, op);
     auto &os = emitter.ostream();
-    os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
-       << emitter.getOrCreateName(op.getSrc()) << ", AscendC::RoundMode::" << stringifyRoundMode(op.getRoundMode())
-       << ", " << maskName << ", " << emitter.getOrCreateName(op.getRepeatTimes()) << ", AscendC::UnaryRepeatParams("
-       << emitter.getOrCreateName(op.getDstBlkStride()) << ", " << emitter.getOrCreateName(op.getSrcBlkStride()) << ", "
-       << emitter.getOrCreateName(op.getDstRepStride()) << ", " << emitter.getOrCreateName(op.getSrcRepStride())
-       << "))";
+    auto maskName = printMask(emitter, op);    
+    FAIL_OR(printCastL01Template(emitter, op));
+    os << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+       << emitter.getOrCreateName(op.getSrc()) 
+       << ", AscendC::RoundMode::" << stringifyRoundMode(op.getRoundMode())
+       << ", " << maskName << ", " << emitter.getOrCreateName(op.getRepeatTimes()) << ", " 
+       << emitter.getOrCreateName(op.getRepeatParams()) 
+       << ")";
     return success();
 }
 
 LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CastL2Op op)
 {
     auto &os = emitter.ostream();
-    os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+    auto dstType = cast<ascendc::LocalTensorType>(op.getDst().getType()).getElementType();
+    auto srcType = cast<ascendc::LocalTensorType>(op.getSrc().getType()).getElementType();
+    os << ascNamespace << "::" << op.getAPIName() << "<";
+    FAIL_OR(emitter.emitType(op.getLoc(), dstType));
+    os << ", ";
+    FAIL_OR(emitter.emitType(op.getLoc(), srcType));
+    os << ">";
+    os << "(" << emitter.getOrCreateName(op.getDst()) << ", "
        << emitter.getOrCreateName(op.getSrc()) << ", "
        << "AscendC::RoundMode::" << stringifyRoundMode(op.getRoundMode()) << ", "
        << emitter.getOrCreateName(op.getCalCount()) << ")";

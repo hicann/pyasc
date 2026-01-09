@@ -21,6 +21,20 @@ namespace ascendc {
 // ===----------------------------------------------------------------------===//
 
 template <typename OpType>
+LogicalResult printCastL01Template(CodeEmitter &emitter, OpType op)
+{
+    auto &os = emitter.ostream();
+    auto dstType = cast<ascendc::LocalTensorType>(op.getDst().getType()).getElementType();
+    auto srcType = cast<ascendc::LocalTensorType>(op.getSrc().getType()).getElementType();
+    os << ascNamespace << "::" << op.getAPIName() << "<";
+    FAIL_OR(emitter.emitType(op.getLoc(), dstType));
+    os << ", ";
+    FAIL_OR(emitter.emitType(op.getLoc(), srcType));
+    os << ", " << op.getIsSetMask() << ">";
+    return success();
+}
+
+template <typename OpType>
 LogicalResult printCastDeqL01Template(CodeEmitter &emitter, OpType op)
 {
     auto &os = emitter.ostream();

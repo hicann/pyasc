@@ -153,6 +153,7 @@ from .vec_unary import (
 )
 from .vec_vconv import (
     add_relu_cast,
+    cast,
     cast_deq,
     set_deq_scale,
     sub_relu_cast,
@@ -315,6 +316,7 @@ __all__ = [
     "rsqrt",
     "sqrt",
     # .vec_vconv
+    "cast",
     "cast_deq",
-    "set_deq_scale",    
+    "set_deq_scale",
 ]
