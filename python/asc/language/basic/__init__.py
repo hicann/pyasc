@@ -38,6 +38,7 @@ from .common import (
     set_vector_mask,
 )
 from .data_copy import copy, data_copy, data_copy_pad, load_image_to_local, set_pad_value
+from .determine_compute_sync import notify_next_block, wait_pre_block
 from .dump_tensor import (
     dump_acc_chk_point, 
     dump_tensor, 
@@ -201,6 +202,9 @@ __all__ = [
     "data_copy_pad",
     "load_image_to_local",
     "set_pad_value",
+    # .determine_compute_sync
+    "notify_next_block",
+    "wait_pre_block",
     # .dump_tensor
     "dump_acc_chk_point",
     "dump_tensor",

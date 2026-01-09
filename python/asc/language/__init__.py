@@ -48,6 +48,7 @@ from .basic.common import (
     set_vector_mask,
 )
 from .basic.data_copy import copy, data_copy, data_copy_pad, load_image_to_local, set_pad_value
+from .basic.determine_compute_sync import notify_next_block, wait_pre_block
 from .basic.dump_tensor import (
     dump_acc_chk_point, 
     dump_tensor, 

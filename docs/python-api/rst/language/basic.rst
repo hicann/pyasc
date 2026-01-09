@@ -52,6 +52,7 @@ Common operations
     mmad
     mrg_sort
     mrg_sort4
+    notify_next_block
     pipe_barrier
     printf
     proposal_concat
@@ -87,6 +88,7 @@ Common operations
     trans_data_to_5hd
     trap
     wait_flag
+    wait_pre_block
 
 
 TensorDesc operations
