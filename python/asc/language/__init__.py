@@ -257,6 +257,8 @@ from .core.types import (
     LoadData2DParamsV2,
     LoadData2dTransposeParams,
     LoadData2dTransposeParamsV2,
+    LoadData3DParamsV1,
+    LoadData3DParamsV2,
     LoadData3DParamsV2Pro,
     LoadDataRepeatParam,
     MmadParams,

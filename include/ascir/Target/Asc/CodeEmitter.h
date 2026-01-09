@@ -165,8 +165,6 @@ struct CodeEmitter {
 
     LogicalResult emitAscFixpipeParamsType(Location loc, Type type, bool emitAsUnsigned);
 
-    LogicalResult emitAscLoadData3DParamsV2Type(Location loc, Type type, bool emitAsUnsigned);
-
     LogicalResult emitAscGlobalTensorType(Location loc, Type type, bool emitAsUnsigned);
 
     LogicalResult emitAscBaseGlobalTensorType(Location loc, Type type, bool emitAsUnsigned);

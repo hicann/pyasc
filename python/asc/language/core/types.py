@@ -1062,6 +1062,246 @@ class LoadData2DParamsV2(IRValue):
         return self.handle
 
 
+class LoadData3DParamsV1(IRValue):
+
+    @overload
+    def __init__(
+        self,
+        pad_list=(0, 0, 0, 0),
+        l1_h: int = 1,
+        l1_w: int = 1,
+        c1_index: int = 0,
+        fetch_filter_w: int = 0,
+        fetch_filter_h: int = 0,
+        left_top_w: int = 0,
+        left_top_h: int = 0,
+        stride_w: int = 1,
+        stride_h: int = 1,
+        filter_w: int = 1,
+        filter_h: int = 1,
+        dilation_filter_w: int = 1,
+        dilation_filter_h: int = 1,
+        jump_stride: int = 1,
+        repeat_mode: int = 0,
+        repeat_time: int = 1,
+        c_size: int = 0,
+        pad_value: int = 0,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+        ...
+
+    def __init__(
+        self,
+        pad_list=(0, 0, 0, 0),
+        l1_h: RuntimeInt = 1,
+        l1_w: RuntimeInt = 1,
+        c1_index: RuntimeInt = 0,
+        fetch_filter_w: RuntimeInt = 0,
+        fetch_filter_h: RuntimeInt = 0,
+        left_top_w: RuntimeInt = 0,
+        left_top_h: RuntimeInt = 0,
+        stride_w: RuntimeInt = 1,
+        stride_h: RuntimeInt = 1,
+        filter_w: RuntimeInt = 1,
+        filter_h: RuntimeInt = 1,
+        dilation_filter_w: RuntimeInt = 1,
+        dilation_filter_h: RuntimeInt = 1,
+        jump_stride: RuntimeInt = 1,
+        repeat_mode: RuntimeInt = 0,
+        repeat_time: RuntimeInt = 1,
+        c_size: RuntimeInt = 0,
+        pad_value: RuntimeInt = 0,
+        handle: Optional[IRHandle] = None,
+    ) -> None:
+        if handle is not None:
+            self.handle = handle
+            return
+
+        builder = global_builder.get_ir_builder()
+
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_LoadData3DParamsV1Type(),
+            [
+                _mat(pad_list[0], KnownTypes.uint8).to_ir(),
+                _mat(pad_list[1], KnownTypes.uint8).to_ir(),
+                _mat(pad_list[2], KnownTypes.uint8).to_ir(),
+                _mat(pad_list[3], KnownTypes.uint8).to_ir(),
+                _mat(l1_h, KnownTypes.uint16).to_ir(),
+                _mat(l1_w, KnownTypes.uint16).to_ir(),
+                _mat(c1_index, KnownTypes.uint16).to_ir(),
+                _mat(fetch_filter_w, KnownTypes.uint8).to_ir(),
+                _mat(fetch_filter_h, KnownTypes.uint8).to_ir(),
+                _mat(left_top_w, KnownTypes.int16).to_ir(),
+                _mat(left_top_h, KnownTypes.int16).to_ir(),
+                _mat(stride_w, KnownTypes.uint8).to_ir(),
+                _mat(stride_h, KnownTypes.uint8).to_ir(),
+                _mat(filter_w, KnownTypes.uint8).to_ir(),
+                _mat(filter_h, KnownTypes.uint8).to_ir(),
+                _mat(dilation_filter_w, KnownTypes.uint8).to_ir(),
+                _mat(dilation_filter_h, KnownTypes.uint8).to_ir(),
+                _mat(jump_stride, KnownTypes.uint8).to_ir(),
+                _mat(repeat_mode, KnownTypes.uint8).to_ir(),
+                _mat(repeat_time, KnownTypes.uint8).to_ir(),
+                _mat(c_size, KnownTypes.uint8).to_ir(),
+                _mat(pad_value, KnownTypes.uint16).to_ir(),
+            ],
+            builder.get_type_array_attr([
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui16_type(),
+                builder.get_ui16_type(),
+                builder.get_ui16_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_i16_type(),
+                builder.get_i16_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui16_type(),
+            ]),
+        )
+
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> "LoadData3DParamsV1":
+        return cls(handle=handle)
+
+    def to_ir(self) -> IRHandle:
+        return self.handle
+
+
+class LoadData3DParamsV2(IRValue):
+
+    @overload
+    def __init__(
+        self,
+        pad_list=(0, 0, 0, 0),
+        l1_h: int = 1,
+        l1_w: int = 1,
+        channel_size: int = 1,
+        k_extension: int = 1,
+        m_extension: int = 1,
+        k_start_pt: int = 0,
+        m_start_pt: int = 0,
+        stride_w: int = 1,
+        stride_h: int = 1,
+        filter_w: int = 1,
+        filter_h: int = 1,
+        dilation_filter_w: int = 1,
+        dilation_filter_h: int = 1,
+        en_transpose: bool = False,
+        pad_value: int = 0,
+        filter_size_w: bool = False,
+        filter_size_h: bool = False,
+        f_matrix_ctrl: bool = False,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+        ...
+
+    def __init__(
+        self,
+        pad_list=(0, 0, 0, 0),
+        l1_h: RuntimeInt = 1,
+        l1_w: RuntimeInt = 1,
+        channel_size: RuntimeInt = 1,
+        k_extension: RuntimeInt = 1,
+        m_extension: RuntimeInt = 1,
+        k_start_pt: RuntimeInt = 0,
+        m_start_pt: RuntimeInt = 0,
+        stride_w: RuntimeInt = 1,
+        stride_h: RuntimeInt = 1,
+        filter_w: RuntimeInt = 1,
+        filter_h: RuntimeInt = 1,
+        dilation_filter_w: RuntimeInt = 1,
+        dilation_filter_h: RuntimeInt = 1,
+        en_transpose: RuntimeBool = False,
+        pad_value: RuntimeInt = 0,
+        filter_size_w: RuntimeBool = False,
+        filter_size_h: RuntimeBool = False,
+        f_matrix_ctrl: RuntimeBool = False,
+        handle: Optional[IRHandle] = None,
+    ) -> None:
+        if handle is not None:
+            self.handle = handle
+            return
+
+        builder = global_builder.get_ir_builder()
+
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_LoadData3DParamsV2Type(),
+            [
+                _mat(pad_list[0], KnownTypes.uint8).to_ir(),
+                _mat(pad_list[1], KnownTypes.uint8).to_ir(),
+                _mat(pad_list[2], KnownTypes.uint8).to_ir(),
+                _mat(pad_list[3], KnownTypes.uint8).to_ir(),
+                _mat(l1_h, KnownTypes.uint16).to_ir(),
+                _mat(l1_w, KnownTypes.uint16).to_ir(),
+                _mat(channel_size, KnownTypes.uint8).to_ir(),
+                _mat(k_extension, KnownTypes.uint16).to_ir(),
+                _mat(m_extension, KnownTypes.uint16).to_ir(),
+                _mat(k_start_pt, KnownTypes.uint16).to_ir(),
+                _mat(m_start_pt, KnownTypes.uint16).to_ir(),
+                _mat(stride_w, KnownTypes.uint8).to_ir(),
+                _mat(stride_h, KnownTypes.uint8).to_ir(),
+                _mat(filter_w, KnownTypes.uint8).to_ir(),
+                _mat(filter_h, KnownTypes.uint8).to_ir(),
+                _mat(dilation_filter_w, KnownTypes.uint8).to_ir(),
+                _mat(dilation_filter_h, KnownTypes.uint8).to_ir(),
+                _mat(en_transpose, KnownTypes.int1).to_ir(),
+                _mat(pad_value, KnownTypes.uint16).to_ir(),
+                _mat(filter_size_w, KnownTypes.int1).to_ir(),
+                _mat(filter_size_h, KnownTypes.int1).to_ir(),
+                _mat(f_matrix_ctrl, KnownTypes.int1).to_ir(),
+            ],
+            builder.get_type_array_attr([
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui16_type(),
+                builder.get_ui16_type(),
+                builder.get_ui8_type(),
+                builder.get_ui16_type(),
+                builder.get_ui16_type(),
+                builder.get_ui16_type(),
+                builder.get_ui16_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_ui8_type(),
+                builder.get_i1_type(),
+                builder.get_ui16_type(),
+                builder.get_i1_type(),
+                builder.get_i1_type(),
+                builder.get_i1_type(),
+            ]),
+        )
+
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> "LoadData3DParamsV2":
+        return cls(handle=handle)
+
+    def to_ir(self) -> IRHandle:
+        return self.handle
+
+
 class LoadData3DParamsV2Pro(IRValue):
 
     @overload

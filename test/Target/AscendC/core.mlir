@@ -94,7 +94,7 @@ func.func @emit_global_tensor(%alloc_0 : memref<1024xf32, 22>, %arg0 : i32, %arg
 // CHECK-NEXT:   AscendC::FixpipeParams<int32_t> v9;
 // CHECK-NEXT:   AscendC::FixpipeParams<half> v10{v2, v2, v2, v3};
 // CHECK-NEXT:   AscendC::LoadData2DParams v11{v2, v1, v2, v1, v2, v1, v1};
-// CHECK-NEXT:   AscendC::LoadData3DParamsV2<float> v12{v1, v2, v2, v2, v2, v2, v2, v2, v1, v1, v1, v1, v1, v1, v1, v1, v5};
+// CHECK-NEXT:   AscendC::LoadData3DParamsV2 v12{v1, v2, v2, v2, v2, v2, v2, v2, v1, v1, v1, v1, v1, v1, v1, v1, v5};
 // CHECK-NEXT:   AscendC::MmadParams v13{v3, v3, v3, v3, v3, v3};
 // CHECK-NEXT:   AscendC::QuantParams v14;
 // CHECK-NEXT:   AscendC::QuantParams v15{v3};

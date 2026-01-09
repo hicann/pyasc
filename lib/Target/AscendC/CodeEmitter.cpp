@@ -149,9 +149,6 @@ void CodeEmitter::createTypeEmitMapper()
     emitTypeMapper[TypeID::get<ascendc::FixpipeParamsType>()] = [this](Location loc, Type type, bool flag) {
         return this->emitAscFixpipeParamsType(loc, type, flag);
     };
-    emitTypeMapper[TypeID::get<ascendc::LoadData3DParamsV2Type>()] = [this](Location loc, Type type, bool flag) {
-        return this->emitAscLoadData3DParamsV2Type(loc, type, flag);
-    };
     emitTypeMapper[TypeID::get<ascendc::GlobalTensorType>()] = [this](Location loc, Type type, bool flag) {
         return this->emitAscGlobalTensorType(loc, type, flag);
     };
@@ -543,16 +540,6 @@ LogicalResult CodeEmitter::emitAscFixpipeParamsType(Location loc, Type type, boo
     auto instanceType = fpType.getType();
     os << ascNamespace << "::FixpipeParams<";
     if (failed(emitType(loc, instanceType)))
-        return failure();
-    os << '>';
-    return success();
-}
-
-LogicalResult CodeEmitter::emitAscLoadData3DParamsV2Type(Location loc, Type type, bool emitAsUnsigned)
-{
-    auto ldType = dyn_cast<ascendc::LoadData3DParamsV2Type>(type);
-    os << ascNamespace << "::LoadData3DParamsV2<";
-    if (failed(emitType(loc, ldType.getType())))
         return failure();
     os << '>';
     return success();

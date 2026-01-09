@@ -234,10 +234,14 @@ def LoadData2dTransposeParamsV2 : APIType<"LoadData2dTransposeParamsV2"> {
   let apiName = "AscendC::LoadData2dTransposeParamsV2";
 }
 
+def LoadData3DParamsV1 : APIType<"LoadData3DParamsV1"> {
+  let mnemonic = "load_data_3d_params_v1";
+  let apiName = "AscendC::LoadData3DParamsV1";
+}
+
 def LoadData3DParamsV2 : APIType<"LoadData3DParamsV2"> {
   let mnemonic = "load_data_3d_params_v2";
   let apiName = "AscendC::LoadData3DParamsV2";
-  let genTypedef = false;
 }
 
 def LoadData3DParamsV2Pro : APIType<"LoadData3DParamsV2Pro"> {

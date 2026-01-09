@@ -53,13 +53,6 @@ def AscendC_GlobalTensor : AscendC_BaseTensorType<"GlobalTensor", "global_tensor
   let summary = "Global tensor from GM (OUT)";
 }
 
-def AscendC_LoadData3DParamsV2
-    : AscendC_BaseLoadDataParamsType<"LoadData3DParamsV2", "load_data_3d_params_v2"> {
-  let summary = "Represents AscendC::LoadData3DParamsV2";
-  let parameters = (ins "Type":$type);
-  let assemblyFormat = "`<`  $type `>`";
-}
-
 def AscendC_LocalTensor : AscendC_BaseTensorType<"LocalTensor", "local_tensor"> {
   let summary = "Local tensor from UB";
 }
