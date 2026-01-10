@@ -20,4 +20,41 @@ include "mlir/Interfaces/CastInterfaces.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 include "mlir/IR/OpBase.td"
 
+//===----------------------------------------------------------------------===//
+// Data Cache Clean And Invalid Ops
+//===----------------------------------------------------------------------===//
+
+def AscendC_DataCacheCleanAndInvalidGlobalOp
+    : APIOp<"data_cache_clean_invalid_global", "DataCacheCleanAndInvalid", [AscFunc]> {
+  let description = "Clean and invalidate data cache for GlobalTensor (with DcciDst).";
+  let arguments = (ins
+    AscendC_GlobalTensor:$dst,
+    AscendC_CacheLineAttr:$entireType,
+    AscendC_DcciDstAttr:$dcciDst
+  );
+  let paramTypeLists = [2, 3, 3];
+}
+
+def AscendC_DataCacheCleanAndInvalidGlobalNoDcciDstOp
+    : APIOp<"data_cache_clean_invalid_global_nodccidst", "DataCacheCleanAndInvalid", [AscFunc]> {
+  let description = "Clean and invalidate data cache for GlobalTensor.";
+  let arguments = (ins
+    AscendC_GlobalTensor:$dst,
+    AscendC_CacheLineAttr:$entireType
+  );
+  let paramTypeLists = [2, 3];
+}
+
+def AscendC_GetICachePreloadStatusOp : APIOp<"get_icache_preload_status", "GetICachePreloadStatus", [AscFunc]> {
+  let description = "Get the status of ICache preload: 0 indicates idle, 1 indicates busy.";
+  let results = (outs I64:$status);
+}
+
+def AscendC_ICachePreLoadOp : APIOp<"icache_preload", "ICachePreLoad", [AscFunc]> {
+  let description = "Preload instructions from DDR address to ICache.";
+  let arguments = (ins
+    I64:$preFetchLen
+  );
+  let paramTypeLists = [0];
+}
 #endif //ASC_BASIC_OP_CACHE_TD
