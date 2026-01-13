@@ -32,6 +32,8 @@ LogicalResult printOperation(CodeEmitter& emitter, ascendc::CompareScalarL1Op op
 
 LogicalResult printOperation(CodeEmitter &emitter, SelectScalarL1Op op);
 
+LogicalResult printOperation(CodeEmitter &emitter, SelectL1Op op);
+
 } // namespace ascendc
 } // namespace mlir
 
