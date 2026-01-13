@@ -1,10 +1,20 @@
 # asc.language.basic.select
 
-### asc.language.basic.select(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), sel_mask: [LocalTensor](../core.md#asc.language.core.LocalTensor), src0: [LocalTensor](../core.md#asc.language.core.LocalTensor), src1: float, sel_mode: SELMODE, count: int) → None
+### asc.language.basic.select(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), sel_mask: [LocalTensor](../core.md#asc.language.core.LocalTensor), src0: [LocalTensor](../core.md#asc.language.core.LocalTensor), src1: float, sel_mode: SelMode, count: int) → None
 
-### asc.language.basic.select(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), sel_mask: [LocalTensor](../core.md#asc.language.core.LocalTensor), src0: [LocalTensor](../core.md#asc.language.core.LocalTensor), src1: [LocalTensor](../core.md#asc.language.core.LocalTensor), sel_mode: SELMODE, count: int) → None
+### asc.language.basic.select(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), sel_mask: [LocalTensor](../core.md#asc.language.core.LocalTensor), src0: [LocalTensor](../core.md#asc.language.core.LocalTensor), src1: [LocalTensor](../core.md#asc.language.core.LocalTensor), sel_mode: SelMode, count: int) → None
 
-### asc.language.basic.select(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), sel_mask: [LocalTensor](../core.md#asc.language.core.LocalTensor), src0: [LocalTensor](../core.md#asc.language.core.LocalTensor), src1: float, sel_mode: SELMODE, mask: List[int], repeat_times: int, repeat_params: BinaryRepeatParams, is_set_mask: bool = True) → None
+### asc.language.basic.select(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), sel_mask: [LocalTensor](../core.md#asc.language.core.LocalTensor), src0: [LocalTensor](../core.md#asc.language.core.LocalTensor), src1: float, sel_mode: SelMode, mask: List[int], repeat_times: int, repeat_params: BinaryRepeatParams, is_set_mask: bool = True) → None
+
+### asc.language.basic.select(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), sel_mask: [LocalTensor](../core.md#asc.language.core.LocalTensor), src0: [LocalTensor](../core.md#asc.language.core.LocalTensor), src1: float, sel_mode: SelMode, mask: int, repeat_times: int, repeat_params: BinaryRepeatParams, is_set_mask: bool = True) → None
+
+### asc.language.basic.select(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), sel_mask: [LocalTensor](../core.md#asc.language.core.LocalTensor), src0: [LocalTensor](../core.md#asc.language.core.LocalTensor), repeat_times: int, repeat_params: BinaryRepeatParams) → None
+
+### asc.language.basic.select(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), sel_mask: [LocalTensor](../core.md#asc.language.core.LocalTensor), src0: [LocalTensor](../core.md#asc.language.core.LocalTensor), src1: [LocalTensor](../core.md#asc.language.core.LocalTensor), sel_mode: SelMode, mask: List[int], repeat_times: int, repeat_params: BinaryRepeatParams, is_set_mask: bool = True) → None
+
+### asc.language.basic.select(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), sel_mask: [LocalTensor](../core.md#asc.language.core.LocalTensor), src0: [LocalTensor](../core.md#asc.language.core.LocalTensor), src1: [LocalTensor](../core.md#asc.language.core.LocalTensor), sel_mode: SelMode, mask: int, repeat_times: int, repeat_params: BinaryRepeatParams, is_set_mask: bool = True) → None
+
+### asc.language.basic.select(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src0: [LocalTensor](../core.md#asc.language.core.LocalTensor), src1: [LocalTensor](../core.md#asc.language.core.LocalTensor), repeat_times: int, repeat_params: BinaryRepeatParams, sel_mode: SelMode) → None
 
 给定两个源操作数src0和src1，根据sel_mask（用于选择的Mask掩码）的比特位值选取元素，得到目的操作数dst。
 
@@ -17,14 +27,49 @@ __aicore__ inline void Select(const LocalTensor<T>& dst, const LocalTensor<U>& s
 ```
 
 ```c++
+template <typename T, typename U>
 __aicore__ inline void Select(const LocalTensor<T>& dst, const LocalTensor<U>& selMask,
                                const LocalTensor<T>& src0, const LocalTensor<T>& src1,
                                SELMODE selMode, uint32_t count)
 ```
 
 ```c++
+template <typename T, typename U, bool isSetMask = true>
 __aicore__ inline void Select(const LocalTensor<T>& dst, const LocalTensor<U>& selMask,
                                const LocalTensor<T>& src0, T src1, SELMODE selMode, uint64_t mask[],
+                               uint8_t repeatTime, const BinaryRepeatParams& repeatParams)
+```
+
+```c++
+template <typename T, typename U, bool isSetMask = true>
+__aicore__ inline void Select(const LocalTensor<T>& dst, const LocalTensor<U>& selMask,
+                               const LocalTensor<T>& src0, T src1, SELMODE selMode, uint64_t mask,
+                               uint8_t repeatTime, const BinaryRepeatParams& repeatParams)
+```
+
+```c++
+template <typename T, typename U>
+__aicore__ inline void Select(const LocalTensor<T>& dst, const LocalTensor<U>& selMask,
+                               const LocalTensor<T>& src0, uint8_t repeatTime, const BinaryRepeatParams& repeatParams)
+```
+
+```c++
+template <typename T, typename U, bool isSetMask = true>
+__aicore__ inline void Select(const LocalTensor<T>& dst, const LocalTensor<U>& selMask,
+                               const LocalTensor<T>& src0, const LocalTensor<T>& src1, SELMODE selMode, uint64_t mask[],
+                               uint8_t repeatTime, const BinaryRepeatParams& repeatParams)
+```
+
+```c++
+template <typename T, typename U, bool isSetMask = true>
+__aicore__ inline void Select(const LocalTensor<T>& dst, const LocalTensor<U>& selMask,
+                               const LocalTensor<T>& src0, const LocalTensor<T>& src1, SELMODE selMode, uint64_t mask,
+                               uint8_t repeatTime, const BinaryRepeatParams& repeatParams)
+```
+
+```c++
+template <typename T, SELMODE selMode>
+__aicore__ inline void Select(const LocalTensor<T>& dst, const LocalTensor<T>& src0, const LocalTensor<T>& src1,
                                uint8_t repeatTime, const BinaryRepeatParams& repeatParams)
 ```
 
@@ -54,19 +99,110 @@ __aicore__ inline void Select(const LocalTensor<T>& dst, const LocalTensor<U>& s
 
 **调用示例**
 
-- tensor前n个数据计算样例（模式0）
+- tensor 前 n 个数据计算样例（模式 0 / 模式 2）
   ```python
-  asc.select(z_local, y_local, x_local, p_local, sel_mode=asc.SELMODE.VSEL_CMPMASK_SPR, count=512)
+  asc.select(
+      z_local,
+      y_local,
+      x_local,
+      p_local,
+      sel_mode=asc.SelMode.VSEL_CMPMASK_SPR,
+      count=512
+  )
   ```
-- tensor前n个数据计算样例（模式1）
+- tensor 前 n 个数据计算样例（模式 1）
   ```python
-  asc.select(z_local, y_local, x_local, 0.0, sel_mode=asc.SELMODE.VSEL_TENSOR_SCALAR_MODE, count=512)
+  asc.select(
+      z_local,
+      y_local,
+      x_local,
+      0.0,
+      sel_mode=asc.SelMode.VSEL_TENSOR_SCALAR_MODE,
+      count=512
+  )
   ```
-- tensor高维切分计算样例-mask逐bit模式（模式1）
+- tensor 高维切分计算样例 —— 标量 + mask 逐 bit（模式 1）
   ```python
+  uint64_max = 2**64 - 1
   mask = [uint64_max, uint64_max]
-  # repeat_times = 1，一次迭代计算128个数
   params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
-  asc.select(z_local, y_local, x_local, 0.0, sel_mode=asc.SELMODE.VSEL_TENSOR_SCALAR_MODE, mask=mask,
-             repeat_times=1, repeat_params=params)
+  asc.select(
+      z_local,
+      y_local,
+      x_local,
+      0.0,
+      sel_mode=asc.SelMode.VSEL_TENSOR_SCALAR_MODE,
+      mask=mask,
+      repeat_times=1,
+      repeat_params=params
+  )
+  ```
+- tensor 高维切分计算样例 —— 标量 + mask 连续（模式 1）
+  ```python
+  mask = 512
+  params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
+  asc.select(
+      z_local,
+      y_local,
+      x_local,
+      0.0,
+      sel_mode=asc.SelMode.VSEL_TENSOR_SCALAR_MODE,
+      mask=mask,
+      repeat_times=1,
+      repeat_params=params
+  )
+  ```
+- tensor 高维切分计算样例 —— 不传入 mask（需配合寄存器 mask 使用，模式 1）
+  ```python
+  params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
+  asc.select(
+      z_local,
+      y_local,
+      x_local,
+      repeat_times=1,
+      repeat_params=params
+  )
+  ```
+- tensor 高维切分计算样例 —— Tensor + mask 逐 bit（模式 0 / 模式 2）
+  ```python
+  uint64_max = 2**64 - 1
+  mask = [uint64_max, uint64_max]
+  params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
+  asc.select(
+      z_local,
+      y_local,
+      x_local,
+      p_local,
+      sel_mode=asc.SelMode.VSEL_CMPMASK_SPR,
+      mask=mask,
+      repeat_times=1,
+      repeat_params=params
+  )
+  ```
+- tensor 高维切分计算样例 —— Tensor + mask 连续（模式 0 / 模式 2）
+  ```python
+  mask = 512
+  params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
+  asc.select(
+      z_local,
+      y_local,
+      x_local,
+      p_local,
+      sel_mode=asc.SelMode.VSEL_CMPMASK_SPR,
+      mask=mask,
+      repeat_times=1,
+      repeat_params=params
+  )
+  ```
+- tensor 高维切分计算样例 —— 寄存器版本（无 selMask，模式 0 / 模式 2）
+  ```python
+  params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
+  asc.select(
+      z_local,
+      x_local,
+      p_local,
+      repeat_times=1,
+      repeat_params=params,
+      sel_mode=asc.SelMode.VSEL_CMPMASK_SPR
+  )
   ```

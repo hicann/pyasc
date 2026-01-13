@@ -82,15 +82,17 @@ def AscendC_GetCmpMaskOp : VectorOp<"get_cmp_mask", "GetCmpMask", [OpWithDstInte
     let arguments = (ins AscendC_LocalTensor:$dst);
 }
 
-def AscendC_SelectL0Op : VectorOp<"select_l0", "Select", [OpWithDstInterface]> {
-    let description = "Select elements from two source tensors (L0 API)";
+def AscendC_SetCmpMaskOp : VectorOp<"set_cmp_mask", "SetCmpMask", [AscFunc]> {
+    let description = "set register for Select(without mask)";
+    let arguments = (ins AscendC_LocalTensor:$src);
+}
+
+def AscendC_SelectScalarL2Op : VectorOp<"select_scalar_l2", "Select", [OpWithDstInterface, AscFunc]> {
+    let description = "Select elements from source tensor and a scalar (L2 API)";
     let arguments = (ins AscendC_LocalTensor:$dst, AscendC_LocalTensor:$selMask,
-                         AscendC_LocalTensor:$src0, AscendC_LocalTensor:$src1,
-                         AscendC_SelModeAttr:$mode, AnyType:$mask,
-                         AnyType:$repeatTimes, AnyType:$dstBlkStride,
-                         AnyType:$src0BlkStride, AnyType:$src1BlkStride,
-                         AnyType:$dstRepStride, AnyType:$src0RepStride,
-                         AnyType:$src1RepStride);
+                         AscendC_LocalTensor:$src0, AnyType:$src1,
+                         AscendC_SelModeAttr:$selMode, AnyType:$calCount);
+    let paramTypeLists = [0, 0, 0, 0, -1, 0];
 }
 
 def AscendC_SelectL2Op : VectorOp<"select_l2", "Select", [OpWithDstInterface, AscFunc]> {
@@ -99,17 +101,6 @@ def AscendC_SelectL2Op : VectorOp<"select_l2", "Select", [OpWithDstInterface, As
                          AscendC_LocalTensor:$src0, AscendC_LocalTensor:$src1,
                          AscendC_SelModeAttr:$selMode, AnyType:$calCount);
     let paramTypeLists = [0, 0, 0, 0, -1, 0];
-}
-
-def AscendC_SelectScalarL0Op : VectorOp<"select_scalar_l0", "Select", [OpWithDstInterface]> {
-    let description = "Select elements from source tensor and a scalar (L0 API)";
-    let arguments = (ins AscendC_LocalTensor:$dst, AscendC_LocalTensor:$selMask,
-                         AscendC_LocalTensor:$src0, AnyType:$src1,
-                         AscendC_SelModeAttr:$mode, AnyType:$mask,
-                         AnyType:$repeatTimes, AnyType:$dstBlkStride,
-                         AnyType:$src0BlkStride, AnyType:$src1BlkStride,
-                         AnyType:$dstRepStride, AnyType:$src0RepStride,
-                         AnyType:$src1RepStride);
 }
 
 def AscendC_SelectScalarL1Op : VectorOp<"select_scalar_l1", "Select", [OpWithDstInterface]> {
@@ -121,16 +112,48 @@ def AscendC_SelectScalarL1Op : VectorOp<"select_scalar_l1", "Select", [OpWithDst
                          UnitAttr:$isSetMask);
 }
 
-def AscendC_SelectScalarL2Op : VectorOp<"select_scalar_l2", "Select", [OpWithDstInterface, AscFunc]> {
-    let description = "Select elements from source tensor and a scalar (L2 API)";
+def AscendC_SelectScalarL0Op : VectorOp<"select_scalar_l0", "Select", [OpWithDstInterface, AscFunc]> {
+    let description = "Select elements from source tensor and a scalar (L0 API)";
     let arguments = (ins AscendC_LocalTensor:$dst, AscendC_LocalTensor:$selMask,
                          AscendC_LocalTensor:$src0, AnyType:$src1,
-                         AscendC_SelModeAttr:$selMode, AnyType:$calCount);
-    let paramTypeLists = [0, 0, 0, 0, -1, 0];
+                         AscendC_SelModeAttr:$selMode, AnyType:$mask, 
+                         AnyType:$repeatTimes, AscendC_BinaryRepeatParams:$repeatParams, 
+                         UnitAttr:$isSetMask);
+    let paramTypeLists = [0, 0, 0, 0, -1, 0, 0, 0];
 }
 
-def AscendC_SetCmpMaskOp : VectorOp<"set_cmp_mask", "SetCmpMask", [AscFunc]> {
-    let description = "set register for Select(without mask)";
-    let arguments = (ins AscendC_LocalTensor:$src);
+def AscendC_SelectScalarRegOp : VectorOp<"select_scalar_reg", "Select", [OpWithDstInterface, AscFunc]> {
+    let description = "Select elements from source tensor and a scalar (register mask API)";
+    let arguments = (ins AscendC_LocalTensor:$dst, AscendC_LocalTensor:$selMask,
+                         AscendC_LocalTensor:$src0, AnyType:$repeatTimes, 
+                         AscendC_BinaryRepeatParams:$repeatParams);
+    let paramTypeLists = [0, 0, 0, 0, 0];
+}
+
+def AscendC_SelectL1Op : VectorOp<"select_l1", "Select", [OpWithDstInterface]> {
+    let description = "Select elements from two source tensors (L1 API)";
+    let arguments = (ins AscendC_LocalTensor:$dst, AscendC_LocalTensor:$selMask,
+                         AscendC_LocalTensor:$src0, AscendC_LocalTensor:$src1,
+                         AscendC_SelModeAttr:$selMode, Variadic<UI64>:$mask, 
+                         AnyType:$repeatTimes, AscendC_BinaryRepeatParams:$repeatParams, 
+                         UnitAttr:$isSetMask);
+}
+
+def AscendC_SelectL0Op : VectorOp<"select_l0", "Select", [OpWithDstInterface, AscFunc]> {
+    let description = "Select elements from two source tensors (L0 API)";
+    let arguments = (ins AscendC_LocalTensor:$dst, AscendC_LocalTensor:$selMask,
+                         AscendC_LocalTensor:$src0, AscendC_LocalTensor:$src1,
+                         AscendC_SelModeAttr:$selMode, AnyType:$mask, 
+                         AnyType:$repeatTimes, AscendC_BinaryRepeatParams:$repeatParams, 
+                         UnitAttr:$isSetMask);
+    let paramTypeLists = [0, 0, 0, 0, -1, 0, 0, 0];
+}
+
+def AscendC_SelectRegOp : VectorOp<"select_reg", "Select", [OpWithDstInterface, AscFunc]> {
+    let description = "Select elements from two source tensors (register mask API)";
+    let arguments = (ins AscendC_LocalTensor:$dst, AscendC_LocalTensor:$src0, AscendC_LocalTensor:$src1,
+                         AnyType:$repeatTimes, AscendC_BinaryRepeatParams:$repeatParams,
+                         AscendC_SelModeAttr:$selMode);
+    let paramTypeLists = [0, 0, 0, 0, 0];
 }
 #endif //ASC_BASIC_OP_VEC_CMPSEL_TD

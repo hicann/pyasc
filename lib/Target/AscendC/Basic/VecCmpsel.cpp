@@ -10,6 +10,7 @@
  */
 
 #include "ascir/Target/Asc/Basic/VecCmpsel.h"
+#include "ascir/Dialect/Asc/IR/Asc.h"
 
 using namespace mlir;
 using namespace mlir::ascendc;
@@ -65,10 +66,19 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, CompareScalarL
 
 LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, SelectScalarL1Op op){
     auto& os = emitter.ostream();
-    auto maskName = (emitter.getOrCreateName(op.getDst()) + "_mask_list").str();
-    os << "uint64_t " << maskName << "[] = {";
-    llvm::interleaveComma(op.getMask(), os, [&](Value operand) { os << emitter.getOrCreateName(operand); });
-    os << "};\n";
+    auto maskName = printMask(emitter, op);
+    os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+       << emitter.getOrCreateName(op.getSelMask()) << ", " << emitter.getOrCreateName(op.getSrc0()) << ", " 
+       << emitter.getOrCreateName(op.getSrc1()) << ", " 
+       << ascNamespace << "::SELMODE::" << ascendc::stringifyEnum(op.getSelMode()) << ", "
+       << maskName << ", " << emitter.getOrCreateName(op.getRepeatTimes()) << ", "
+       << emitter.getOrCreateName(op.getRepeatParams()) << ")";
+    return success();
+}
+
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, SelectL1Op op){
+    auto& os = emitter.ostream();
+    auto maskName = printMask(emitter, op);
     os << ascNamespace << "::" << op.getAPIName() << "(" << emitter.getOrCreateName(op.getDst()) << ", "
        << emitter.getOrCreateName(op.getSelMask()) << ", " << emitter.getOrCreateName(op.getSrc0()) << ", " 
        << emitter.getOrCreateName(op.getSrc1()) << ", " 

@@ -152,46 +152,205 @@ def set_cmp_mask(src: LocalTensor) -> None:
 
 
 @overload
-def select(dst: LocalTensor, sel_mask: LocalTensor, src0: LocalTensor, src1: float, 
+def select(dst: LocalTensor, sel_mask: LocalTensor, src0: LocalTensor, src1: float,
            sel_mode: SelMode, count: int) -> None:
     ...
 
 
 @overload
-def select(dst: LocalTensor, sel_mask: LocalTensor, src0: LocalTensor, src1: LocalTensor, 
+def select(dst: LocalTensor, sel_mask: LocalTensor, src0: LocalTensor, src1: LocalTensor,
            sel_mode: SelMode, count: int) -> None:
     ...
 
 
 @overload
-def select(dst: LocalTensor, sel_mask: LocalTensor, src0: LocalTensor, src1: float, sel_mode: SelMode, 
+def select(dst: LocalTensor, sel_mask: LocalTensor, src0: LocalTensor, src1: float, sel_mode: SelMode,
            mask: List[int], repeat_times: int, repeat_params: BinaryRepeatParams, is_set_mask: bool = True) -> None:
+    ...
+
+
+@overload
+def select(dst: LocalTensor, sel_mask: LocalTensor, src0: LocalTensor, src1: float, sel_mode: SelMode,
+           mask: int, repeat_times: int, repeat_params: BinaryRepeatParams, is_set_mask: bool = True) -> None:
+    ...
+
+
+@overload
+def select(dst: LocalTensor, sel_mask: LocalTensor, src0: LocalTensor,
+           repeat_times: int, repeat_params: BinaryRepeatParams) -> None:
+    ...
+
+
+@overload
+def select(dst: LocalTensor, sel_mask: LocalTensor, src0: LocalTensor, src1: LocalTensor,
+           sel_mode: SelMode, mask: List[int], repeat_times: int, repeat_params: BinaryRepeatParams,
+           is_set_mask: bool = True) -> None:
+    ...
+
+
+@overload
+def select(dst: LocalTensor, sel_mask: LocalTensor, src0: LocalTensor, src1: LocalTensor,
+           sel_mode: SelMode, mask: int, repeat_times: int, repeat_params: BinaryRepeatParams,
+           is_set_mask: bool = True) -> None:
+    ...
+
+
+@overload
+def select(dst: LocalTensor, src0: LocalTensor, src1: LocalTensor,
+           repeat_times: int, repeat_params: BinaryRepeatParams, sel_mode: SelMode) -> None:
     ...
 
 
 @require_jit
 @set_common_docstring(api_name="select")
-def select(dst: LocalTensor, sel_mask: LocalTensor, src0: LocalTensor, *args, **kwargs) -> None:
-    dispatcher = OverloadDispatcher(__name__)
+def select(dst: LocalTensor, *args, **kwargs) -> None:
     builder = global_builder.get_ir_builder()
 
-    @dispatcher.register(src1=RuntimeFloat, sel_mode=SelMode, count=RuntimeInt)
-    def _(src1: RuntimeFloat, sel_mode: SelMode, count: RuntimeInt):
-        builder.create_asc_SelectScalarL2Op(dst.to_ir(), sel_mask.to_ir(), src0.to_ir(), _mat(src1, src0.dtype).to_ir(), 
-                ir.SELMODE.symbolize(sel_mode), _mat(count, KT.uint32).to_ir())
-    
-    @dispatcher.register(src1=LocalTensor, sel_mode=SelMode, count=RuntimeInt)
-    def _(src1: LocalTensor, sel_mode: SelMode, count: RuntimeInt):
-        builder.create_asc_SelectL2Op(dst.to_ir(), sel_mask.to_ir(), src0.to_ir(), src1.to_ir(), 
-                ir.SELMODE.symbolize(sel_mode), _mat(count, KT.uint32).to_ir())
-        
-    @dispatcher.register(src1=RuntimeFloat, sel_mode=SelMode, mask=list, repeat_times=RuntimeInt, 
-                         repeat_params=BinaryRepeatParams)
-    def _(src1: RuntimeFloat, sel_mode: SelMode, mask: list, repeat_times: RuntimeInt, 
-          repeat_params: BinaryRepeatParams, is_set_mask: bool = True):
-        mask = [_mat(v, KT.uint64).to_ir() for v in mask]
-        builder.create_asc_SelectScalarL1Op(dst.to_ir(), sel_mask.to_ir(), src0.to_ir(), _mat(src1, src0.dtype).to_ir(), 
-                ir.SELMODE.symbolize(sel_mode), mask, _mat(repeat_times, KT.int8).to_ir(), 
-                repeat_params.to_ir(), is_set_mask)
+    if len(args) < 2:
+        raise TypeError("select: invalid arguments")
+    if not hasattr(builder, "_select_mask_list_cache"):
+        builder._select_mask_list_cache = {}
+    if (
+        len(args) == 2 and
+        "repeat_times" in kwargs and
+        "repeat_params" in kwargs and
+        "sel_mode" in kwargs
+    ):
+        src0, src1 = args
+        builder.create_asc_SelectRegOp(
+            dst.to_ir(),
+            src0.to_ir(),
+            src1.to_ir(),
+            _mat(kwargs["repeat_times"], KT.int8).to_ir(),
+            kwargs["repeat_params"].to_ir(),
+            ir.SELMODE.symbolize(kwargs["sel_mode"]),
+        )
+        return
+    sel_mask = args[0]
+    src0 = args[1]
+    rest = args[2:]
+    dispatcher = OverloadDispatcher(__name__)
 
-    dispatcher(*args, **kwargs)
+    @dispatcher.register(src1=RuntimeFloat, sel_mode=SelMode, count=RuntimeInt)
+    def _(src1, sel_mode, count):
+        builder.create_asc_SelectScalarL2Op(
+            dst.to_ir(),
+            sel_mask.to_ir(),
+            src0.to_ir(),
+            _mat(src1, src0.dtype).to_ir(),
+            ir.SELMODE.symbolize(sel_mode),
+            _mat(count, KT.uint32).to_ir(),
+        )
+
+    @dispatcher.register(src1=LocalTensor, sel_mode=SelMode, count=RuntimeInt)
+    def _(src1, sel_mode, count):
+        builder.create_asc_SelectL2Op(
+            dst.to_ir(),
+            sel_mask.to_ir(),
+            src0.to_ir(),
+            src1.to_ir(),
+            ir.SELMODE.symbolize(sel_mode),
+            _mat(count, KT.uint32).to_ir(),
+        )
+
+    @dispatcher.register(
+        src1=RuntimeFloat,
+        sel_mode=SelMode,
+        mask=list,
+        repeat_times=RuntimeInt,
+        repeat_params=BinaryRepeatParams,
+    )
+    def _(src1, sel_mode, mask, repeat_times, repeat_params, is_set_mask: bool = True):
+        key = tuple(int(v) for v in mask)
+        mask_ir = builder._select_mask_list_cache.get(key)
+        if mask_ir is None:
+            mask_ir = [_mat(v, KT.uint64).to_ir() for v in mask]
+            builder._select_mask_list_cache[key] = mask_ir
+        builder.create_asc_SelectScalarL1Op(
+            dst.to_ir(),
+            sel_mask.to_ir(),
+            src0.to_ir(),
+            _mat(src1, src0.dtype).to_ir(),
+            ir.SELMODE.symbolize(sel_mode),
+            mask_ir,
+            _mat(repeat_times, KT.int8).to_ir(),
+            repeat_params.to_ir(),
+            is_set_mask,
+        )
+
+    @dispatcher.register(
+        src1=RuntimeFloat,
+        sel_mode=SelMode,
+        mask=RuntimeInt,
+        repeat_times=RuntimeInt,
+        repeat_params=BinaryRepeatParams,
+    )
+    def _(src1, sel_mode, mask, repeat_times, repeat_params, is_set_mask: bool = True):
+        builder.create_asc_SelectScalarL0Op(
+            dst.to_ir(),
+            sel_mask.to_ir(),
+            src0.to_ir(),
+            _mat(src1, src0.dtype).to_ir(),
+            ir.SELMODE.symbolize(sel_mode),
+            _mat(mask, KT.uint64).to_ir(),
+            _mat(repeat_times, KT.int8).to_ir(),
+            repeat_params.to_ir(),
+            is_set_mask,
+        )
+
+    @dispatcher.register(repeat_times=RuntimeInt, repeat_params=BinaryRepeatParams)
+    def _(repeat_times, repeat_params):
+        builder.create_asc_SelectScalarRegOp(
+            dst.to_ir(),
+            sel_mask.to_ir(),
+            src0.to_ir(),
+            _mat(repeat_times, KT.int8).to_ir(),
+            repeat_params.to_ir(),
+        )
+
+    @dispatcher.register(
+        src1=LocalTensor,
+        sel_mode=SelMode,
+        mask=list,
+        repeat_times=RuntimeInt,
+        repeat_params=BinaryRepeatParams,
+    )
+    def _(src1, sel_mode, mask, repeat_times, repeat_params, is_set_mask: bool = True):
+        key = tuple(int(v) for v in mask)
+        mask_ir = builder._select_mask_list_cache.get(key)
+        if mask_ir is None:
+            mask_ir = [_mat(v, KT.uint64).to_ir() for v in mask]
+            builder._select_mask_list_cache[key] = mask_ir
+        builder.create_asc_SelectL1Op(
+            dst.to_ir(),
+            sel_mask.to_ir(),
+            src0.to_ir(),
+            src1.to_ir(),
+            ir.SELMODE.symbolize(sel_mode),
+            mask_ir,
+            _mat(repeat_times, KT.int8).to_ir(),
+            repeat_params.to_ir(),
+            is_set_mask,
+        )
+
+    @dispatcher.register(
+        src1=LocalTensor,
+        sel_mode=SelMode,
+        mask=RuntimeInt,
+        repeat_times=RuntimeInt,
+        repeat_params=BinaryRepeatParams,
+    )
+    def _(src1, sel_mode, mask, repeat_times, repeat_params, is_set_mask: bool = True):
+        builder.create_asc_SelectL0Op(
+            dst.to_ir(),
+            sel_mask.to_ir(),
+            src0.to_ir(),
+            src1.to_ir(),
+            ir.SELMODE.symbolize(sel_mode),
+            _mat(mask, KT.uint64).to_ir(),
+            _mat(repeat_times, KT.int8).to_ir(),
+            repeat_params.to_ir(),
+            is_set_mask,
+        )
+
+    dispatcher(*rest, **kwargs)

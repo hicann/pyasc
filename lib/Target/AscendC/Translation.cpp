@@ -190,7 +190,7 @@ using PrintableOpTypes = std::tuple<
     ascendc::AxpyL2Op,
     // VecCmpSel (Select) operations
     ascendc::CompareL1Op, ascendc::CompareRL1Op, ascendc::CompareScalarL1Op, 
-    ascendc::SelectScalarL1Op,
+    ascendc::SelectScalarL1Op, ascendc::SelectL1Op,
     // Duplicate operations
     ascendc::DuplicateL0Op, ascendc::DuplicateL1Op, ascendc::DuplicateL2Op,
     // Vector gather operations

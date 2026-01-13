@@ -59,23 +59,72 @@ func.func @emit_set_cmp_mask(%src : !ascendc.local_tensor<*xf16>) {
   return
 }
 
-// CHECK-LABEL:void emit_select_op(AscendC::LocalTensor<float> v1, AscendC::LocalTensor<uint16_t> v2, AscendC::LocalTensor<float> v3, AscendC::LocalTensor<float> v4, uint32_t v5) {
+// CHECK-LABEL:void emit_select_l2_op(AscendC::LocalTensor<float> v1, AscendC::LocalTensor<uint16_t> v2, AscendC::LocalTensor<float> v3, AscendC::LocalTensor<float> v4, uint32_t v5, float v6) {
 // CHECK-NEXT:   AscendC::Select(v1, v2, v3, v4, AscendC::SELMODE::VSEL_CMPMASK_SPR, v5);
+// CHECK-NEXT:   AscendC::Select(v1, v2, v3, v6, AscendC::SELMODE::VSEL_TENSOR_SCALAR_MODE, v5);
 // CHECK-NEXT:   return;
 // CHECK-NEXT: }
-func.func @emit_select_op(%dst : !ascendc.local_tensor<1024xf32>, %cond : !ascendc.local_tensor<32xui16>, %src0 : !ascendc.local_tensor<1024xf32>, %src1 : !ascendc.local_tensor<1024xf32>, %c0_ui32 : ui32) {
-  ascendc.select_l2 %dst, %cond, %src0, %src1, %c0_ui32 {selMode = 0 : i32}: !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<32xui16>, !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, ui32
+func.func @emit_select_l2_op(
+  %dst : !ascendc.local_tensor<1024xf32>,
+  %cond : !ascendc.local_tensor<32xui16>,
+  %src0 : !ascendc.local_tensor<1024xf32>,
+  %src1 : !ascendc.local_tensor<1024xf32>,
+  %c0_ui32 : ui32,
+  %f0 : f32
+) {
+  ascendc.select_l2 %dst, %cond, %src0, %src1, %c0_ui32 {selMode = 0 : i32}
+    : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<32xui16>, !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, ui32
+  ascendc.select_scalar_l2 %dst, %cond, %src0, %f0, %c0_ui32 {selMode = 1 : i32}
+    : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<32xui16>, !ascendc.local_tensor<1024xf32>, f32, ui32
   return
 }
 
-// CHECK-LABEL:void emit_select_scalar_op(AscendC::LocalTensor<float> v1, AscendC::LocalTensor<uint16_t> v2, AscendC::LocalTensor<float> v3, float v4, uint32_t v5, uint8_t v6, AscendC::BinaryRepeatParams v7, uint64_t v8) {
-// CHECK-NEXT:   AscendC::Select(v1, v2, v3, v4, AscendC::SELMODE::VSEL_TENSOR_SCALAR_MODE, v5);
-// CHECK-NEXT:   uint64_t v1_mask_list[] = {v8, v8};
-// CHECK-NEXT:   AscendC::Select(v1, v2, v3, v4, AscendC::SELMODE::VSEL_TENSOR_SCALAR_MODE, v1_mask_list, v6, v7);
+// CHECK-LABEL:void emit_select_slice_scalar_op(AscendC::LocalTensor<float> v1, AscendC::LocalTensor<uint16_t> v2, AscendC::LocalTensor<float> v3, float v4, uint8_t v5, AscendC::BinaryRepeatParams v6, uint64_t v7) {
+// CHECK-NEXT:   uint64_t v1_mask_list0[] = {v7, v7};
+// CHECK-NEXT:   AscendC::Select(v1, v2, v3, v4, AscendC::SELMODE::VSEL_TENSOR_SCALAR_MODE, v1_mask_list0, v5, v6);
+// CHECK-NEXT:   AscendC::Select(v1, v2, v3, v4, AscendC::SELMODE::VSEL_TENSOR_SCALAR_MODE, v7, v5, v6);
+// CHECK-NEXT:   AscendC::Select(v1, v2, v3, v5, v6);
 // CHECK-NEXT:   return;
 // CHECK-NEXT: }
-func.func @emit_select_scalar_op(%dst : !ascendc.local_tensor<1024xf32>, %cond : !ascendc.local_tensor<32xui16>, %src0 : !ascendc.local_tensor<1024xf32>, %src1 : f32, %c0_ui32 : ui32, %c1_ui8 : ui8, %params: !ascendc.binary_repeat_params, %c2_ui64 : ui64) {
-  ascendc.select_scalar_l2 %dst, %cond, %src0, %src1, %c0_ui32 {selMode = 1 : i32}: !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<32xui16>, !ascendc.local_tensor<1024xf32>, f32, ui32
-  ascendc.select_scalar_l1 %dst, %cond, %src0, %src1, %c2_ui64, %c2_ui64, %c1_ui8, %params {selMode = 1 : i32}: !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<32xui16>, !ascendc.local_tensor<1024xf32>, f32, ui64, ui64, ui8, !ascendc.binary_repeat_params
+func.func @emit_select_slice_scalar_op(
+  %dst : !ascendc.local_tensor<1024xf32>,
+  %cond : !ascendc.local_tensor<32xui16>,
+  %src0 : !ascendc.local_tensor<1024xf32>,
+  %f0 : f32,
+  %c0_ui8 : ui8,
+  %params : !ascendc.binary_repeat_params,
+  %m0_ui64 : ui64
+) {
+  ascendc.select_scalar_l1 %dst, %cond, %src0, %f0, %m0_ui64, %m0_ui64, %c0_ui8, %params {selMode = 1 : i32, isSetMask}
+    : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<32xui16>, !ascendc.local_tensor<1024xf32>, f32, ui64, ui64, ui8, !ascendc.binary_repeat_params
+  ascendc.select_scalar_l0 %dst, %cond, %src0, %f0, %m0_ui64, %c0_ui8, %params {selMode = 1 : i32, isSetMask}
+    : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<32xui16>, !ascendc.local_tensor<1024xf32>, f32, ui64, ui8, !ascendc.binary_repeat_params
+  ascendc.select_scalar_reg %dst, %cond, %src0, %c0_ui8, %params
+    : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<32xui16>, !ascendc.local_tensor<1024xf32>, ui8, !ascendc.binary_repeat_params
+  return
+}
+
+// CHECK-LABEL:void emit_select_slice_tensor_op(AscendC::LocalTensor<float> v1, AscendC::LocalTensor<uint16_t> v2, AscendC::LocalTensor<float> v3, AscendC::LocalTensor<float> v4, uint8_t v5, AscendC::BinaryRepeatParams v6, uint64_t v7) {
+// CHECK-NEXT:  uint64_t v1_mask_list0[] = {v7, v7};
+// CHECK-NEXT:  AscendC::Select(v1, v2, v3, v4, AscendC::SELMODE::VSEL_CMPMASK_SPR, v1_mask_list0, v5, v6);
+// CHECK-NEXT:  AscendC::Select(v1, v2, v3, v4, AscendC::SELMODE::VSEL_CMPMASK_SPR, v7, v5, v6);
+// CHECK-NEXT:  AscendC::Select(v1, v3, v4, v5, v6);
+// CHECK-NEXT:  return;
+// CHECK-NEXT: }
+func.func @emit_select_slice_tensor_op(
+  %dst : !ascendc.local_tensor<1024xf32>,
+  %cond : !ascendc.local_tensor<32xui16>,
+  %src0 : !ascendc.local_tensor<1024xf32>,
+  %src1 : !ascendc.local_tensor<1024xf32>,
+  %c0_ui8 : ui8,
+  %params : !ascendc.binary_repeat_params,
+  %m0_ui64 : ui64
+) {
+  ascendc.select_l1 %dst, %cond, %src0, %src1, %m0_ui64, %m0_ui64, %c0_ui8, %params {selMode = 0 : i32, isSetMask}
+    : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<32xui16>, !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, ui64, ui64, ui8, !ascendc.binary_repeat_params
+  ascendc.select_l0 %dst, %cond, %src0, %src1, %m0_ui64, %c0_ui8, %params {selMode = 0 : i32, isSetMask}
+    : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<32xui16>, !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, ui64, ui8, !ascendc.binary_repeat_params
+  ascendc.select_reg %dst, %src0, %src1, %c0_ui8, %params {selMode = 0 : i32}
+    : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, ui8, !ascendc.binary_repeat_params
   return
 }

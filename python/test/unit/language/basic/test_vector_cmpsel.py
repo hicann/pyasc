@@ -52,23 +52,98 @@ def test_compare_scalar_kernel(mock_launcher_run):
     assert mock_launcher_run.call_count == 1
 
 
-def test_select_kernel(mock_launcher_run):
+def test_select_l2_kernel(mock_launcher_run):
 
     @asc.jit
-    def select_kernel():
-        x_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
-        y_local = asc.LocalTensor(dtype=asc.uint32, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
-        z_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
-        asc.select(z_local, y_local, x_local, 0.0, sel_mode=asc.SelMode.VSEL_TENSOR_SCALAR_MODE, count=512)
-        p_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
-        asc.select(z_local, y_local, x_local, p_local, sel_mode=asc.SelMode.VSEL_CMPMASK_SPR, count=512)
+    def kernel():
+        x = asc.LocalTensor(asc.float16, asc.TPosition.VECIN, 0, 512)
+        y = asc.LocalTensor(asc.uint32, asc.TPosition.VECIN, 0, 512)
+        z = asc.LocalTensor(asc.float16, asc.TPosition.VECOUT, 0, 512)
+        p = asc.LocalTensor(asc.float16, asc.TPosition.VECIN, 0, 512)
+        asc.select(
+            z, y, x, 0.0,
+            sel_mode=asc.SelMode.VSEL_TENSOR_SCALAR_MODE,
+            count=512
+        )
+        asc.select(
+            z, y, x, p,
+            sel_mode=asc.SelMode.VSEL_CMPMASK_SPR,
+            count=512
+        )
+
+    kernel[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_select_slice_scalar_kernel(mock_launcher_run):
+
+    @asc.jit
+    def kernel():
+        x = asc.LocalTensor(asc.float16, asc.TPosition.VECIN, 0, 512)
+        y = asc.LocalTensor(asc.uint32, asc.TPosition.VECIN, 0, 512)
+        z = asc.LocalTensor(asc.float16, asc.TPosition.VECOUT, 0, 512)
         params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
         uint64_max = 2**64 - 1
-        mask = [uint64_max, uint64_max]
-        asc.select(z_local, y_local, x_local, 0.0, sel_mode=asc.SelMode.VSEL_TENSOR_SCALAR_MODE, mask=mask, 
-                   repeat_times=1, repeat_params=params)
+        mask_list = [uint64_max, uint64_max]
+        mask_contiguous = 512
+        asc.select(
+            z, y, x, 0.0,
+            sel_mode=asc.SelMode.VSEL_TENSOR_SCALAR_MODE,
+            mask=mask_list,
+            repeat_times=1,
+            repeat_params=params
+        )
+        asc.select(
+            z, y, x, 0.0,
+            sel_mode=asc.SelMode.VSEL_TENSOR_SCALAR_MODE,
+            mask=mask_contiguous,
+            repeat_times=1,
+            repeat_params=params
+        )
+        asc.select(
+            z, y, x,
+            repeat_times=1,
+            repeat_params=params
+        )
 
-    select_kernel[1]()
+    kernel[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_select_slice_tensor_kernel(mock_launcher_run):
+
+    @asc.jit
+    def kernel():
+        x = asc.LocalTensor(asc.float16, asc.TPosition.VECIN, 0, 512)
+        y = asc.LocalTensor(asc.uint32, asc.TPosition.VECIN, 0, 512)
+        z = asc.LocalTensor(asc.float16, asc.TPosition.VECOUT, 0, 512)
+        p = asc.LocalTensor(asc.float16, asc.TPosition.VECIN, 0, 512)
+        params = asc.BinaryRepeatParams(1, 1, 1, 8, 8, 8)
+        uint64_max = 2**64 - 1
+        mask_list = [uint64_max, uint64_max]
+        mask_contiguous = 512
+        asc.select(
+            z, y, x, p,
+            sel_mode=asc.SelMode.VSEL_CMPMASK_SPR,
+            mask=mask_list,
+            repeat_times=1,
+            repeat_params=params
+        )
+        asc.select(
+            z, y, x, p,
+            sel_mode=asc.SelMode.VSEL_CMPMASK_SPR,
+            mask=mask_contiguous,
+            repeat_times=1,
+            repeat_params=params
+        )
+        asc.select(
+            z, x, p,
+            repeat_times=1,
+            repeat_params=params,
+            sel_mode=asc.SelMode.VSEL_CMPMASK_SPR
+        )
+
+    kernel[1]()
     assert mock_launcher_run.call_count == 1
 
 
