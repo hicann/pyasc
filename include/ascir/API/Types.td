@@ -189,6 +189,11 @@ def GlobalTensor : APIType {
   let apiName = "AscendC::GlobalTensor";
 }
 
+def InitConstValueParams : APIType<"InitConstValueParams"> {
+  let mnemonic = "init_const_value_params";
+  let apiName = "AscendC::InitConstValueParams";
+}
+
 def IsResetLoad3dConfig : APIType<"IsResetLoad3dConfig"> {
   let mnemonic = "is_reset_load_3d_config";
   let apiName = "AscendC::IsResetLoad3dConfig";

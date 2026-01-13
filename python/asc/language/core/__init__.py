@@ -88,7 +88,9 @@ from .types import (
     DataCopyPadParams,
     GatherMaskParams,
     GatherRepeatParams,
+    InitConstValueParams,
     LoadImageToLocalParams,
+    MmadParams,
     MrgSort4Info,
     Nd2NzParams,
     ShapeInfo,
@@ -107,7 +109,6 @@ from .types import (
     LoadData3DParamsV2,
     LoadData3DParamsV2Pro,
     LoadDataRepeatParam,
-    MmadParams,
 )
 from .utils import ceildiv, static_assert
 
@@ -201,7 +202,9 @@ __all__ = [
     "DataCopyPadParams",
     "GatherMaskParams",
     "GatherRepeatParams",
+    "InitConstValueParams",
     "LoadImageToLocalParams",
+    "MmadParams",
     "MrgSort4Info",
     "Nd2NzParams",
     "ShapeInfo",
@@ -220,7 +223,6 @@ __all__ = [
     "LoadData3DParamsV2",
     "LoadData3DParamsV2Pro",
     "LoadDataRepeatParam",
-    "MmadParams",
     # .core.utils
     "ceildiv",
     "static_assert",

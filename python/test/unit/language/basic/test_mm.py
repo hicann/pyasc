@@ -6,7 +6,25 @@
 # INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
 # See LICENSE in the root of the software repository for the full text of the License.
 
+import numpy as np
 import asc
+
+
+def test_init_const_value(mock_launcher_run):
+
+    @asc.jit
+    def kernel_init_const_value() -> None:
+        dst = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.A1, addr=0, tile_size=128)
+        params = asc.InitConstValueParams(
+            repeat_times=1,
+            block_num=2,
+            dst_gap=0,
+            init_value=np.float16(2.2)
+        )
+        asc.init_const_value(dst, params)
+
+    kernel_init_const_value[1]()
+    assert mock_launcher_run.call_count == 1
 
 
 def test_load_data(mock_launcher_run):
@@ -38,6 +56,24 @@ def test_load_data(mock_launcher_run):
         asc.load_data(y_local, x_local, params_3d_v2_pro)
 
     mock_launcher_run(kernel_load_data)
+
+
+def test_load_data_with_sparse(mock_launcher_run):
+
+    @asc.jit
+    def kernel_load_data_with_sparse() -> None:
+        dst = asc.LocalTensor(dtype=asc.int8, pos=asc.TPosition.B2, addr=0, tile_size=512)
+        src = asc.LocalTensor(dtype=asc.int8, pos=asc.TPosition.B1, addr=0, tile_size=512)
+        idx = asc.LocalTensor(dtype=asc.uint8, pos=asc.TPosition.B1, addr=0, tile_size=512)
+        params = asc.LoadData2DParams(
+            repeat_times=1,
+            src_stride=0,
+            if_transpose=False,
+        )
+        asc.load_data_with_sparse(dst, src, idx, params)
+
+    kernel_load_data_with_sparse[1]()
+    assert mock_launcher_run.call_count == 1
 
 
 def test_load_data_with_transpose(mock_launcher_run):
@@ -82,6 +118,28 @@ def test_mmad(mock_launcher_run):
 
 
     kernel_mmad[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_mmad_with_sparse(mock_launcher_run):
+    @asc.jit
+    def kernel_mmad_with_sparse() -> None:
+        dst = asc.LocalTensor(dtype=asc.int32, pos=asc.TPosition.CO1, addr=0, tile_size=400)
+        fm = asc.LocalTensor(dtype=asc.int8, pos=asc.TPosition.A2, addr=0, tile_size=400)
+        filter = asc.LocalTensor(dtype=asc.int8, pos=asc.TPosition.B2, addr=0, tile_size=400)
+        params = asc.MmadParams(
+            m=20,
+            n=20,
+            k=20,
+            is_bias=False,
+            fm_offset=0,
+            en_ssparse=False,
+            en_winograd_a=False,
+            en_winograd_b=False
+        )
+        asc.mmad_with_sparse(dst, fm, filter, params)
+
+    kernel_mmad_with_sparse[1]()
     assert mock_launcher_run.call_count == 1
 
 

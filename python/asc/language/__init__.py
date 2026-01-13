@@ -59,14 +59,16 @@ from .basic.dump_tensor import (
 )
 from .basic.list_tensor import TensorDesc, ListTensorDesc
 from .basic.mm import (
+    init_const_value,
     load_data,
+    load_data_with_sparse,
     load_data_with_transpose,
     mmad,
+    mmad_with_sparse,
     set_load_data_boundary,
     set_load_data_padding_value,
     set_load_data_repeat,
-) 
-from .basic.mm import load_data, load_data_with_transpose, mmad
+)
 from .basic.scalar import (
     count_bits_cnt_same_as_sign_bit,
     scalar_cast, 
@@ -242,8 +244,11 @@ from .core.types import (
     DataCopyPadParams,
     GatherMaskParams,
     GatherRepeatParams,
+    InitConstValueParams,
+    LoadData2DParams,
     LoadImageToLocalParams,
-    MrgSort4Info,    
+    MmadParams,
+    MrgSort4Info,
     Nd2NzParams,
     ShapeInfo,
     SliceInfo,
@@ -261,7 +266,6 @@ from .core.types import (
     LoadData3DParamsV2,
     LoadData3DParamsV2Pro,
     LoadDataRepeatParam,
-    MmadParams,
 )
 from .core.aipp_types import (
     AippParams,

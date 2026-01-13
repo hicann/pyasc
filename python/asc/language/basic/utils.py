@@ -1762,6 +1762,67 @@ def icache_preload_docstring():
     return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
 
 
+def init_const_value_docstring():
+    func_introduction = """
+    将特定TPosition的LocalTensor初始化为某一具体数值。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T, typename U = PrimT<T>, typename Std::enable_if<Std::is_same<PrimT<T>, U>::value, bool>::type = true>
+        __aicore__ inline void InitConstValue(const LocalTensor<T> &dst, const InitConstValueParams<U> &initConstValueParams)
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：目的操作数，类型为 LocalTensor，支持的 TPosition 为 A1/A2/B1/B2。如果TPosition为A1/B1，起始地址需要满足32B对齐；如果TPosition为A2/B2，起始地址需要满足512B对齐。
+
+    - init_const_value_params：初始化相关参数，类型为InitConstValueParams。仅支持配置迭代次数（repeat_times）和初始化值（init_value）场景下，其他参数配置无效。每次迭代处理固定数据量（512字节），迭代间无间隔。支持配置所有参数场景下，支持配置迭代次数（repeat_times）、初始化值（init_value）、每个迭代处理的数据块个数（block_num）和迭代间间隔（dst_gap）。
+
+      - repeat_times：迭代次数。默认值为0。
+
+        - 仅支持配置迭代次数（repeat_times）和初始化值（init_value）场景下，repeat_times∈[0, 255]。
+        - 支持配置所有参数场景下，repeat_times∈[0, 32767]。
+
+      - block_num：每次迭代初始化的数据块个数，取值范围：block_num∈[0, 32767] 。默认值为0。
+
+        - dst的位置为A1/B1时，每一个block（数据块）大小是32B；
+        - dst的位置为A2/B2时，每一个block（数据块）大小是512B。
+
+      - dst_gap：目的操作数前一个迭代结束地址到后一个迭代起始地址之间的距离。取值范围：dst_gap∈[0, 32767] 。默认值为0。
+
+        - dst的位置为A1/B1时，单位是32B；
+        - dst的位置为A2/B2时，单位是512B。
+
+      - init_value：初始化的value值，支持的数据类型与dst保持一致。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+    
+        import asc
+        dst = asc.LocalTensor(dtype=asc.float32, pos=asc.TPosition.A1, addr=0, tile_size=128)
+        params = asc.InitConstValueParams(repeat_times=1, block_num=2, dst_gap=0, init_value=2.2)
+        asc.init_const_value(dst=dst, init_const_value_params=params)
+
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
 def load_data_docstring():
     func_introduction = """
     源操作数/目的操作数的数据类型为uint8_t/int8_t时，分形矩阵大小在A1/A2上为16*32， 在B1/B2上为32*16。
@@ -2613,6 +2674,96 @@ def duplicate_docstring():
     return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
+def mmad_with_sparse_docstring():
+    func_introduction = """
+    完成矩阵乘加操作，传入的左矩阵A为稀疏矩阵， 右矩阵B为稠密矩阵 。
+    对于矩阵A，在MmadWithSparse计算时完成稠密化；
+    对于矩阵B，在计算执行前的输入数据准备时自行完成稠密化（按照下文中介绍的稠密算法进行稠密化），
+    所以输入本接口的B矩阵为稠密矩阵。B稠密矩阵需要通过调用LoadDataWithSparse载入，同时加载索引矩阵，
+    索引矩阵在矩阵B稠密化的过程中生成，再用于A矩阵的稠密化。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T = int32_t, typename U = int8_t, typename Std::enable_if<Std::is_same<PrimT<T>, int32_t>::value, bool>::type = true, typename Std::enable_if<Std::is_same<PrimT<U>, int8_t>::value, bool>::type = true>
+        __aicore__ inline void MmadWithSparse(const LocalTensor<T>& dst, const LocalTensor<U>& fm, const LocalTensor<U>& filter, const MmadParams& mmadParams)
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：输出，目的操作数，结果矩阵，类型为LocalTensor，支持的TPosition为CO1。起始地址需要256个元素（1024字节）对齐。
+
+    - fm：输入，源操作数，左矩阵A，类型为LocalTensor，支持的TPosition为A2。LocalTensor的起始地址需要512字节对齐。
+
+    - filter：输入，源操作数，右矩阵B，类型为LocalTensor，支持的TPosition为B2。LocalTensor的起始地址需要512字节对齐。
+
+    - mmad_params：输入，矩阵乘相关参数，类型为MmadParams。
+
+      - m：左矩阵Height，取值范围：m∈[0, 4095] 。默认值为0。
+      - n：右矩阵Width，取值范围：n∈[0, 4095] 。默认值为0。
+      - k：左矩阵Width、右矩阵Height，取值范围：k∈[0, 4095] 。默认值为0。
+      - cmatrix_init_val：配置C矩阵初始值是否为0。默认值true。
+
+        - true：C矩阵初始值为0；
+        - false：C矩阵初始值通过cmatrix_source参数进行配置。
+
+      - cmatrix_source：配置C矩阵初始值是否来源于C2（存放Bias的硬件缓存区）。默认值为false。
+
+        - false：来源于CO1；
+        - true：来源于C2。
+
+      - is_bias：该参数废弃，新开发内容不要使用该参数。如果需要累加初始矩阵，请使用带bias的接口来实现；也可以通过cmatrix_init_val和cmatrix_source参数配置C矩阵的初始值来源来实现。推荐使用带bias的接口，相比于配置cmatrix_init_val和cmatrix_source参数更加简单方便。配置是否需要累加初始矩阵，默认值为false，取值说明如下：
+
+        - false：矩阵乘，无需累加初始矩阵，C = A * B。
+        - true：矩阵乘加，需要累加初始矩阵，C += A * B。
+
+      - fm_offset：预留参数。为后续的功能做保留，开发者暂时无需关注，使用默认值即可。
+      - en_ssparse：预留参数。
+      - en_winograd_a：预留参数。
+      - en_winograd_b：预留参数。
+      - unit_flag：预留参数。
+      - k_direction_align：预留参数。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 原始稀疏矩阵B每4个元素中应保证最多2个非零元素，如果存在3个或更多非零元素，则仅使用前2个非零元素。
+    - 当M、K、N中的任意一个值为0时，该指令不会被执行。
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        import asc
+        dst = asc.LocalTensor(dtype=asc.int32, pos=asc.TPosition.CO1, addr=0, tile_size=400)
+        fm = asc.LocalTensor(dtype=asc.int8, pos=asc.TPosition.A2, addr=0, tile_size=400)
+        filter = asc.LocalTensor(dtype=asc.int8, pos=asc.TPosition.B2, addr=0, tile_size=400)
+        mmad_params = asc.MmadParams(
+            m=20,
+            n=20,
+            k=20,
+            is_bias=False,
+            fm_offset=0,
+            en_ssparse=False,
+            en_winograd_a=False,
+            en_winograd_b=False
+        )
+        asc.mmad_with_sparse(dst, fm, filter, mmad_params)
+
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
 def pair_reduce_sum_docstring():
     func_introduction = """
     PairReduceSum：相邻两个（奇偶）元素求和。例如，对于序列 (a1, a2, a3, a4, a5, a6, ...)，
@@ -3161,6 +3312,73 @@ def whole_reduce_sum_docstring():
           mask = [uint64_max, uint64_max]
           asc.whole_reduce_sum(z_local, x_local, mask=mask, repeat_time=4,
                                dst_rep_stride=1, src_blk_stride=1, src_rep_stride=8)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def load_data_with_sparse_docstring():
+    func_introduction = """
+    用于搬运存放在B1里的512B的稠密权重矩阵到B2里，同时读取128B的索引矩阵用于稠密矩阵的稀疏化。
+    索引矩阵的数据类型为int2，需要拼成int8的数据类型，再传入接口。
+    索引矩阵在一个int8的地址中的排布是逆序排布的，例如：索引矩阵1 2 0 1 0 2 1 0，
+    在地址中的排布为1 0 2 1 0 1 2 0，其中1 0 2 1（对应索引矩阵前四位1 2 0 1）为一个int8，0 1 2 0（对应索引矩阵后四位0 2 1 0）为一个int8。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T = int8_t, typename U = uint8_t, typename Std::enable_if<Std::is_same<PrimT<T>, int8_t>::value, bool>::type = true, typename Std::enable_if<Std::is_same<PrimT<U>, uint8_t>::value, bool>::type = true>
+        __aicore__ inline void LoadDataWithSparse(const LocalTensor<T> &dst, const LocalTensor<T> &src, const LocalTensor<U> &idx, const LoadData2dParams &loadDataParam)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：输出，目的操作数，类型为LocalTensor，支持的TPosition为B2，LocalTensor的起始地址需要512字节对齐。支持的数据类型为int8_t。数据连续排列顺序要求为小N大Z格式。
+
+    - src：输入，源操作数，类型为LocalTensor，支持的TPosition为B1，LocalTensor的起始地址需要32字节对齐。支持的数据类型为int8_t。
+
+    - idx：输入，源操作数，类型为LocalTensor，支持的TPosition为B1，LocalTensor的起始地址需要32字节对齐。支持的数据类型为int8_t。
+
+    - load_data_param：输入，LoadData参数结构体，LoadData2DParams类型。
+
+      - start_index：分形矩阵ID，说明搬运起始位置为源操作数中第几个分形（0为源操作数中第1个分形矩阵）。取值范围：start_index∈[0, 65535] 。单位：512B。默认为0。
+      - repeat_times：迭代次数，每个迭代可以处理512B数据。取值范围：repeat_times∈[1, 255]。
+      - src_stride：相邻迭代间，源操作数前一个分形与后一个分形起始地址的间隔，单位：512B。取值范围：src_stride∈[0, 65535]。默认为0。
+      - sid：预留参数，配置为0即可。
+      - dst_gap：相邻迭代间，目的操作数前一个分形结束地址与后一个分形起始地址的间隔，单位：512B。取值范围：dst_gap∈[0, 65535]。默认为0。
+      - if_transpose：是否启用转置功能，对每个分形矩阵进行转置，默认为false（注意：只有A1->A2和B1->B2通路才能使能转置，使能转置功能时，源操作数、目的操作数仅支持uint16_t/int16_t/half数据类型）:
+
+        - true：启用
+        - false：不启用
+
+      - addr_mode：预留参数，配置为0即可。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - repeat_times=0表示不执行。
+    - 每次迭代中的start_index不能小于零。
+    - 不支持转置功能。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        import asc
+        dst = asc.LocalTensor(dtype=asc.int8, pos=asc.TPosition.B2, addr=0, tile_size=512)
+        src = asc.LocalTensor(dtype=asc.int8, pos=asc.TPosition.B1, addr=0, tile_size=512)
+        idx = asc.LocalTensor(dtype=asc.uint8, pos=asc.TPosition.B1, addr=0, tile_size=512)
+        params = asc.LoadData2DParams(repeat_times=1, src_stride=0, if_transpose=False)
+        asc.load_data_with_sparse(dst=dst, src=src, idx=idx, load_data_param=params)
+
     """
 
     return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
@@ -5965,7 +6183,9 @@ DOC_HANDLES = {
     "ib_set": ib_set_docstring,
     "ib_wait": ib_wait_docstring,
     "icache_preload": icache_preload_docstring,
+    "init_const_value": init_const_value_docstring,
     "load_data": load_data_docstring,
+    "load_data_with_sparse": load_data_with_sparse_docstring,
     "load_data_with_transpose": load_data_with_transpose_docstring,
     "load_image_to_local": load_image_to_local_docstring,
     "mmad": mmad_docstring,
@@ -5983,6 +6203,7 @@ DOC_HANDLES = {
     "dump_acc_chk_point": dump_acc_chk_point_docstring,
     "dump_tensor": dump_tensor_docstring_docstring,
     "gather_mask": gather_mask_docstring,
+    "mmad_with_sparse": mmad_with_sparse_docstring,
     "set_vector_mask": set_vector_mask_docstring,
     "pair_reduce_sum": pair_reduce_sum_docstring,
     "repeat_reduce_sum": repeat_reduce_sum_docstring,
