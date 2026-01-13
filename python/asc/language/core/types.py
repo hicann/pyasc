@@ -9,13 +9,15 @@
 from __future__ import annotations
 from typing import Any, Iterable, List, Optional, Tuple, Union, overload
 
+import numpy as np
+
 from ..._C import ir
 from ...common.compat import isinstance
 from .array import Array
 from .dtype import DataType, KnownTypes
 from .enums import BlockMode, DataFormat, DeqScale, pad_t, QuantModes, TransposeType
 from .ir_value import IRHandle, IRValue, PlainValue, \
-                            RuntimeBool, RuntimeInt, RuntimeNumeric, materialize_ir_value as _mat
+                            RuntimeBool, RuntimeInt, RuntimeNumeric, materialize_ir_value as _mat, convert_value
 from .utils import require_jit, global_builder
 from .properties import property, ONE_BLK_SIZE
 from .dtype import KnownTypes as KT
@@ -214,6 +216,80 @@ class DataCopyEnhancedParams(IRValue):
 
     @classmethod
     def from_ir(cls, handle: IRHandle) -> DataCopyEnhancedParams:
+        return cls(handle=handle)
+
+    def to_ir(self) -> IRHandle:
+        return self.handle
+
+
+class InitConstValueParams(IRValue):
+
+    @overload
+    def __init__(self, repeat_times: int = 0, block_num: int = 0, dst_gap: int = 0, init_value=0) -> None:
+        ...
+
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+        ...
+
+    @require_jit
+    def __init__(
+        self,
+        repeat_times: RuntimeInt = 0,
+        block_num: RuntimeInt = 0,
+        dst_gap: RuntimeInt = 0,
+        init_value=0,
+        handle: Optional[IRHandle] = None,
+    ) -> None:
+
+        if handle is not None:
+            self.handle = handle
+            return
+
+        builder = global_builder.get_ir_builder()
+
+        if isinstance(init_value, IRValue):
+            init_ir = init_value.to_ir()
+            init_type = init_ir.get_type()
+
+        elif isinstance(init_value, np.generic):
+            numpy_type_map = {
+                np.float16: KT.float16,
+                np.float32: KT.float32,
+                np.int16: KT.int16,
+                np.uint16: KT.uint16,
+                np.int32: KT.int32,
+                np.uint32: KT.uint32,
+            }
+            np_type = type(init_value)
+            if np_type not in numpy_type_map:
+                raise TypeError(f"Unsupported numpy scalar type: {np_type}")
+            pv = convert_value(init_value.item(), numpy_type_map[np_type])
+
+        else:
+            pv = _mat(init_value)
+        
+        init_ir = pv.to_ir()
+        init_type = pv.dtype.to_ir()
+
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_InitConstValueParamsType(),
+            [
+                _mat(repeat_times, KnownTypes.uint16).to_ir(),
+                _mat(block_num, KnownTypes.uint16).to_ir(),
+                _mat(dst_gap, KnownTypes.uint16).to_ir(),
+                init_ir
+            ],
+            builder.get_type_array_attr([
+                builder.get_ui16_type(),
+                builder.get_ui16_type(),
+                builder.get_ui16_type(),
+                init_type
+            ]),
+        )
+
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> "InitConstValueParams":
         return cls(handle=handle)
 
     def to_ir(self) -> IRHandle:
@@ -703,6 +779,102 @@ class GatherMaskParams(IRValue):
     def to_ir(self) -> IRHandle:
         return self.handle
 
+
+class MmadParams(IRValue):
+
+    @overload
+    def __init__(self) -> None: ...
+
+    @overload
+    def __init__(self,
+                 m: int = 0, n: int = 0, k: int = 0,
+                 is_bias: bool = False, fm_offset: int = 0,
+                 en_ssparse: bool = False, en_winograd_a: bool = False,
+                 en_winograd_b: bool = False) -> None:
+        ...
+
+    @overload
+    def __init__(self,
+                 m: int = 0, n: int = 0, k: int = 0,
+                 unit_flag: int = 0,
+                 cmatrix_source: bool = False,
+                 cmatrix_init_val: bool = True) -> None:
+        ...
+
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+        ...
+
+    @require_jit
+    def __init__(self,
+                 m: RuntimeInt = 0, n: RuntimeInt = 0, k: RuntimeInt = 0,
+                 is_bias: RuntimeBool = None,
+                 fm_offset: RuntimeInt = None,
+                 en_ssparse: RuntimeBool = None,
+                 en_winograd_a: RuntimeBool = None,
+                 en_winograd_b: RuntimeBool = None,
+                 unit_flag: RuntimeInt = None,
+                 cmatrix_source: RuntimeBool = None,
+                 cmatrix_init_val: RuntimeBool = None,
+                 handle: IRHandle = None) -> None:
+
+        if handle is not None:
+            self.handle = handle
+            return
+
+        builder = global_builder.get_ir_builder()
+
+        if (is_bias is not None and fm_offset is not None and
+            en_ssparse is not None and en_winograd_a is not None and
+            en_winograd_b is not None and
+            unit_flag is None and cmatrix_source is None and cmatrix_init_val is None):
+
+            args = [
+                _mat(m, KT.uint16).to_ir(), _mat(n, KT.uint16).to_ir(), _mat(k, KT.uint16).to_ir(),
+                _mat(is_bias, KT.int1).to_ir(), _mat(fm_offset, KT.int32).to_ir(),
+                _mat(en_ssparse, KT.int1).to_ir(), _mat(en_winograd_a, KT.int1).to_ir(),
+                _mat(en_winograd_b, KT.int1).to_ir(),
+            ]
+
+            types = builder.get_type_array_attr([
+                builder.get_ui16_type(), builder.get_ui16_type(), builder.get_ui16_type(),
+                builder.get_i1_type(), builder.get_i32_type(),
+                builder.get_i1_type(), builder.get_i1_type(), builder.get_i1_type(),
+            ])
+
+        elif (unit_flag is not None and
+              cmatrix_source is not None and
+              cmatrix_init_val is not None and
+              is_bias is None):
+
+            args = [
+                _mat(m, KT.uint16).to_ir(), _mat(n, KT.uint16).to_ir(), _mat(k, KT.uint16).to_ir(),
+                _mat(unit_flag, KT.int1).to_ir(), _mat(cmatrix_source, KT.int1).to_ir(),
+                _mat(cmatrix_init_val, KT.int1).to_ir(),
+            ]
+
+            types = builder.get_type_array_attr([
+                builder.get_ui16_type(), builder.get_ui16_type(), builder.get_ui16_type(),
+                builder.get_i1_type(), builder.get_i1_type(), builder.get_i1_type(),
+            ])
+
+        else:
+            args = []
+            types = builder.get_type_array_attr([])
+
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_MmadParamsType(),
+            args,
+            types,
+        )
+
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> "MmadParams":
+        return cls(handle=handle)
+
+    def to_ir(self) -> IRHandle:
+        return self.handle
+    
 
 class LoadImageToLocalParams(IRValue):
 
@@ -1543,69 +1715,6 @@ class LoadData2dTransposeParamsV2(IRValue):
 
     def to_ir(self) -> IRHandle:
         return self.handle
-
-
-class MmadParams(IRValue):
-
-    @overload
-    def __init__(
-        self,
-        m: int,
-        n: int,
-        k: int,
-        unit_flag: int = 0,
-        fm_offset: int = 0,
-        filter_offset: int = 0,
-    ) -> None:
-        ...
-
-    @overload
-    def __init__(self, handle: IRHandle) -> None:
-        ...
-
-    def __init__(
-        self,
-        m: RuntimeInt,
-        n: RuntimeInt,
-        k: RuntimeInt,
-        unit_flag: RuntimeInt = 0,
-        fm_offset: RuntimeInt = 0,
-        filter_offset: RuntimeInt = 0,
-        handle: Optional[IRHandle] = None,
-    ) -> None:
-        if handle is not None:
-            self.handle = handle
-            return
-
-        builder = global_builder.get_ir_builder()
-
-        self.handle = builder.create_asc_ConstructOp(
-            builder.get_asc_MmadParamsType(),
-            [
-                _mat(m, KnownTypes.uint16).to_ir(),
-                _mat(n, KnownTypes.uint16).to_ir(),
-                _mat(k, KnownTypes.uint16).to_ir(),
-                _mat(unit_flag, KnownTypes.uint8).to_ir(),
-                _mat(fm_offset, KnownTypes.uint8).to_ir(),
-                _mat(filter_offset, KnownTypes.uint8).to_ir(),
-            ],
-            builder.get_type_array_attr([
-                builder.get_ui16_type(),  # m
-                builder.get_ui16_type(),  # n
-                builder.get_ui16_type(),  # k
-                builder.get_ui8_type(),   # unitFlag
-                builder.get_ui8_type(),   # fmOffset
-                builder.get_ui8_type(),   # filterOffset
-            ]),
-        )
-
-    @classmethod
-    def from_ir(cls, handle: IRHandle) -> "MmadParams":
-        return cls(handle=handle)
-
-    def to_ir(self) -> IRHandle:
-        return self.handle
-
 
 
 class MrgSort4Info(IRValue):

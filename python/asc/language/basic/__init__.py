@@ -49,9 +49,12 @@ from .dump_tensor import (
 )
 from .list_tensor import TensorDesc, ListTensorDesc
 from .mm import (
+    init_const_value,
     load_data,
+    load_data_with_sparse,
     load_data_with_transpose,
     mmad,
+    mmad_with_sparse,
     set_load_data_boundary,
     set_load_data_padding_value,
     set_load_data_repeat,
@@ -216,9 +219,12 @@ __all__ = [
     "TensorDesc",
     "ListTensorDesc",
     # .mm
+    "init_const_value",
     "load_data",
+    "load_data_with_sparse",
     "load_data_with_transpose",
     "mmad",
+    "mmad_with_sparse",
     "set_load_data_boundary",
     "set_load_data_padding_value",
     "set_load_data_repeat",

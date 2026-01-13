@@ -10,13 +10,27 @@ from typing import overload
 
 from ..core.ir_value import RuntimeInt, materialize_ir_value as _mat
 from ..core.tensor import BaseTensor, GlobalTensor, LocalTensor
-from ..core.types import LoadData2DParams, LoadData2DParamsV2, \
+from ..core.types import InitConstValueParams, LoadData2DParams, LoadData2DParamsV2, \
                          LoadData2dTransposeParamsV2, LoadData2dTransposeParams, \
                          LoadData3DParamsV1, LoadData3DParamsV2, \
                          LoadData3DParamsV2Pro, \
                          LoadDataRepeatParam, MmadParams
 from ..core.utils import OverloadDispatcher, require_jit, global_builder
 from .utils import set_common_docstring
+
+
+@overload
+def init_const_value(dst: LocalTensor, init_const_value_params: InitConstValueParams) -> None:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="init_const_value")
+def init_const_value(dst: LocalTensor, init_const_value_params: InitConstValueParams) -> None:
+    global_builder.get_ir_builder().create_asc_InitConstValueOp(
+        dst.to_ir(),
+        init_const_value_params.to_ir(),
+    )
 
 
 @overload
@@ -135,6 +149,21 @@ def load_data(dst: BaseTensor, src: BaseTensor, *args, **kwargs) -> None:
 
 
 @overload
+def load_data_with_sparse(dst: LocalTensor, src: LocalTensor, idx: LocalTensor,
+                          load_data_params: LoadData2DParams) -> None:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="load_data_with_sparse")
+def load_data_with_sparse(dst: LocalTensor, src: LocalTensor, idx: LocalTensor,
+                          load_data_params: LoadData2DParams) -> None:
+    global_builder.get_ir_builder().create_asc_LoadDataWithSparseOp(
+        dst.to_ir(), src.to_ir(), idx.to_ir(), load_data_params.to_ir()
+    )
+
+
+@overload
 def load_data_with_transpose(dst: LocalTensor, src: LocalTensor, params: LoadData2dTransposeParams) -> None:
     ...
 
@@ -212,6 +241,19 @@ def mmad(dst: BaseTensor, fm: BaseTensor, filter: BaseTensor, *args, **kwargs) -
         return
 
     dispatcher(*args, **kwargs)
+
+
+@overload
+def mmad_with_sparse(dst: LocalTensor, fm: LocalTensor, filter: LocalTensor, mmad_params: MmadParams) -> None:
+    ...
+
+
+@require_jit
+@set_common_docstring(api_name="mmad_with_sparse")
+def mmad_with_sparse(dst: LocalTensor, fm: LocalTensor, filter: LocalTensor, mmad_params: MmadParams) -> None:
+    global_builder.get_ir_builder().create_asc_MmadWithSparseOp(
+        dst.to_ir(), fm.to_ir(), filter.to_ir(), mmad_params.to_ir()
+    )
 
 
 @overload

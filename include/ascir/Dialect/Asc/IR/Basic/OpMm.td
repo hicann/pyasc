@@ -19,6 +19,15 @@ include "mlir/Interfaces/CastInterfaces.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 include "mlir/IR/OpBase.td"
 
+def AscendC_InitConstValueOp
+    : APIOp<"init_const_value", "InitConstValue", [AscFunc]> {
+  let description = "Initialize the LocalTensor at a specific TPosition to a specific value.";
+  let arguments = (ins
+    AscendC_LocalTensor:$dst,
+    AscendC_InitConstValueParams:$initConstValueParams
+  );
+}
+
 def AscendC_LoadDataOp
     : APIOp<"load_data", "LoadData", [AscFunc]> {
   let arguments = (ins AscendC_LocalTensor:$dst, AscendC_LocalTensor:$src,
@@ -81,6 +90,12 @@ def AscendC_LoadData3DL0V2ProOp
                        AscendC_LoadData3DParamsV2Pro:$loadDataParams);
 }
 
+def AscendC_LoadDataWithSparseOp
+    : APIOp<"load_data_with_sparse", "LoadDataWithSparse", [AscFunc]> {
+  let arguments = (ins AscendC_LocalTensor:$dst, AscendC_LocalTensor:$src,
+                   AscendC_LocalTensor:$idx, AscendC_LoadData2DParams:$loadDataParam);
+}
+
 def AscendC_LoadDataWithTransposeOp
     : APIOp<"load_data_with_transpose", "LoadDataWithTranspose", [AscFunc]> {
   let description = "Perform 2D LoadData with transpose between tensors";
@@ -116,6 +131,12 @@ def AscendC_MmadWithBiasOp
                        AscendC_MmadParams:$mmadParams);
 }
 
+def AscendC_MmadWithSparseOp
+    : APIOp<"mmad_with_sparse", "MmadWithSparse", [AscFunc]> {
+  let arguments = (ins AscendC_LocalTensor:$dst, AscendC_LocalTensor:$fm,
+                   AscendC_LocalTensor:$filter, AscendC_MmadParams:$mmadParams);
+}
+
 def AscendC_SetFmatrixOp : APIOp<"set_fmatrix", "SetFmatrix", [AscFunc]> {
   let arguments = (ins AnySignlessIntegerOrIndex:$l1H,
                        AnySignlessIntegerOrIndex:$l1W,
@@ -137,6 +158,5 @@ def AscendC_SetLoadDataBoundaryOp
     : APIOp<"set_load_data_boundary", "SetLoadDataBoundary", [AscFunc]> {
   let arguments = (ins AnySignlessIntegerOrIndex:$value);
 }
-
 
 #endif // ASC_BASIC_OP_MM_TD

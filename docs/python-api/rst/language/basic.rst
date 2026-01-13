@@ -206,3 +206,15 @@ Vector unary operations
     relu
     rsqrt
     sqrt
+
+
+Matrix operations
+-----------------
+
+.. autosummary::
+    :toctree: generated
+    :nosignatures:
+
+    init_const_value
+    load_data_with_sparse
+    mmad_with_sparse
