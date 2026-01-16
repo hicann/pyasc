@@ -284,7 +284,7 @@ bash build_llt.sh --cov --run_python_ut --llvm_install_path ${llvm_install_path}
 ```
 
 ### ASC-IR定义模块UT测试
-在执行ASC-IR定义模块的UT测试前，请确保环境已安装lit工具。安装命令如下：
+在执行ASC-IR定义模块的UT测试前，请确保环境已安装[lit](https://llvm.org/docs/CommandGuide/lit.html)工具。安装命令如下：
 ```bash
 pip install lit
 ```
