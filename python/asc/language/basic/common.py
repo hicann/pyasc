@@ -114,18 +114,6 @@ def set_aipp_functions(*args, **kwargs) -> None:
 
 
 @overload
-def set_fix_pipe_pre_quant_flag(config: int) -> None:
-    ...
-
-
-@require_jit
-@set_common_docstring("set_fix_pipe_pre_quant_flag")
-def set_fix_pipe_pre_quant_flag(config: RuntimeInt) -> None:
-    builder = global_builder.get_ir_builder()
-    builder.create_asc_SetFixpipePreQuantFlagOp(_mat(config, KT.uint64).to_ir())
-
-
-@overload
 @require_jit
 def set_hccl_context(index: int, context: GlobalAddress) -> None:
     ...

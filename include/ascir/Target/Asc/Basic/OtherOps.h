@@ -48,6 +48,29 @@ LogicalResult printOperation(CodeEmitter &emitter, ascendc::SetFftsBaseAddrOp op
 
 LogicalResult printOperation(CodeEmitter &emitter, ascendc::ResetMaskOp op);
 
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::FixpipeOp op);
+
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::FixpipeWithWorkspaceOp op);
+
+template <typename FixpipeOp>
+auto printFixpipeTemplate(CodeEmitter &emitter, FixpipeOp op)
+{
+    auto &os = emitter.ostream();
+    auto dstType = cast<ascendc::GlobalTensorType>(op.getDst().getType()).getElementType();
+    auto srcType = cast<ascendc::LocalTensorType>(op.getSrc().getType()).getElementType();
+    os << ascNamespace << "::" << op.getAPIName() << "<";
+    FAIL_OR(emitter.emitType(op.getLoc(), dstType));
+    os << ", ";
+    FAIL_OR(emitter.emitType(op.getLoc(), srcType));
+    os << ", ";
+    auto constructOp = cast<ascendc::ConstructOp>(op.getFixpipeConfig().getDefiningOp());
+    auto constOp = cast<arith::ConstantOp>(constructOp->getOperand(0).getDefiningOp());
+    int64_t value = cast<IntegerAttr>(constOp.getValue()).getInt();
+    os << ascNamespace << "::" << (value == 0 ? "CFG_NZ" : "CFG_ROW_MAJOR");
+    os << ">";
+    return success();
+}
+
 } // namespace ascendc
 
 LogicalResult printOperation(CodeEmitter &emitter, LLVM::UndefOp op);

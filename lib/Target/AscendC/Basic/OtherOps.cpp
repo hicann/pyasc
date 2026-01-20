@@ -238,3 +238,24 @@ LogicalResult mlir::printOperation(CodeEmitter &emitter, LLVM::UndefOp op)
 }
 
 LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::ResetMaskOp op);
+
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::FixpipeOp op)
+{
+    auto &os = emitter.ostream();
+    FAIL_OR(printFixpipeTemplate(emitter, op));
+    os << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+       << emitter.getOrCreateName(op.getSrc()) << ", "
+       << emitter.getOrCreateName(op.getIntriParams()) << ")";
+    return success();
+}
+
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::FixpipeWithWorkspaceOp op)
+{
+    auto &os = emitter.ostream();
+    FAIL_OR(printFixpipeTemplate(emitter, op));
+    os << "(" << emitter.getOrCreateName(op.getDst()) << ", "
+       << emitter.getOrCreateName(op.getSrc()) << ", "
+       << emitter.getOrCreateName(op.getCbufWorkspace()) << ", "
+       << emitter.getOrCreateName(op.getIntriParams()) << ")";
+    return success();
+}

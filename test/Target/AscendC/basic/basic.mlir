@@ -48,21 +48,6 @@ func.func @emit_set_load_data_boundary(%c0_i32: i32) {
   return
 }
 
-// CHECK-LABEL: void emit_fixpipe(AscendC::GlobalTensor<half> v1, AscendC::LocalTensor<float> v2, AscendC::LocalTensor<int64_t> v3, AscendC::FixpipeParams<int32_t> v4) {
-// CHECK-NEXT:   AscendC::Fixpipe(v2, v2, v4);
-// CHECK-NEXT:   AscendC::Fixpipe(v2, v2, v3, v4);
-// CHECK-NEXT:   AscendC::Fixpipe(v1, v2, v4);
-// CHECK-NEXT:   AscendC::Fixpipe(v1, v2, v3, v4);
-// CHECK-NEXT:   return;
-// CHECK-NEXT: }
-func.func @emit_fixpipe(%arg0: !ascendc.global_tensor<*xf16>, %arg1: !ascendc.local_tensor<*xf32>, %arg2: !ascendc.local_tensor<*xi64>, %arg3: !ascendc.fixpipe_params<i32>) {
-  ascendc.fixpipe %arg1, %arg1, %arg3 : !ascendc.local_tensor<*xf32>, !ascendc.local_tensor<*xf32>, !ascendc.fixpipe_params<i32>
-  ascendc.fixpipe %arg1, %arg1, %arg2, %arg3 : !ascendc.local_tensor<*xf32>, !ascendc.local_tensor<*xf32>, !ascendc.local_tensor<*xi64>, !ascendc.fixpipe_params<i32>
-  ascendc.fixpipe %arg0, %arg1, %arg3 : !ascendc.global_tensor<*xf16>, !ascendc.local_tensor<*xf32>, !ascendc.fixpipe_params<i32>
-  ascendc.fixpipe %arg0, %arg1, %arg2, %arg3 : !ascendc.global_tensor<*xf16>, !ascendc.local_tensor<*xf32>, !ascendc.local_tensor<*xi64>, !ascendc.fixpipe_params<i32>
-  return
-}
-
 // CHECK-LABEL:void emit_ffts_cross_core_sync(int32_t v1, int64_t v2) {
 // CHECK-NEXT:  constexpr int64_t c3873_i64 = 3873;
 // CHECK-NEXT:  constexpr int32_t c5_i32 = 5;

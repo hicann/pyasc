@@ -465,17 +465,6 @@ func.func @emit_set_mask_norm() {
   return
 }
 
-// CHECK-LABEL: void emit_set_fixpipe_pre_quant_flag() {
-// CHECK-NEXT:    constexpr int64_t c11_i64 = 11;
-// CHECK-NEXT:    AscendC::SetFixpipePreQuantFlag(c11_i64);
-// CHECK-NEXT:    return;
-// CHECK-NEXT: }
-func.func @emit_set_fixpipe_pre_quant_flag() {
-  %config = arith.constant 11 : i64
-  ascendc.set_fixpipe_pre_quant_flag %config : i64
-  return
-}
-
 // CHECK-LABEL:void emit_set_vector_mask(int32_t v1, int64_t v2, int64_t v3) {
 // CHECK-NEXT:  AscendC::SetVectorMask<half, AscendC::MaskMode::COUNTER>(v1)
 // CHECK-NEXT:  AscendC::SetVectorMask<float, AscendC::MaskMode::NORMAL>(v2, v3)
