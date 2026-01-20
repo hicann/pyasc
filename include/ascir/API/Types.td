@@ -114,6 +114,11 @@ def CopyRepeatParams : APIType<"CopyRepeatParams"> {
   let apiName = "AscendC::CopyRepeatParams";
 }
 
+def CO2Layout : APIType<"CO2Layout"> {
+  let mnemonic = "co2_layout";
+  let apiName = "AscendC::CO2Layout";
+}
+
 def DataCopyCO12DstParams : APIType<"DataCopyCO12DstParams"> {
   let mnemonic = "data_copy_co12dst_params";
   let apiName = "AscendC::DataCopyCO12DstParams";
@@ -162,6 +167,11 @@ def DeqScale : APIType<"DeqScale"> {
 def FixpipeConfig : APIType<"FixpipeConfig"> {
   let mnemonic = "fixpipe_config";
   let apiName = "AscendC::FixpipeConfig";
+}
+
+def FixpipeParamsV220 : APIType<"FixpipeParamsV220"> {
+  let mnemonic = "fixpipe_params_v220";
+  let apiName = "AscendC::FixpipeParamsV220";
 }
 
 def FixpipeParams : APIType {

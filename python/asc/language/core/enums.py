@@ -276,6 +276,12 @@ class CMPMODE(IntEnum):
     NE = 5
 
 
+class CO2Layout(IntEnum):
+    NZ = 0
+    ROW_MAJOR = 1
+    COLUMN_MAJOR = 2
+
+
 class SelMode(IntEnum):
     VSEL_CMPMASK_SPR = 0, 
     VSEL_TENSOR_SCALAR_MODE = 1,

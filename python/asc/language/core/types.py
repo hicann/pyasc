@@ -15,7 +15,7 @@ from ..._C import ir
 from ...common.compat import isinstance
 from .array import Array
 from .dtype import DataType, KnownTypes
-from .enums import BlockMode, DataFormat, DeqScale, pad_t, QuantModes, TransposeType
+from .enums import BlockMode, CO2Layout, DataFormat, DeqScale, pad_t, QuantModes, TransposeType
 from .ir_value import IRHandle, IRValue, PlainValue, \
                             RuntimeBool, RuntimeInt, RuntimeNumeric, materialize_ir_value as _mat, convert_value
 from .utils import require_jit, global_builder
@@ -1764,3 +1764,111 @@ class MrgSort4Info(IRValue):
     
     def to_ir(self) -> IRHandle:
         return self.handle
+
+
+class FixpipeConfig(IRValue):
+
+    @overload
+    def __init__(self, layout: CO2Layout) -> None:
+        ...
+
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+        """This constructor should not be called by user"""
+        ...
+
+    @require_jit
+    def __init__(self, layout: CO2Layout, handle: Optional[IRHandle] = None) -> None:
+        if handle is not None:
+            self.handle = handle
+            return
+        builder = global_builder.get_ir_builder()
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_FixpipeConfigType(),
+            [_mat(layout).to_ir()],
+            builder.get_type_array_attr([builder.get_asc_CO2LayoutType()])
+        )
+    
+    @classmethod
+    @require_jit
+    def cfg_nz(cls) -> FixpipeConfig:
+        """constexpr FixpipeConfig CFG_NZ = {CO2Layout::NZ}"""
+        return cls(CO2Layout.NZ)
+
+    @classmethod
+    @require_jit
+    def cfg_row_major(cls) -> FixpipeConfig:
+        """constexpr FixpipeConfig CFG_ROW_MAJOR = {CO2Layout::ROW_MAJOR}"""
+        return cls(CO2Layout.ROW_MAJOR)
+
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> FixpipeConfig:
+        return cls(handle=handle)
+
+    def to_ir(self) -> IRHandle:
+        return self.handle
+    
+
+class FixpipeParamsV220(IRValue):
+
+    @overload
+    def __init__(self, n_size: int, m_size: int, src_stride: int, dst_stride: int,
+                 quant_pre: QuantModes = QuantModes.NoQuant, deq_scalar: int = 0,
+                 nd_num: int = 1, src_nd_stride: int = 0, dst_nd_stride: int = 0,
+                 relu_en: bool = False, unit_flag: int = 0, is_channel_split: bool = False) -> None:
+        ...
+
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+        """This constructor should not be called by user"""
+        ...
+
+    @require_jit
+    def __init__(self, n_size: RuntimeInt, m_size: RuntimeInt, src_stride: RuntimeInt, dst_stride: RuntimeInt,
+                 quant_pre: QuantModes = QuantModes.NoQuant, deq_scalar: RuntimeInt = 0,
+                 nd_num: RuntimeInt = 1, src_nd_stride: RuntimeInt = 0, dst_nd_stride: RuntimeInt = 0,
+                 relu_en: RuntimeBool = False, unit_flag: RuntimeInt = 0, is_channel_split: RuntimeBool = False,
+                 handle: Optional[IRHandle] = None) -> None:
+        if handle is not None:
+            self.handle = handle
+            return
+        builder = global_builder.get_ir_builder()
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_FixpipeParamsV220Type(),
+            [
+                _mat(n_size, KT.uint16).to_ir(),
+                _mat(m_size, KT.uint16).to_ir(),
+                _mat(src_stride, KT.uint16).to_ir(),
+                _mat(dst_stride, KT.uint32).to_ir(),
+                _mat(relu_en).to_ir(),
+                _mat(quant_pre).to_ir(),
+                _mat(deq_scalar).to_ir(),
+                _mat(nd_num, KT.uint16).to_ir(),
+                _mat(src_nd_stride, KT.uint16).to_ir(),
+                _mat(dst_nd_stride, KT.uint16).to_ir(),
+                _mat(unit_flag).to_ir(),
+                _mat(is_channel_split).to_ir(),
+            ],
+            builder.get_type_array_attr([
+                builder.get_ui16_type(),  # nSize
+                builder.get_ui16_type(),  # mSize
+                builder.get_ui16_type(),  # srcStride
+                builder.get_ui32_type(),  # dstStride
+                builder.get_i1_type(),    # reluEn
+                builder.get_asc_QuantModesType(),  # quantPre
+                builder.get_ui64_type(),  # deqScalar
+                builder.get_ui16_type(),  # ndNum
+                builder.get_ui16_type(),  # srcNdStride
+                builder.get_ui16_type(),  # dstNdStride
+                builder.get_ui8_type(),   # unitFlag
+                builder.get_i1_type(),    # isChannelSplit
+            ])
+        )
+
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> FixpipeParamsV220:
+        return cls(handle=handle)
+
+    def to_ir(self) -> IRHandle:
+        return self.handle
+

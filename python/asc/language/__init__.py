@@ -37,7 +37,6 @@ from .basic.common import (
     get_sys_workspace,
     reset_mask,
     set_aipp_functions,
-    set_fix_pipe_pre_quant_flag,
     set_hccl_context,
     set_hf32_mode,
     set_hf32_trans_mode,
@@ -56,6 +55,10 @@ from .basic.dump_tensor import (
     print_time_stamp, 
     metrics_prof_start, 
     metrics_prof_stop,
+)
+from .basic.fixpipe import (
+    fixpipe,
+    set_fix_pipe_pre_quant_flag,
 )
 from .basic.list_tensor import TensorDesc, ListTensorDesc
 from .basic.mm import (
@@ -199,6 +202,7 @@ from .core.enums import (
     CacheMode,
     CacheRwMode,
     CMPMODE,
+    CO2Layout,
     CubeFormat,
     DataFormat,
     DcciDst,
@@ -242,6 +246,8 @@ from .core.types import (
     DataCopyExtParams,
     DataCopyPadExtParams,
     DataCopyPadParams,
+    FixpipeConfig,
+    FixpipeParamsV220,
     GatherMaskParams,
     GatherRepeatParams,
     InitConstValueParams,

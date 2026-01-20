@@ -30,6 +30,7 @@ Common operations
     dump_acc_chk_point
     dump_tensor
     duplicate
+    fixpipe
     get_block_idx
     get_block_num
     get_cmp_mask

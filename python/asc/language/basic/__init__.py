@@ -27,7 +27,6 @@ from .common import (
     get_sys_workspace,
     reset_mask,
     set_aipp_functions,
-    set_fix_pipe_pre_quant_flag,
     set_hccl_context,
     set_hf32_mode,
     set_hf32_trans_mode,
@@ -46,6 +45,10 @@ from .dump_tensor import (
     print_time_stamp, 
     metrics_prof_start, 
     metrics_prof_stop,
+)
+from .fixpipe import (
+    fixpipe,
+    set_fix_pipe_pre_quant_flag,
 )
 from .list_tensor import TensorDesc, ListTensorDesc
 from .mm import (
@@ -179,11 +182,11 @@ __all__ = [
     "ascend_is_aic",
     "ascend_is_aiv",
     "data_cache_preload",
+    
     "get_hccl_context",
     "get_sys_workspace",
     "reset_mask",
     "set_aipp_functions",
-    "set_fix_pipe_pre_quant_flag",
     "set_hccl_context",
     "set_hf32_mode",
     "set_hf32_trans_mode",
@@ -215,6 +218,9 @@ __all__ = [
     "print_time_stamp",
     "metrics_prof_start",
     "metrics_prof_stop",
+    # .fixpipe
+    "fixpipe",
+    "set_fix_pipe_pre_quant_flag",
     # .list_tensor
     "TensorDesc",
     "ListTensorDesc",
