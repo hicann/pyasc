@@ -373,8 +373,8 @@ extras_require = {
 
 
 def setup() -> None:
-    if sys.version_info < (3, 8):
-        raise RuntimeError("Python 3.8+ is required")
+    if sys.version_info < (3, 9):
+        raise RuntimeError("Python 3.9+ is required")
     data_files = None
     devtools = get_requested_devtools()
     if devtools:
@@ -382,17 +382,14 @@ def setup() -> None:
         data_files = [("bin", [str(get_cmake_dir() / "bin" / tool) for tool in devtools])]
     setuptools.setup(
         name=os.environ.get("PYASC_SETUP_NAME", "pyasc"),
-        description="Modern programming models for Ascend NPU",
+        description="Programming language for writing efficient custom operators " \
+            "with native support for Python standard specifications",
         version=get_project_version(),
-        license="text = Apache-2.0 WITH LLVM-exception",
+        license="CANN Open Software License Agreement Version 2.0",
+        url="https://gitcode.com/cann/pyasc",
         packages=packages,
         package_dir={"": "python"},
         data_files=data_files,
-        entry_points={
-            "console_scripts": [
-                "pyasc = asc.__main__:main",
-            ],
-        },
         ext_modules=[
             LocalExtension("asc._C.libpyasc"),
         ],
@@ -401,6 +398,7 @@ def setup() -> None:
             "asc/lib/host": ["bindings/*.cpp"],
         },
         install_requires=[
+            "pybind11==2.13.1",
             "numpy<2",
             "typing_extensions",
         ],
@@ -415,7 +413,6 @@ def setup() -> None:
         },
         zip_safe=False,
         classifiers=[
-            "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: 3.11",

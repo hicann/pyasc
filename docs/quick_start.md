@@ -15,7 +15,7 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
    ```bash
    pip install pyasc
    ```
-   二进制wheel安装包支持CPython 3.8-3.12。
+   二进制wheel安装包支持CPython 3.9-3.12。
 
 #### 基于源码安装
 
@@ -27,7 +27,7 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
 - 依赖
 
    1. 包版本依赖  
-      Python支持版本为：**py3.8-py3.12**。
+      Python支持版本为：**py3.9-py3.12**。
 
       推荐使用python虚拟环境（venv）
          ```shell
@@ -105,6 +105,14 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
             ninja install
             ```
 
+         - 步骤4：验证安装：  
+            执行以下命令，若输出对应版本信息，说明安装成功：
+
+            ```shell
+            clang --version
+            ${llvm_install_path}/bin/llvm-config --version
+            ```
+
       - GCC构建安装LLVM  
          GCC 构建 LLVM 兼容性极强，支持几乎所有 GCC 覆盖的平台，与系统 GCC 工具链无缝集成且适合离线构建，但编译较慢、内存占用高，版本可能落后于源码仓库且错误提示较晦涩。适合需与 GCC 工具链深度集成或受限环境下稳定部署的场景。推荐使用clang，如果只能使用GCC安装，请注意[注1] [注2]。
 
@@ -134,14 +142,6 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
 
          - 注1：若在编译时出现错误`ld.lld: error: undefined symbol`，可在步骤2中加入设置`-DLLVM_ENABLE_LLD=ON`。
          - 注2：若环境上ccache已安装且正常运行，可设置`-DLLVM_CCACHE_BUILD=ON`加速构建, 否则请勿开启。
-
-   3. 验证安装  
-      执行以下命令，若输出对应版本信息，说明安装成功：
-
-         ```shell
-         clang --version
-         ${llvm_install_path}/bin/llvm-config --version
-         ```
 
 - 构建pyasc
    1. 进入上文下载的pyasc源码目录
