@@ -307,6 +307,9 @@ class PlainValue(IRValue):
         elif (from_i and to_i) or (from_f and to_f):
             ext = self.dtype.bitwidth < dtype.bitwidth
             if from_i:
+                if self.dtype.is_unsigned() != dtype.is_unsigned():
+                    method = builder.create_emitc_CastOp
+                    return PlainValue(handle=method(self.to_ir(), dtype.to_ir()), dtype=dtype)
                 method = builder.create_arith_ExtSIOp if ext else builder.create_arith_TruncIOp
             else:
                 method = builder.create_arith_ExtFOp if ext else builder.create_arith_TruncFOp
