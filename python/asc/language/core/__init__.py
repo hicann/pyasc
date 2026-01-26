@@ -51,6 +51,7 @@ from .enums import (
     DeqScale,
     GatherMaskMode,
     HardEvent,
+    Hardware,
     MemDsbT,
     IterateMode,
     IterateOrder,
@@ -68,6 +69,7 @@ from .enums import (
     MatmulConfigMode,
 )
 from .ir_value import GlobalAddress
+from .memory_allocator import LocalMemAllocator
 from .ops import inline, number
 from .properties import (
     property,
@@ -159,6 +161,7 @@ __all__ = [
     "DeqScale",
     "GatherMaskMode",
     "HardEvent",
+    "Hardware",
     "MemDsbT",
     "IterateMode",
     "IterateOrder",
@@ -178,6 +181,8 @@ __all__ = [
     "MatmulConfigMode",
     # .ir_value
     "GlobalAddress",
+    # .memory_allocator
+    "LocalMemAllocator",
     # .ops
     "inline",
     "number",

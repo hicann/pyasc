@@ -25,6 +25,19 @@ GlobalTensor public成员函数如下。类型T支持基础数据类型以及Ten
 | [`GlobalTensor.set_shape_info`](generated/asc.language.core.GlobalTensor.set_shape_info.md#asc.language.core.GlobalTensor.set_shape_info)          | 设置GlobalTensor的shape信息。                                                                    |
 | [`GlobalTensor.set_value`](generated/asc.language.core.GlobalTensor.set_value.md#asc.language.core.GlobalTensor.set_value)                         | 设置GlobalTensor相应偏移位置的值。                                                                    |
 
+## LocalMemAllocator
+
+### *class* asc.language.core.LocalMemAllocator(hard: Hardware = Hardware.UB)
+
+LocalMemAllocator是在使用Ascend C静态Tensor编程方式时用于内存管理的类，用户无需构建TPipe/TQue，
+而是直接创建LocalTensor对象并开发算子，从而减少运行时的开销，实现更优的性能。
+
+LocalMemAllocator仅支持在Ascend C静态Tensor编程方式中使用，不可以与TPipe等接口混用。
+
+| [`LocalMemAllocator.alloc`](generated/asc.language.core.LocalMemAllocator.alloc.md#asc.language.core.LocalMemAllocator.alloc)                      | 根据用户指定的逻辑位置、数据类型、数据长度返回对应的 LocalTensor 对象。   |
+|----------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
+| [`LocalMemAllocator.get_cur_addr`](generated/asc.language.core.LocalMemAllocator.get_cur_addr.md#asc.language.core.LocalMemAllocator.get_cur_addr) | 返回当前物理位置空闲的起始地址。                             |
+
 ## LocalTensor
 
 ### *class* asc.language.core.LocalTensor

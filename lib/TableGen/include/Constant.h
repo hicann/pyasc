@@ -47,6 +47,7 @@ static constexpr int64_t kInferElementType = 2;
 static constexpr int64_t kInferEnumType = 3;
 static constexpr int64_t kInferValue = 4;
 static constexpr int64_t kTemplateType = 5;
+static constexpr int64_t kInferTypeAttr = 6;
 static constexpr int64_t kPointerValue = -3L;
 static constexpr int64_t kPointerToIntValue = -2L;
 

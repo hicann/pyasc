@@ -415,6 +415,10 @@ void bind_get_special_type(py::class_<PyOpBuilder> &clss)
 			[](PyOpBuilder &self, Type elementType) -> Type {
 				return self->getType<ascendc::MrgSortSrcListType>(elementType);
 			})
+        .def("get_local_mem_allocator_type",
+             [](PyOpBuilder &self, uint64_t hardware) -> Type {
+                 return ascendc::LocalMemAllocatorType::get(self->getContext(), hardware);
+             })
 #include "ascir/API/AscTypeBindings.h.inc"
         ;
 }

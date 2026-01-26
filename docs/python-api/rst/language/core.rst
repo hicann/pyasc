@@ -29,6 +29,17 @@ GlobalTensor
     GlobalTensor.set_value
 
 
+LocalMemAllocator
+-----------------
+.. autoclass:: LocalMemAllocator
+.. autosummary::
+    :toctree: generated
+    :nosignatures:
+
+    LocalMemAllocator.alloc
+    LocalMemAllocator.get_cur_addr
+
+
 LocalTensor
 ------------
 .. autoclass:: LocalTensor

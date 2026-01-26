@@ -274,6 +274,11 @@ def LoadImageToLocalParams : APIType<"LoadImageToLocalParams"> {
   let apiName = "AscendC::LoadImageToLocalParams";
 }
 
+def LocalMemAllocator : APIType {
+  let mnemonic = "local_mem_allocator";
+  let apiName = "AscendC::LocalMemAllocator";
+}
+
 def LocalTensor : APIType {
   let mnemonic = "local_tensor";
   let apiName = "AscendC::LocalTensor";
