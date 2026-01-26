@@ -210,6 +210,9 @@ bool printTemplateParam(raw_indented_ostream &os, const Record *def, const std::
             case mlir::asc::kTemplateType: // pass by template type
                 printTemplateType(os, genGetterName(args, i), templateTypeVar);
                 break;
+            case mlir::asc::kInferTypeAttr: // type attribute, use directly as template type
+                printTemplateType(os, genGetterName(args, i), templateTypeVar);
+                break;
         }
     }
     os << mlir::asc::kOutTemplateCallEnd;

@@ -161,6 +161,9 @@ void CodeEmitter::createTypeEmitMapper()
     emitTypeMapper[TypeID::get<ascendc::MatmulType>()] = [this](Location loc, Type type, bool flag) {
         return this->emitAscMatmulType(loc, type, flag);
     };
+    emitTypeMapper[TypeID::get<ascendc::LocalMemAllocatorType>()] = [this](Location loc, Type type, bool flag) {
+        return this->emitAscLocalMemAllocatorType(loc, type, flag);
+    };
     emitTypeMapper[TypeID::get<ascendc::LocalTensorType>()] = [this](Location loc, Type type, bool flag) {
         return this->emitAscLocalTensorType(loc, type, flag);
     };
@@ -574,6 +577,35 @@ LogicalResult CodeEmitter::emitAscBaseLocalTensorType(Location loc, Type type, b
     os << ascNamespace << "::BaseLocalTensor<";
     if (failed(emitType(loc, elemTy)))
         return failure();
+    os << ">";
+    return success();
+}
+
+LogicalResult CodeEmitter::emitAscLocalMemAllocatorType(Location loc, Type type, bool emitAsUnsigned)
+{
+    auto pType = dyn_cast<ascendc::LocalMemAllocatorType>(type);
+    os << ascNamespace << "::LocalMemAllocator<";
+    uint64_t hardware = pType.getHardware();
+    if (hardware == 0)
+        os << ascNamespace << "::Hardware::GM";
+    else if (hardware == 1)
+        os << ascNamespace << "::Hardware::UB";
+    else if (hardware == 2)
+        os << ascNamespace << "::Hardware::L1";
+    else if (hardware == 3)
+        os << ascNamespace << "::Hardware::L0A";
+    else if (hardware == 4)
+        os << ascNamespace << "::Hardware::L0B";
+    else if (hardware == 5)
+        os << ascNamespace << "::Hardware::L0C";
+    else if (hardware == 6)
+        os << ascNamespace << "::Hardware::BIAS";
+    else if (hardware == 7)
+        os << ascNamespace << "::Hardware::FIXBUF";
+    else if (hardware == 8)
+        os << ascNamespace << "::Hardware::MAX";
+    else
+        llvm_unreachable("unexpected LocalMemAllocator hardware value");
     os << ">";
     return success();
 }

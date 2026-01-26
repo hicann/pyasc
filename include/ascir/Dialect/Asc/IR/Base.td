@@ -51,6 +51,7 @@ class AscendC_Op<string mnemonic, list<Trait> traits = []>
   //  3：Non-type template parameter (enum value)
   //  4: Non-type template parameter (regular value)
   //  5: Type template paramter (eg., <typename T> function())
+  //  6: Type attribute as template parameter (e.g., TypeAttr for <typename T>, no function parameter)
   // This allows flexible template argument generation from operation arguments while supporting
   // various patterns like type extraction and non-type template
   list<int> paramTypeLists = [];

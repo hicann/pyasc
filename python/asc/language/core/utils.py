@@ -489,6 +489,114 @@ class GlobalTensorDocstring:
         return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
+class LocalMemAllocatorDocstring:
+
+    def __init__(self) -> None:
+        ...
+
+    @staticmethod
+    def get_cur_addr_docstring():
+        func_introduction = """
+        返回当前物理位置空闲的起始地址。
+        """
+
+        cpp_signature = """
+        **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            __aicore__ inline uint32_t GetCurAddr() const
+
+        """
+
+        param_list = """
+        **参数说明**
+
+        无。
+        """
+
+        return_list = """
+        **返回值说明**
+
+        当前物理位置空闲的起始地址，范围为[0，物理内存最大值)。
+        """
+
+        py_example = """
+        **调用示例**
+
+        .. code-block:: python
+
+            allocator = asc.LocalMemAllocator()
+            # 默认的物理位置为UB，由于从0地址开始分配，下面的打印结果为0
+            addr = allocator.get_cur_addr()
+            asc.printf("current addr is %u\\n", addr)
+
+        """
+
+        return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
+
+    @staticmethod
+    def alloc_docstring():
+        func_introduction = """
+        根据用户指定的逻辑位置、数据类型、数据长度返回对应的 LocalTensor 对象。
+        """
+
+        cpp_signature = """
+        **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            // 原型1：tileSize为模板参数
+            // 当tileSize为常量时，建议使用此接口，以获得更优的性能
+            template <TPosition pos, class DataType, uint32_t tileSize>
+            __aicore__ inline LocalTensor<DataType> Alloc()
+
+            // 原型2：tileSize为接口入参
+            // 当tileSize为动态参数时使用此接口
+            template <TPosition pos, class DataType>
+            LocalTensor<DataType> __aicore__ inline Alloc(uint32_t tileSize)
+
+        """
+
+        param_list = """
+        **参数说明**
+
+        - pos：TPosition 位置，需要符合 LocalMemAllocator 中指定的 Hardware 物理位置。
+        - data_type：LocalTensor 的数据类型，只支持基础数据类型，当前不支持 TensorTrait 类型。
+        - tile_size：LocalTensor 的元素个数，其数量不应超过当前物理位置剩余的内存空间。
+        """
+
+        return_list = """
+        **返回值说明**
+
+        根据用户输入构造的 LocalTensor 对象。
+        """
+
+        constraint_list = """
+        **约束说明**
+
+        tile_size 不应超过当前物理位置剩余的内存空间。剩余的内存空间可以通过物理内存最大值与当前可用内存地址（get_cur_addr 返回值）的差值来计算。
+        """
+
+        py_example = """
+        **调用示例**
+
+        .. code-block:: python
+
+            allocator = asc.LocalMemAllocator()
+
+            # 用户指定逻辑位置 VECIN，float 类型，Tensor 中有 1024 个元素
+            tensor1 = allocator.alloc(asc.TPosition.VECIN, float, 1024)
+
+            # 用户指定逻辑位置 VECIN，float 类型，Tensor 中有 tileLength 个元素
+            tile_length = 512
+            tensor2 = allocator.alloc(asc.TPosition.VECIN, float, tile_length)
+
+        """
+
+        return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
+
+
 class LocalTensorDocstring:
 
     def __init__(self) -> None:
@@ -1111,7 +1219,15 @@ class LocalTensorDocstring:
         return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
-DOC_HANDLERS = {
+ALLOCATOR_DOC_HANDLERS = {
+    "LocalMemAllocator": {
+        "get_cur_addr": LocalMemAllocatorDocstring.get_cur_addr_docstring,
+        "alloc": LocalMemAllocatorDocstring.alloc_docstring,
+    }
+}
+
+
+TENSOR_DOC_HANDLERS = {
     "GlobalTensor": {
         "set_global_buffer": GlobalTensorDocstring.set_global_buffer_docstring,
         "get_phy_addr": GlobalTensorDocstring.get_phy_addr_docstring,
@@ -1143,6 +1259,38 @@ DOC_HANDLERS = {
 }
 
 
+def set_allocator_docstring(allocator_name: Optional[str] = None, api_name: Optional[str] = None) -> Callable[[T], T]:
+    func_introduction = ""
+    cpp_signature = ""
+    param_list = ""
+    return_list = ""
+    constraint_list = ""
+    py_example = ""
+    
+    if ALLOCATOR_DOC_HANDLERS.get(allocator_name) is None:
+        raise RuntimeError(f"Invalid allocator name {allocator_name}")
+    if ALLOCATOR_DOC_HANDLERS.get(allocator_name, {}).get(api_name) is None:
+        raise RuntimeError(f"Unsupported API [{api_name}] for allocator type [{allocator_name}]")
+    
+    handler = ALLOCATOR_DOC_HANDLERS.get(allocator_name, {}).get(api_name)
+    func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example = handler()
+    
+    docstr = f"""
+    {func_introduction}
+    {cpp_signature}
+    {param_list}
+    {return_list}
+    {constraint_list}
+    {py_example}
+    """
+
+    def decorator(fn: T) -> T:
+        fn.__doc__ = docstr
+        return fn
+
+    return decorator
+
+
 def set_tensor_docstring(tensor_name: Optional[str] = None, api_name: Optional[str] = None) -> Callable[[T], T]:
     func_introduction = ""
     cpp_signature = ""
@@ -1150,11 +1298,11 @@ def set_tensor_docstring(tensor_name: Optional[str] = None, api_name: Optional[s
     return_list = ""
     constraint_list = ""
     py_example = ""
-    if DOC_HANDLERS.get(tensor_name) is None:
+    if TENSOR_DOC_HANDLERS.get(tensor_name) is None:
         raise RuntimeError(f"Invalid tensor name {tensor_name}")
-    if DOC_HANDLERS.get(tensor_name, {}).get(api_name) is None:
+    if TENSOR_DOC_HANDLERS.get(tensor_name, {}).get(api_name) is None:
         raise RuntimeError(f"Unsupported API [{api_name}] for tensor type [{tensor_name}]")
-    handler = DOC_HANDLERS.get(tensor_name, {}).get(api_name)
+    handler = TENSOR_DOC_HANDLERS.get(tensor_name, {}).get(api_name)
     func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example = handler()
     docstr = f"""
     {func_introduction}

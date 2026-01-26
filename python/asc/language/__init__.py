@@ -209,6 +209,7 @@ from .core.enums import (
     DeqScale,
     GatherMaskMode,
     HardEvent,
+    Hardware,
     PipeID,
     MemDsbT,
     TPosition,
@@ -227,6 +228,7 @@ from .core.enums import (
     SelMode,
 )
 from .core.ir_value import GlobalAddress
+from .core.memory_allocator import LocalMemAllocator
 from .core.ops import inline, number
 from .core.properties import (
     property,

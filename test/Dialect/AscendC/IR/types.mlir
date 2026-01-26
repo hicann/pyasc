@@ -88,3 +88,11 @@ func.func @test_get_tensor_basic(%arg0: !ascendc.tbuf<vecin>) -> !ascendc.local_
   // CHECK: return %{{[0-9]+}} : !ascendc.local_tensor<?xf32>
   return %0 : !ascendc.local_tensor<?xf32>
 }
+
+// CHECK-LABEL: test_local_mem_allocator
+func.func @test_local_mem_allocator(
+// CHECK-SAME: !ascendc.local_mem_allocator<0>
+  %allocator: !ascendc.local_mem_allocator<0>
+) {
+  return
+}

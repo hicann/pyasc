@@ -230,6 +230,22 @@ def AscendC_HardEventAttr : I32EnumAttr<"HardEvent", "", [
   let underlyingType = "uint8_t";
 }
 
+def AscendC_HardwareAttr : I32EnumAttr<"Hardware", "Hardware memory location", [
+  I32EnumAttrCase<"GM", 0, "gm">,
+  I32EnumAttrCase<"UB", 1, "ub">,
+  I32EnumAttrCase<"L1", 2, "l1">,
+  I32EnumAttrCase<"L0A", 3, "l0a">,
+  I32EnumAttrCase<"L0B", 4, "l0b">,
+  I32EnumAttrCase<"L0C", 5, "l0c">,
+  I32EnumAttrCase<"BIAS", 6, "bias">,
+  I32EnumAttrCase<"FIXBUF", 7, "fixbuf">,
+  I32EnumAttrCase<"MAX", 8, "max">,
+]> {
+  let cppNamespace = "::mlir::ascendc";
+  let description = "Represents AscendC::Hardware";
+  let underlyingType = "uint8_t";
+}
+
 def AscendC_IterateModeAttr : I32EnumAttr<"IterateMode", "", [
   I32EnumAttrCase<"ITERATE_MODE_NORMAL", 0b00000001>,
   I32EnumAttrCase<"ITERATE_MODE_ALL", 0b00000010>,

@@ -175,6 +175,8 @@ struct CodeEmitter {
 
     LogicalResult emitAscLocalTensorType(Location loc, Type type, bool emitAsUnsigned);
 
+    LogicalResult emitAscLocalMemAllocatorType(Location loc, Type type, bool emitAsUnsigned);
+
     LogicalResult emitAscPyStructType(Location loc, Type type, bool emitAsUnsigned);
 
     LogicalResult emitAscMatmulType(Location loc, Type type, bool emitAsUnsigned);

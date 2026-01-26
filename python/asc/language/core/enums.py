@@ -121,6 +121,18 @@ class HardEvent(IntEnum):
     FIX_FIX = 34
 
 
+class Hardware(IntEnum):
+    GM = 0
+    UB = 1
+    L1 = 2
+    L0A = 3
+    L0B = 4
+    L0C = 5
+    BIAS = 6
+    FIXBUF = 7
+    MAX = 8
+
+
 class IterateMode(IntEnum):
     ITERATE_MODE_NORMAL = 0b00000001
     ITERATE_MODE_ALL = 0b00000010

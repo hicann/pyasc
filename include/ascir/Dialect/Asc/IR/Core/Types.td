@@ -53,6 +53,12 @@ def AscendC_GlobalTensor : AscendC_BaseTensorType<"GlobalTensor", "global_tensor
   let summary = "Global tensor from GM (OUT)";
 }
 
+def AscendC_LocalMemAllocator : AscendC_Type<"LocalMemAllocator", "local_mem_allocator"> {
+  let summary = "Represents AscendC::LocalMemAllocator";
+  let parameters = (ins "uint64_t":$hardware);
+  let assemblyFormat = "`<` $hardware `>`";
+}
+
 def AscendC_LocalTensor : AscendC_BaseTensorType<"LocalTensor", "local_tensor"> {
   let summary = "Local tensor from UB";
 }
