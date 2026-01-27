@@ -380,10 +380,13 @@ def setup() -> None:
     if devtools:
         print("packaging development tools:", *devtools)
         data_files = [("bin", [str(get_cmake_dir() / "bin" / tool) for tool in devtools])]
+    cur_dir = Path(__file__).parent
     setuptools.setup(
         name=os.environ.get("PYASC_SETUP_NAME", "pyasc"),
         description="Programming language for writing efficient custom operators " \
             "with native support for Python standard specifications",
+        long_description=(cur_dir / "README.md").read_text(encoding="utf-8"),
+        long_description_content_type="text/markdown",
         version=get_project_version(),
         license="CANN Open Software License Agreement Version 2.0",
         url="https://gitcode.com/cann/pyasc",
