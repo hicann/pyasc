@@ -167,9 +167,9 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
    python3 -m pip install -r requirements-runtime.txt
    ```
 
-2. **安装社区尝鲜版CANN toolkit包**
+2. **安装社区版CANN toolkit包**
 
-    根据实际环境，下载对应`Ascend-cann-toolkit_${cann_version}_linux-${arch}.run`包，下载链接为[toolkit x86_64包](https://ascend.devcloud.huaweicloud.com/artifactory/cann-run/software/8.5.0-beta.1/x86_64/Ascend-cann-toolkit_8.5.0-beta.1_linux-x86_64.run)、[toolkit aarch64包](https://ascend.devcloud.huaweicloud.com/artifactory/cann-run/software/8.5.0-beta.1/aarch64/Ascend-cann-toolkit_8.5.0-beta.1_linux-aarch64.run)。
+    根据实际环境，下载对应`Ascend-cann-toolkit_${cann_version}_linux-${arch}.run`包，下载链接见[CANN toolkit](https://www.hiascend.com/zh/developer/download/community/result?module=cann)。
     
     ```bash
     # 确保安装包具有可执行权限
