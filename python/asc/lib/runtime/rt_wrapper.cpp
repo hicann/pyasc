@@ -8,7 +8,11 @@
  * See LICENSE in the root of the software repository for the full text of the License.
  */
 
+#ifdef SEPARATE_PKG_ARCH
 #include "runtime/rt.h"
+#else
+#include "experiment/runtime/runtime/rt.h"
+#endif
 
 extern "C" {
 /**

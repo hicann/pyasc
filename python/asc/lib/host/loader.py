@@ -26,7 +26,6 @@ class Loader:
     def build(so_name: str):
         so_path = os.path.join(os.path.dirname(__file__), so_name)
         asc_path = get_ascend_path()
-        arch = platform.machine()
         cc_cmd = [
             get_cxx_compiler(),
             os.path.join(os.path.dirname(__file__), "bindings/Platform.cpp"),
@@ -39,7 +38,8 @@ class Loader:
             "-fPIC",
             f"-I{os.path.join(asc_path, 'include')}",
             f"-I{pybind11.get_include()}",
-            f"-L{os.path.join(asc_path, f'{arch}-linux/lib64')}",
+            f"-L{os.path.join(asc_path, f'{platform.machine()}-linux/lib64')}",
+            f"-L{os.path.join(asc_path, 'runtime/lib64')}",
             "-ltiling_api",
             "-lplatform",
             "-lregister",

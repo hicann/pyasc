@@ -38,9 +38,6 @@ def build_npu_ext(obj_name: str, is_model: bool, soc: config.Platform, src_path:
         cxx = gxx if gxx is not None else clangxx
         if cxx is None:
             raise RuntimeError("Failed to find C++ compiler")
-    cc_cmd = [cxx, src_path]
-    # disable all warnings
-    cc_cmd += ["-w"]
     # find the python library
     if hasattr(sysconfig, "get_default_scheme"):
         scheme = sysconfig.get_default_scheme()
@@ -51,25 +48,34 @@ def build_npu_ext(obj_name: str, is_model: bool, soc: config.Platform, src_path:
     if scheme == "posix_local":
         scheme = "posix_prefix"
     py_include_dir = sysconfig.get_paths(scheme=scheme)["include"]
-    cc_cmd += [f"-I{py_include_dir}"]
+    cc_cmd = [cxx, src_path, "-w", f"-I{py_include_dir}"]
 
     arch = platform.machine()
     # find the ascend library
     asc_path = get_ascend_path()
+
+    pkg_include_path = os.path.join(asc_path, f'{arch}-linux', 'pkg_inc')
+    profiling_include_path = os.path.join(asc_path, f'{arch}-linux', 'pkg_inc/profiling')
+    runtime_include_path = os.path.join(asc_path, f'{arch}-linux', 'pkg_inc/runtime') 
+    if Path(pkg_include_path).exists() and Path(profiling_include_path).exists()  \
+        and Path(runtime_include_path).exists():
+        include_path = [
+            f"-I{pkg_include_path}", f"-I{profiling_include_path}", f"-I{runtime_include_path}", 
+            "-DSEPARATE_PKG_ARCH"]
+    else:
+        include_path = [
+            f"-I{os.path.join(asc_path, 'include/experiment')}",	 
+            f"-I{os.path.join(asc_path, 'include/experiment/msprof')}"]
+
     cc_cmd += [
         f"-I{os.path.join(asc_path, 'include')}",
-        f"-I{os.path.join(asc_path, f'{arch}-linux', 'pkg_inc')}",
-        f"-I{os.path.join(asc_path, f'{arch}-linux', 'pkg_inc/profiling')}",
-        f"-I{os.path.join(asc_path, f'{arch}-linux', 'pkg_inc/runtime')}",
         f"-I{pybind11.get_include()}",
-        f"-L{os.path.join(asc_path, 'lib64')}", 
-    ]
+        f"-L{os.path.join(asc_path, 'lib64')}"]
+
+    cc_cmd += include_path
 
     if is_model:
-        cc_cmd += [
-            f"-L{os.path.join(asc_path, f'tools/simulator/{soc.value}/lib')}",
-            "-lruntime_camodel",
-        ]
+        cc_cmd += [f"-L{os.path.join(asc_path, f'tools/simulator/{soc.value}/lib')}", "-lruntime_camodel"]
     else:
         cc_cmd += ["-lruntime", "-lmsprofiler"]
 
