@@ -14,10 +14,16 @@
 #include <sys/syscall.h>
 
 #include "acl/acl.h"
+#ifdef SEPARATE_PKG_ARCH
 #include "profiling/prof_api.h"
 #include "profiling/prof_common.h"
 #include "profiling/aprof_pub.h"
 #include "runtime/rt.h"
+#else
+#include "experiment/msprof/toolchain/prof_api.h"	 
+#include "experiment/msprof/toolchain/prof_data_config.h"	 
+#include "experiment/runtime/runtime/rt.h"
+#endif
 
 static unsigned int moduleId = 8;
 static unsigned int msprofFlagL0 = 0;
@@ -34,11 +40,18 @@ int ProfCtrlHandle(unsigned int ctrlType, void *ctrlData, unsigned int dataLen)
     const uint64_t profSwitch = handle->profSwitch;
     const uint64_t profType = handle->type;
     if (profType == PROF_COMMANDHANDLE_TYPE_START) {
+#ifdef SEPARATE_PKG_ARCH
         if ((profSwitch & PROF_TASK_TIME_MASK) == PROF_TASK_TIME_MASK) {
+#else
+        if ((profSwitch & PROF_TASK_TIME) == PROF_TASK_TIME) {
+#endif
             msprofFlagL0 = 1;
         }
-
+#ifdef SEPARATE_PKG_ARCH
         if ((profSwitch & PROF_TASK_TIME_L1_MASK) == PROF_TASK_TIME_L1_MASK) {
+#else
+        if ((profSwitch & PROF_TASK_TIME_L1) == PROF_TASK_TIME_L1) {
+#endif
             msprofFlagL1 = 1;
         }
     }
