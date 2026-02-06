@@ -2,7 +2,7 @@
 
 #### BatchMatmulTiling.get_core_num(self: libhost.BatchMatmulTiling) → object
 
-获得多核切分所使用的BlockDim参数。
+获得多核切分所使用的BlockNum参数。
 
 **对应的Ascend C函数原型**
 
@@ -36,7 +36,7 @@ tiling.set_bias(True)
 tiling.set_buffer_space(-1, -1, -1)
 tiling_data = host.TCubeTiling()
 ret = tiling.get_tiling(tiling_data)
-# 获得多核切分后，使用的BlockDim
+# 获得多核切分后，使用的BlockNum
 dim, m_dim, n_dim = 0
 ret1 = tiling.get_core_num(dim, m_dim, n_dim)
 ```

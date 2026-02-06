@@ -517,7 +517,7 @@ def ib_set_docstring():
     - 注意：如果是AIVOnly模式，核数 = GetBlockNum()；如果是MIX模式，核数 = GetBlockNum() * 2；
     - ubWorkspace申请的空间最少要求为：32Bytes；
     - gmWorkspace缓存的值需要初始化为0。
-    - 使用该接口进行多核控制时，算子调用时指定的逻辑blockDim必须保证不大于实际运行该算子的AI处理器核数，否则框架进行多轮调度时会插入异常同步，导致Kernel“卡死”现象。
+    - 使用该接口进行多核控制时，算子调用时指定的逻辑blockNum必须保证不大于实际运行该算子的AI处理器核数，否则框架进行多轮调度时会插入异常同步，导致Kernel“卡死”现象。
     """
 
     py_example = """
@@ -568,7 +568,7 @@ def ib_wait_docstring():
 
     - gmWorkspace申请的空间最少要求为：核数 * 32Bytes * eventID_max + blockIdx_max * 32Bytes + 32Bytes。（eventID_max和blockIdx_max分别指eventID、blockIdx的最大值 ）
     - ubWorkspace申请的空间最少要求为：32Bytes。
-    - 使用该接口进行多核控制时，算子调用时指定的逻辑blockDim必须保证不大于实际运行该算子的AI处理器核数，否则框架进行多轮调度时会插入异常同步，导致Kernel“卡死”现象。
+    - 使用该接口进行多核控制时，算子调用时指定的逻辑blockNum必须保证不大于实际运行该算子的AI处理器核数，否则框架进行多轮调度时会插入异常同步，导致Kernel“卡死”现象。
     """
 
     py_example = """
@@ -615,7 +615,7 @@ def sync_all_docstring():
 
     - gmWorkspace: gmWorkspace为用户定义的全局Global空间，作为所有核共用的缓存，用于保存每个核的状态标记，类型为GlobalTensor，支持的数据类型为int32_t。
     - ubWorkspace: ubWorkspace为用户定义的局部Local空间，每个核单独自用，用于标记当前核的状态。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT，支持的数据类型为int32_t。
-    - usedCores: 指定多少个核之间的同步，传入数值不能超过算子调用时指定的逻辑blockDim。此参数为默认参数，不传此参数表示全核软同步。
+    - usedCores: 指定多少个核之间的同步，传入数值不能超过算子调用时指定的逻辑blockNum。此参数为默认参数，不传此参数表示全核软同步。
     - isAIVOnly: 控制SyncAll作用于纯Vector算子或融合（Cube和Vector融合）算子。可选值：
       - true（默认值）：纯Vector算子的全核同步，仅执行Vector核的全核同步。
       - false：融合算子的全核同步，先分别完成Vector核和Cube核的全核同步，再执行两者之间的同步（软同步接口不支持此功能）。
@@ -628,7 +628,7 @@ def sync_all_docstring():
       - 通过在host侧进行初始化操作，确保传入该接口时，gmWorkspace缓存已经初始化为0；
       - 在kernel侧初始化的时候对gmWorkspace缓存初始化，需要注意的是，每个核上都需要初始化全部的gmWorkspace缓存空间。
     - ubWorkspace申请的空间大小要求大于等于核数*32Bytes。
-    - 使用该接口进行多核控制时，算子调用时指定的逻辑blockDim必须保证不大于实际运行该算子的AI处理器核数，否则框架进行多轮调度时会插入异常同步，导致Kernel“卡死”现象。
+    - 使用该接口进行多核控制时，算子调用时指定的逻辑blockNum必须保证不大于实际运行该算子的AI处理器核数，否则框架进行多轮调度时会插入异常同步，导致Kernel“卡死”现象。
     - 在分离模式下，建议使用硬同步接口而非软同步接口。软同步接口仅适用于纯Vector场景，且性能较低。使用硬同步接口时，需根据场景设置Kernel类型：
       - 在纯Vector/Cube场景下，需设置Kernel类型为KERNEL_TYPE_MIX_AIV_1_0或KERNEL_TYPE_MIX_AIC_1_0。
       - 对于Vector和Cube混合场景，需根据实际情况灵活配置Kernel类型。
@@ -6224,7 +6224,7 @@ def wait_pre_block_docstring():
     - 需要保证每个核调用该接口的次数相同。
     - gm_workspace申请的空间最少要求为：blockNum * 32Bytes；ub_workspace申请的空间最少要求为：blockNum * 32 + 32Bytes；其中blockNum为调用的核数，可调用get_block_num获取。
     - 分离模式下，使用该接口进行多核同步时，仅对AIV核生效，wait_pre_block和notify_next_block之间仅支持插入矢量计算相关指令，对矩阵计算相关指令不生效。
-    - 使用该接口进行多核控制时，算子调用时指定的逻辑blockDim必须保证不大于实际运行该算子的AI处理器核数，否则框架进行多轮调度时会插入异常同步，导致Kernel“卡死”现象。
+    - 使用该接口进行多核控制时，算子调用时指定的逻辑blockNum必须保证不大于实际运行该算子的AI处理器核数，否则框架进行多轮调度时会插入异常同步，导致Kernel“卡死”现象。
     """
 
     py_example = """
@@ -6277,7 +6277,7 @@ def notify_next_block_docstring():
     - 需要保证每个核调用该接口的次数相同。
     - gm_workspace申请的空间最少要求为：blockNum * 32Bytes；ub_workspace申请的空间最少要求为：blockNum * 32 + 32Bytes；其中blockNum为调用的核数，可调用get_block_num获取。
     - 分离模式下，使用该接口进行多核同步时，仅对AIV核生效，wait_pre_block和notify_next_block之间仅支持插入矢量计算相关指令，对矩阵计算相关指令不生效。
-    - 使用该接口进行多核控制时，算子调用时指定的逻辑blockDim必须保证不大于实际运行该算子的AI处理器核数，否则框架进行多轮调度时会插入异常同步，导致Kernel“卡死”现象。
+    - 使用该接口进行多核控制时，算子调用时指定的逻辑blockNum必须保证不大于实际运行该算子的AI处理器核数，否则框架进行多轮调度时会插入异常同步，导致Kernel“卡死”现象。
     """
 
     py_example = """

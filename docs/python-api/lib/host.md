@@ -44,7 +44,7 @@ Ascend C提供一组Matmul Tiling API，方便用户获取Matmul kernel计算时
 
 | [`MultiCoreMatmulTiling.enable_multi_core_split_k`](generated/asc.lib.host.MultiCoreMatmulTiling.enable_multi_core_split_k.md#asc.lib.host.MultiCoreMatmulTiling.enable_multi_core_split_k)(...)   | 多核场景，通过该接口使能切K轴。不调用该接口的情况下，默认不切K轴。在GetTiling接口调用前使用。                                                          |
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
-| [`MultiCoreMatmulTiling.get_core_num`](generated/asc.lib.host.MultiCoreMatmulTiling.get_core_num.md#asc.lib.host.MultiCoreMatmulTiling.get_core_num)(self)                                         | 获得多核切分所使用的BlockDim参数。                                                                                         |
+| [`MultiCoreMatmulTiling.get_core_num`](generated/asc.lib.host.MultiCoreMatmulTiling.get_core_num.md#asc.lib.host.MultiCoreMatmulTiling.get_core_num)(self)                                         | 获得多核切分所使用的BlockNum参数。                                                                                         |
 | [`MultiCoreMatmulTiling.get_single_shape`](generated/asc.lib.host.MultiCoreMatmulTiling.get_single_shape.md#asc.lib.host.MultiCoreMatmulTiling.get_single_shape)(self)                             | 获取计算后的single_core_m/single_core_n/single_core_k。                                                              |
 | [`MultiCoreMatmulTiling.set_align_split`](generated/asc.lib.host.MultiCoreMatmulTiling.set_align_split.md#asc.lib.host.MultiCoreMatmulTiling.set_align_split)(self, ...)                           | 多核切分时， 设置single_core_m/single_core_n/single_core_k的对齐值。比如设置single_core_m的对齐值为64（单位为元素），切分出的singleCoreM为64的倍数。 |
 | [`MultiCoreMatmulTiling.set_dim`](generated/asc.lib.host.MultiCoreMatmulTiling.set_dim.md#asc.lib.host.MultiCoreMatmulTiling.set_dim)(self, dim)                                                   | 设置多核Matmul时，参与运算的核数。                                                                                          |
@@ -53,5 +53,5 @@ Ascend C提供一组Matmul Tiling API，方便用户获取Matmul kernel计算时
 
 ## BatchMatmulTiling其他接口
 
-| [`BatchMatmulTiling.get_core_num`](generated/asc.lib.host.BatchMatmulTiling.get_core_num.md#asc.lib.host.BatchMatmulTiling.get_core_num)(self)   | 获得多核切分所使用的BlockDim参数。   |
+| [`BatchMatmulTiling.get_core_num`](generated/asc.lib.host.BatchMatmulTiling.get_core_num.md#asc.lib.host.BatchMatmulTiling.get_core_num)(self)   | 获得多核切分所使用的BlockNum参数。   |
 |--------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------|

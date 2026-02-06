@@ -199,7 +199,7 @@ RTS_API rtError_t MemcpyWrapper(void *dst, uint64_t destMax, const void *src, ui
  * @ingroup rt_kernel
  * @brief launch kernel to device
  * @param [in] stubFunc   stub function
- * @param [in] blockDim   block dimentions
+ * @param [in] blockNum   block dimentions
  * @param [in] args   argments address for kernel function
  * @param [in] argsSize   argements size
  * @param [in] smDesc   shared memory description
@@ -207,10 +207,10 @@ RTS_API rtError_t MemcpyWrapper(void *dst, uint64_t destMax, const void *src, ui
  * @return RT_ERROR_NONE for ok
  * @return RT_ERROR_INVALID_VALUE for error input
  */
-RTS_API rtError_t KernelLaunchWrapper(const void *stubFunc, uint32_t blockDim, void *args, uint32_t argsSize,
+RTS_API rtError_t KernelLaunchWrapper(const void *stubFunc, uint32_t blockNum, void *args, uint32_t argsSize,
                                       rtSmDesc_t *smDesc, rtStream_t stm)
 {
-    return rtKernelLaunch(stubFunc, blockDim, args, argsSize, smDesc, stm);
+    return rtKernelLaunch(stubFunc, blockNum, args, argsSize, smDesc, stm);
 }
 
 /**

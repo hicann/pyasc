@@ -82,7 +82,7 @@ def matmul_launch(a: torch.Tensor, b: torch.Tensor, tiling: asc.adv.TCubeTiling,
     _, size_n = b.shape
     c = torch.zeros((size_m, size_n), dtype=torch.float32, device=device)
     workspace = torch.zeros(16 * 1024 * 1024, dtype=torch.uint8, device=device)
-    # the block_dim for kernel should be the number of AIC-AIV group under MIX mode
+    # the block_num for kernel should be the number of AIC-AIV group under MIX mode
     matmul_kernel[USE_CORE_NUM // 2, rt.current_stream()](a, b, c, tiling, workspace)
     return c
 
