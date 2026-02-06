@@ -28,7 +28,7 @@ __aicore__ inline void IBWait(
 
 - gmWorkspace申请的空间最少要求为：核数 \* 32Bytes \* eventID_max + blockIdx_max \* 32Bytes + 32Bytes。（eventID_max和blockIdx_max分别指eventID、blockIdx的最大值 ）
 - ubWorkspace申请的空间最少要求为：32Bytes。
-- 使用该接口进行多核控制时，算子调用时指定的逻辑blockDim必须保证不大于实际运行该算子的AI处理器核数，否则框架进行多轮调度时会插入异常同步，导致Kernel“卡死”现象。
+- 使用该接口进行多核控制时，算子调用时指定的逻辑blockNum必须保证不大于实际运行该算子的AI处理器核数，否则框架进行多轮调度时会插入异常同步，导致Kernel“卡死”现象。
 
 **调用示例**
 

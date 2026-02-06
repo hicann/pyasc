@@ -90,7 +90,7 @@
   - 开发者定义Kernel函数时通过修饰器@asc.jit的小括号()传入编译参数，执行Kernel函数时通过中括号[]传入运行时配置（核数和Stream）。注：Device侧执行函数传递的jit的编译参数是无效的，仅Kernel函数生效。
   - 编译模块通过调用AST转ASC-IR、Ascend C代码生成模块接口，将Python前端代码转换为Ascend C代码，并根据开发者配置的编译参数组装编译命令，基于毕昇编译器生成NPU上可执行的Kernel文件。若开发者需要查看编译过程中生成的ASC-IR和Ascend C代码文件，可通过设置环境变量PYASC_DUMP_PATH=`${dump_path}`设置文件保存路径，在编译完成后切换到该路径下查看生成的文件。同时，编译模块提供JIT编译缓存功能。缓存机制能够存储和复用已经编译的Kernel二进制，避免重复编译，从而提高编译效率和程序执行速度。JIT编译缓存的影响因素包括编译选项、Kernel参数、全局变量以及由@asc.jit修饰的Kernel函数代码等。开发者可通过设置环境变量PYASC_HOME=`${home_path}`设置缓存根目录，默认是当前用户目录，设置环境变量PYASC_CACHE_DIR=`${cache_dir}`设置具体缓存目录，默认值是`${home_path}/.pyasc/cache`。若需要强制开启编译，可设置编译参数always_compile=True。
 
-  - 运行模块解析开发者通过[]传递的运行时配置和Kernel函数的输入输出参数，调用Ascend C Runtime接口加载编译模块生成的Kernel二进制并执行Kernel函数。对于Kernel函数的输入输出位于Host侧的场景，运行模块会自动完成Host侧和Device侧之间的数据拷贝。同时，运行模块支持开发者使用msprof工具采集profiling数据。
+  - 运行模块解析开发者通过[]传递的运行时配置和Kernel函数的输入输出参数，调用Ascend C Runtime接口加载编译模块生成的Kernel二进制并执行Kernel函数。对于Kernel函数的输入输出位于Host侧的场景，运行模块会自动完成Host侧和Device侧之间的数据拷贝。同时，为了便于优化算子性能，运行模块支持开发者使用msprof op工具采集profiling数据，生成内存热力图和仿真流水图等。
 - 目录结构说明
 
     详见[前端目录结构说明](#核心模块说明)。

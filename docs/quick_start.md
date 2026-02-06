@@ -161,6 +161,34 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
       ```
 
 ### 运行环境准备
+
+使用基于源码安装时，建议安装社区版<a href="https://www.hiascend.com/developer/download/community/result?module=cann&cann=8.5.0.alpha001">8.5.0.alpha001</a>及以上版本。
+
+使用快速安装时，不同pyasc发行版可支持的硬件平台及所需的[CANN](https://www.hiascend.com/developer/download/community/result?module=cann)版本如下表：
+
+<table style="width: 75%; margin: 0 auto;">
+  <colgroup>
+    <col style="width: 25%">
+    <col style="width: 22%">
+    <col style="width: 22%">
+  </colgroup>
+  <thead>
+      <tr>
+          <th>pyasc社区版本</th>
+          <th>支持CANN包版本</th>
+          <th>支持昇腾产品</th>
+      </tr>
+  </thead>
+  <tbody style="text-align: center">
+      <tr>
+          <td>v1.0.0</td>
+          <td>社区版<a href="https://www.hiascend.com/developer/download/community/result?module=cann&cann=8.5.0.alpha001">8.5.0.alpha001</a>、<a href="https://www.hiascend.com/developer/download/community/result?module=cann&cann=8.5.0.alpha002">8.5.0.alpha002</a></td>
+          <td><a href="https://www.hiascend.com/document/detail/zh/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html">Atlas A2训练/推理产品</a> <br>
+          <a href="https://www.hiascend.com/document/detail/zh/AscendFAQ/ProduTech/productform/hardwaredesc_0001.html">Atlas A3训练/推理产品</a></td>
+      </tr>
+  </tbody>
+</table>
+
 在运行Ascend C Python实现的算子前，请根据如下步骤完成相关环境准备。
 1. **安装python依赖**
    ```shell
@@ -169,7 +197,7 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
 
 2. **安装社区版CANN toolkit包**
 
-    根据实际环境，下载对应`Ascend-cann-toolkit_${cann_version}_linux-${arch}.run`包，下载链接见[CANN toolkit](https://www.hiascend.com/zh/developer/download/community/result?module=cann)。
+    根据实际环境，下载对应`Ascend-cann-toolkit_${cann_version}_linux-${arch}.run`包。
     
     ```bash
     # 确保安装包具有可执行权限
@@ -185,10 +213,7 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
 
     运行接入torch的算子时必须安装本包，若仅编译算子，可跳过本操作。
 
-    根据AI处理器类型，下载对应`cann-${soc_name}-ops-legacy_${cann_version}_linux-${arch}.run`包，下载链接如下：
-
-   - Ascend 910C：[ops x86_64包](https://ascend.devcloud.huaweicloud.com/artifactory/cann-run/software/8.5.0-beta.1/x86_64/Ascend-cann-910_93-ops_8.5.0-beta.1_linux-x86_64.run)、[ops aarch64包](https://ascend.devcloud.huaweicloud.com/artifactory/cann-run/software/8.5.0-beta.1/aarch64/Ascend-cann-910_93-ops_8.5.0-beta.1_linux-aarch64.run)。
-    - Ascend 910B：[ops x86_64包](https://ascend.devcloud.huaweicloud.com/artifactory/cann-run/software/8.5.0-beta.1/x86_64/Ascend-cann-910b-ops_8.5.0-beta.1_linux-x86_64.run)、[ops aarch64包](https://ascend.devcloud.huaweicloud.com/artifactory/cann-run/software/8.5.0-beta.1/aarch64/Ascend-cann-910b-ops_8.5.0-beta.1_linux-aarch64.run)。
+    根据AI处理器类型，下载对应`cann-${soc_name}-ops-legacy_${cann_version}_linux-${arch}.run`包。
     
     ```bash
     # 确保安装包具有可执行权限

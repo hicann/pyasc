@@ -90,18 +90,28 @@ DumpTensor: desc=1, addr=0, data_type=float32, position=UB, dump_size=32
 
   - asc.dump_tensor接口会对算子实际运行的性能带来一定影响，通常在调测阶段使用。
 
+## 算子性能调优
 
-## 使用msprof采集性能数据
+为了帮助开发者快速完成高性能算子开发，pyasc支持通过算子性能调优工具msprof op采集profiling数据，生成性能数据、内存热力图、仿真流水图等。本文档介绍了msprof op在算子开发过程中的应用。
 
-进行性能调优时，开发者可以使用msprof工具来采集和分析运行在昇腾AI处理器上的AI任务在各个运行阶段的关键性能指标，根据输出的性能数据，快速定位软、硬件性能瓶颈，提升AI任务性能分析的效率。关于msprof工具的详细介绍请参考官方文档：[性能调优工具](https://www.hiascend.com/document/detail/zh/canncommercial/83RC1/devaids/Profiling/atlasprofiling_16_0001.html)。
+msprof op工具用于采集和分析运行在昇腾AI处理器上算子的关键性能指标，开发者根据输出的profiling数据快速定位算子的软硬件性能瓶颈，提升算子性能分析效率。该工具的详细介绍请参考：[《算子开发工具-算子调优》](https://hiascend.com/document/redirect/CannCommunityToolMsProf)。
 
 ### 环境准备
 
 工具使用前，需完成环境准备，详细参考[quick_start.md](quick_start.md#envready)。
 
-### 采集性能数据
+### 算子性能数据采集
 
-本文以add算子为例，介绍如何使用msprof工具采集性能数据。
+msprof op工具包含msprof op（上板）和msprof op simulator（仿真）两种使用方式，协助用户定位算子内存、算子代码以及算子指令的异常，实现全方位的算子调优。
+
+功能简介：
+
+| 功能名称 | 适用场景       | 展示的图形                      |
+|----------|------------------|----------------------------------|
+| msprof op   | 适用于实际运行环境中的性能分析   | 计算内存热力图、Roofline瓶颈分析图、Cache热力图、通算流水图、算子代码热点图  |
+| msprof op simulator  | 适用于开发和调试阶段，进行详细仿真调优 | 指令流水图、算子代码热点图、内存通路吞吐率波形图 |
+
+本文以add算子为例，介绍如何在上板和仿真两种场景中使用msprof op算子性能调优工具。
 
 add算子实现代码参考[02_add_framework.py](../python/tutorials/02_add_framework/add_framework.py),
 确保代码中后端模式配置为NPU，如下：
@@ -121,22 +131,72 @@ msprof --output=./output python add_framework.py
 
 成功执行后在output目录下生成如下文件：
 ```
-├── host         //保存原始数据，用户无需关注
-...
-│    └── data
-├── device_{id}  //保存原始数据，用户无需关注
-...
-│    └── data
-...
-├── mindstudio_profiler_log
-├── mindstudio_profiler_output
-      ├── api_static_{timestamp}.csv   //用于统计CANN层的API执行耗时信息
-      ├── op_static_{timestamp}.csv    //AI Core和AI CPU算子调用次数及耗时统计
-      ├── op_summary_{timestamp}.csv   //AI Core和AI CPU算子数据
-      ├── task_time_{timestamp}.csv    //Task Scheduler任务调度信息
-      ├── msprof_{timestamp}.json      //timeline数据总表
-      ├── README.txt
+OPPROF_{timestamp}_XXX
+├── dump
+├── ArithmeticUtilization.csv
+├── L2Cache.csv
+├── Memory.csv
+├── MemoryL0.csv
+├── MemoryUB.csv
+├── OpBasicInfo.csv
+├── PipeUtilization.csv
+├── ResourceConflictRatio.csv
+├── visualize_data.bin
 ```
+
+- 将visualize_data.bin文件导入MindStudio Insight后，将会展示计算内存热力图、Roofline瓶颈分析图、Cache热力图、通算流水图和算子代码热点图。
+- 将trace.json文件导入Chrome浏览器或MindStudio Insight后，将会展示通算流水图。
+
+上述展示的图示内容的说明参考[算子调优](https://hiascend.com/document/redirect/CannCommunityToolMsProf)的相关章节。
+
+#### 3 仿真性能数据采集
+
+算子仿真运行需要修改运行模式，可以选择以下任意一种方式进行修改：
+
+- 方式一、运行脚本时指定-r参数
+
+    ```Shell
+    msprof op simulator --kernel-name=vadd_kernel --output=./output python add.py -r Model
+    ```
+
+- 方式二、修改脚本代码，指定Model
+
+    ```python
+    if __name__ == "__main__":
+        parser = argparse.ArgumentParser()
+        parser.add_argument("-r", type=str, default="Model", help="backend to run")
+    ```
+
+算子仿真信息采集，参考命令如下，各参数含义请参考msProf工具文档的说明。
+```Shell
+ msprof op simulator --kernel-name=vadd_kernel --output=./output python test_vadd.py 
+```
+ 成功执行后在output目录下生成如下文件：
+```
+OPPROF_{timestamp}_XXX 
+├── dump
+└── simulator
+    ├── core0.veccore0       // 按照core*.veccore*或core*.cubecore*目录存放各核的数据文件
+    │   ├── core0.veccore0_code_exe.csv
+    │   ├── core0.veccore0_instr_exe.csv
+    │   └── trace.json     // 该核的仿真指令流水图文件
+    ├── core0.veccore1
+    │   ├── core0.veccore1_code_exe.csv
+    │   ├── core0.veccore1_instr_exe.csv
+    │   └── trace.json
+    ├── core1.veccore0
+    │   ├── core1.veccore0_code_exe.csv
+    │   ├── core1.veccore0_instr_exe.csv
+    │   └── trace.json
+    ├── ...
+    ├── visualize_data.bin
+    └── trace.json      // 全部核的仿真指令流水图文件
+```
+
+- 将visualize_data.bin文件导入MindStudio Insight后，将会展示指令流水图、算子代码热点图和内存通路吞吐率波形图。
+- 将trace.json文件导入Chrome浏览器或MindStudio Insight后，将会展示指令流水图和内存通路吞吐率波形图。
+
+上述展示的图示内容的说明参考[算子调优](https://hiascend.com/document/redirect/CannCommunityToolMsProf)的相关章节。
 
 ## 使用Ascend PyTorch Profiler采集性能数据
 
@@ -152,7 +212,10 @@ pyasc的环境准备请参考[quick_start.md](quick_start.md#envready)，Ascend 
 
 ```Python
 import torch
-import torch_npu
+try:
+    import torch_npu
+except ModuleNotFoundError:
+    pass
 
 import asc
 import asc.runtime.config as config
@@ -160,32 +223,31 @@ import asc.lib.runtime as rt
 
 
 @asc.jit
-def vadd_kernel(x: asc.GlobalAddress, y: asc.GlobalAddress, z: asc.GlobalAddress, block_length: asc.ConstExpr[int],
-                buffer_num: asc.ConstExpr[int], tile_length: asc.ConstExpr[int], tile_num: asc.ConstExpr[int]):
+def vadd_kernel(x: asc.GlobalAddress, y: asc.GlobalAddress, z: asc.GlobalAddress, block_length: int):
+
     offset = asc.get_block_idx() * block_length
+    x_gm = asc.GlobalTensor()
+    y_gm = asc.GlobalTensor()
+    z_gm = asc.GlobalTensor()
     ......
 
 
 def vadd_launch(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
-    assert x.shape == y.shape
-    assert x.dtype == y.dtype
     z = torch.zeros_like(x)
+
     total_length = z.numel()
-    use_core_num = 16
-    block_length = (total_length + use_core_num - 1) // use_core_num
-    tile_num = 8
-    tile_length = (block_length + tile_num - 1) // tile_num
-    buffer_num = 1
-    vadd_kernel[use_core_num, rt.current_stream()](x, y, z, block_length, buffer_num, tile_length, tile_num)
+    block_length = total_length // USE_CORE_NUM
+
+    vadd_kernel[USE_CORE_NUM, rt.current_stream()](x, y, z, block_length)
     return z
 
 
-def test_vadd(backend: config.Backend):
-    config.set_platform(backend)
-    size = 8192
+def vadd_custom(backend: config.Backend, platform: config.Platform):
+    config.set_platform(backend, platform)
     device = "npu" if config.Backend(backend) == config.Backend.NPU else "cpu"
-    x = torch.randn(size, dtype=torch.float32, device=device)
-    y = torch.randn(size, dtype=torch.float32, device=device)
+    size = 8 * 2048
+    x = torch.rand(size, dtype=torch.float32, device=device)
+    y = torch.rand(size, dtype=torch.float32, device=device)
     z = vadd_launch(x, y)
     assert torch.allclose(z, x + y)
 
@@ -219,7 +281,7 @@ with torch_npu.profiler.profile(
     experimental_config=experimental_config) as prof:
     steps = 2
     for step in range(steps):
-        test_vadd(config.Backend.NPU)
+        vadd_custom(config.Backend.NPU)
         prof.step()    
 
 ```
