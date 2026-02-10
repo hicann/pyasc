@@ -213,7 +213,7 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
 
     运行接入torch的算子时必须安装本包，若仅编译算子，可跳过本操作。
 
-    根据AI处理器类型，下载对应`cann-${soc_name}-ops-legacy_${cann_version}_linux-${arch}.run`包。
+    根据AI处理器类型，下载对应`Ascend-cann-${soc_name}-ops_${cann_version}_linux-${arch}.run`包（8.5.0.alpha001与8.5.0.alpha002版本中为`Ascend-cann-kernels-${soc_name}_${cann_version}_linux-${arch}.run`包）。
     
     ```bash
     # 确保安装包具有可执行权限
