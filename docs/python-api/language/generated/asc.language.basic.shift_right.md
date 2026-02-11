@@ -6,7 +6,7 @@
 
 ### asc.language.basic.shift_right(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src: [LocalTensor](../core.md#asc.language.core.LocalTensor), scalar: int | float, mask: List[int], repeat_times: int, repeat_params: UnaryRepeatParams, is_set_mask: bool = True) → None
 
-对源操作数中的每个元素进行右移操作，右移的位数由输入参数scalarValue决定。
+对源操作数中的每个元素进行右移操作，右移的位数由输入参数scalar决定。
 
 **对应的Ascend C函数原型**
 

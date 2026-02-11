@@ -4,6 +4,8 @@
 
 #### TQueBind.deque(tensor: [LocalTensor](../core.md#asc.language.core.LocalTensor)) → None
 
+#### TQueBind.deque(dtype: DataType, src_user_pos: TPosition, dst_user_pos: TPosition) → [LocalTensor](../core.md#asc.language.core.LocalTensor)
+
 将Tensor从队列中取出，用于后续处理。
 
 **对应的Ascend C函数原型**

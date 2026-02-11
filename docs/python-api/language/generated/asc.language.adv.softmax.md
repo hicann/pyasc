@@ -21,62 +21,79 @@ def softmax(src):
 
 - 接口框架申请临时空间
   - LocalTensor的数据类型相同
-
     ```c++
-    template <typename T, bool isReuseSource = false, bool isBasicBlock = false, bool isDataFormatNZ = false, const SoftmaxConfig& config = SOFTMAX_DEFAULT_CFG>
-    __aicore__ inline void SoftMax(const LocalTensor<T>& dstTensor, const LocalTensor<T>& sumTensor, const LocalTensor<T>& maxTensor, const LocalTensor<T>& srcTensor, const SoftMaxTiling& tiling, const SoftMaxShapeInfo& softmaxShapeInfo = {})
+    template <typename T, bool isReuseSource = false, bool isBasicBlock = false,
+    bool isDataFormatNZ = false, const SoftmaxConfig& config = SOFTMAX_DEFAULT_CFG>
+    __aicore__ inline void SoftMax(const LocalTensor<T>& dstTensor, const LocalTensor<T>& sumTensor,
+                                  const LocalTensor<T>& maxTensor, const LocalTensor<T>& srcTensor,
+                                  const SoftMaxTiling& tiling, const SoftMaxShapeInfo& softmaxShapeInfo = {})
     ```
-
   - LocalTensor的数据类型不同
     ```c++
-    template <typename T, bool isReuseSource = false, bool isBasicBlock = false, bool isDataFormatNZ = false, const SoftmaxConfig& config = SOFTMAX_DEFAULT_CFG>
-    __aicore__ inline void SoftMax(const LocalTensor<half>& dstTensor, const LocalTensor<float>& sumTensor, const LocalTensor<float>& maxTensor, const LocalTensor<half>& srcTensor, const SoftMaxTiling& tiling, const SoftMaxShapeInfo& softmaxShapeInfo = {})
+    template <typename T, bool isReuseSource = false, bool isBasicBlock = false,
+    bool isDataFormatNZ = false, const SoftmaxConfig& config = SOFTMAX_DEFAULT_CFG>
+    __aicore__ inline void SoftMax(const LocalTensor<half>& dstTensor, const LocalTensor<float>& sumTensor,
+                                  const LocalTensor<float>& maxTensor, const LocalTensor<half>& srcTensor,
+                                  const SoftMaxTiling& tiling, const SoftMaxShapeInfo& softmaxShapeInfo = {})
     ```
   - 不带sumTensor和maxTensor参数
     ```c++
-    template <typename T, bool isReuseSource = false, bool isBasicBlock = false, const SoftmaxConfig& config = SOFTMAX_DEFAULT_CFG>
-    __aicore__ inline void SoftMax(const LocalTensor<T>& dstTensor, const LocalTensor<T>& srcTensor, const SoftMaxTiling& tiling, const SoftMaxShapeInfo& softmaxShapeInfo = {})
+    template <typename T, bool isReuseSource = false, bool isBasicBlock = false,
+    const SoftmaxConfig& config = SOFTMAX_DEFAULT_CFG>
+    __aicore__ inline void SoftMax(const LocalTensor<T>& dstTensor, const LocalTensor<T>& srcTensor,
+                                const SoftMaxTiling& tiling, const SoftMaxShapeInfo& softmaxShapeInfo = {})
     ```
 - 通过sharedTmpBuffer入参传入临时空间
   - LocalTensor的数据类型相同
     ```c++
-    template <typename T, bool isReuseSource = false, bool isBasicBlock = false, bool isDataFormatNZ = false, const SoftmaxConfig& config = SOFTMAX_DEFAULT_CFG>
-    __aicore__ inline void SoftMax(const LocalTensor<T>& dstTensor, const LocalTensor<T>& sumTensor, const LocalTensor<T>& maxTensor, const LocalTensor<T>& srcTensor, const LocalTensor<uint8_t>& sharedTmpBuffer, const SoftMaxTiling& tiling, const SoftMaxShapeInfo& softmaxShapeInfo = {})
+    template <typename T, bool isReuseSource = false, bool isBasicBlock = false,
+    bool isDataFormatNZ = false, const SoftmaxConfig& config = SOFTMAX_DEFAULT_CFG>
+    __aicore__ inline void SoftMax(const LocalTensor<T>& dstTensor, const LocalTensor<T>& sumTensor,
+                                  const LocalTensor<T>& maxTensor, const LocalTensor<T>& srcTensor,
+                                  const LocalTensor<uint8_t>& sharedTmpBuffer, const SoftMaxTiling& tiling,
+                                  const SoftMaxShapeInfo& softmaxShapeInfo = {})
     ```
   - LocalTensor的数据类型不同
     ```c++
-    template <typename T, bool isReuseSource = false, bool isBasicBlock = false, bool isDataFormatNZ = false, const SoftmaxConfig& config = SOFTMAX_DEFAULT_CFG>
-    __aicore__ inline void SoftMax(const LocalTensor<half>& dstTensor, const LocalTensor<float>& sumTensor, const LocalTensor<float>& maxTensor, const LocalTensor<half>& srcTensor, const LocalTensor<uint8_t>& sharedTmpBuffer, const SoftMaxTiling& tiling, const SoftMaxShapeInfo& softmaxShapeInfo = {})
+    template <typename T, bool isReuseSource = false, bool isBasicBlock = false,
+    bool isDataFormatNZ = false, const SoftmaxConfig& config = SOFTMAX_DEFAULT_CFG>
+    __aicore__ inline void SoftMax(const LocalTensor<half>& dstTensor, const LocalTensor<float>& sumTensor,
+                                  const LocalTensor<float>& maxTensor, const LocalTensor<half>& srcTensor,
+                                  const LocalTensor<uint8_t>& sharedTmpBuffer, const SoftMaxTiling& tiling,
+                                  const SoftMaxShapeInfo& softmaxShapeInfo = {})
     ```
   - 不带sumTensor和maxTensor参数
     ```c++
-    template <typename T, bool isReuseSource = false, bool isBasicBlock = false, const SoftmaxConfig& config = SOFTMAX_DEFAULT_CFG>
-    __aicore__ inline void SoftMax(const LocalTensor<T>& dstTensor, const LocalTensor<T>& srcTensor, const LocalTensor<uint8_t>& sharedTmpBuffer, const SoftMaxTiling& tiling, const SoftMaxShapeInfo& softmaxShapeInfo = {})
+    template <typename T, bool isReuseSource = false, bool isBasicBlock = false,
+    const SoftmaxConfig& config = SOFTMAX_DEFAULT_CFG>
+    __aicore__ inline void SoftMax(const LocalTensor<T>& dstTensor, const LocalTensor<T>& srcTensor,
+                                  const LocalTensor<uint8_t>& sharedTmpBuffer, const SoftMaxTiling& tiling,
+                                  const SoftMaxShapeInfo& softmaxShapeInfo = {})
     ```
 
 **参数说明**
 
-- T：操作数的数据类型。
-- isReuseSource：该参数预留，传入默认值false即可。
-- isBasicBlock：srcTensor和dstTensor的shape信息和Tiling切分策略满足基本块要求的情况下，可以使能该参数用于提升性能，默认不使能。
-- isDataFormatNZ：当前输入输出的数据格式是否为NZ格式，默认数据格式为ND，即默认取值为false。
-- config：结构体模板参数，此参数可选配，SoftmaxConfig类型。
 - dst：目的操作数。
 - sum：目的操作数。
 - max：目的操作数。
 - src：源操作数。
-- sharedTmpBuffer：临时空间。
 - tiling：SoftMax计算所需Tiling信息。
-- softmaxShapeInfo：src的shape信息。
+- tmp_buffer：临时空间。
+- reuse_source：该参数预留，传入默认值false即可。
+- basic_block：src和dst的shape信息和Tiling切分策略满足基本块要求的情况下，可以使能该参数用于提升性能，默认不使能。
+- data_format_nz：当前输入输出的数据格式是否为NZ格式，默认数据格式为ND，即默认取值为false。
 
 **约束说明**
 
 - src和dst的Tensor空间可以复用。
-- sumTensor和maxTensor为输出，并且last轴长度必须固定32Byte，非last轴大小需要和src以及dst保持一致。
-- sumTensor和maxTensor的数据类型需要保持一致。
+- sum和max为输出，并且last轴长度必须固定32Byte，非last轴大小需要和src以及dst保持一致。
+- sum和max的数据类型需要保持一致。
 - 操作数地址对齐要求请参见通用地址对齐约束。
-- 不支持sharedTmpBuffer与源操作数和目的操作数地址重叠。
-- 当参数softmaxShapeInfo中srcM != oriSrcM 或者 srcK != oriSrcK时，开发者需要对GM上的原始输入(oriSrcM, oriSrcK)在M或K方向补齐数据到(srcM, srcK)，补齐的数据会参与部分运算，在输入输出复用的场景下，API的计算结果会覆盖srcTensor中补齐的原始数据，在输入输出不复用的场景下，API的计算结果会覆盖dstTensor中对应srcTensor补齐位置的数据。
+- 不支持tmp_buffer与源操作数和目的操作数地址重叠。
+
+开发者需要对GM上的原始输入(ori_src_M, ori_src_K)在M或K方向补齐数据到(src_M, src_K)，补齐的数据会参与部分运算，
+在输入输出复用的场景下，API的计算结果会覆盖src中补齐的原始数据，在输入输出不复用的场景下，
+API的计算结果会覆盖dst中对应src补齐位置的数据。
 
 **调用示例**
 

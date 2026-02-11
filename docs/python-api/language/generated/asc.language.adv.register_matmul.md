@@ -1,6 +1,6 @@
 # asc.language.adv.register_matmul
 
-### asc.language.adv.register_matmul(pipe: [TPipe](../fwk.md#asc.language.fwk.TPipe), matmul: [Matmul](../adv.md#asc.language.adv.Matmul), tiling: TCubeTiling | None = None) → None
+### asc.language.adv.register_matmul(pipe: [TPipe](../fwk.md#asc.language.fwk.TPipe), workspace: GlobalAddress, matmul: [Matmul](../adv.md#asc.language.adv.Matmul), tiling: TCubeTiling | None = None) → None
 
 主要用于初始化Matmul对象。
 

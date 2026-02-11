@@ -1,8 +1,8 @@
 # asc.language.basic.set_load_data_padding_value
 
-### asc.language.basic.set_load_data_padding_value(padValue: int) → None
+### asc.language.basic.set_load_data_padding_value(pad_value: int) → None
 
-用于调用 Load3Dv1接口/Load3Dv2 接口时设置 Pad 填充的数值。 Load3Dv1/Load3Dv2 的模板参数 isSetPadding 设置为 true 时，用户需要通过本接口设置 Pad 填充的数值，设置为 false 时，本接口设置的填充值不生效。
+用于调用 load_3d_v1接口/load_3d_v2 接口时设置 Pad 填充的数值。 load_3d_v1/load_3d_v2 的模板参数 isSetPadding 设置为 true 时，用户需要通过本接口设置 Pad 填充的数值，设置为 false 时，本接口设置的填充值不生效。
 
 **对应的 Ascend C 函数原型**
 

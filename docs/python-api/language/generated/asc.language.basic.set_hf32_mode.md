@@ -20,7 +20,7 @@ __aicore__ inline void SetHF32Mode(bool hf32Mode);
 
 **约束说明**
 
-- 无特殊约束。
+无。
 
 **调用示例**
 

@@ -440,6 +440,52 @@ def set_wait_flag_docstring():
     return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
+def data_sync_barrier_docstring():
+    func_introduction = """
+    用于阻塞后续的指令执行，直到所有之前的内存访问指令（需要等待的内存位置可通过参数控制）执行结束。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <MemDsbT arg0>
+        __aicore__ inline void DataSyncBarrier()
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    - arg0: 模板参数，表示需要等待的内存位置，类型为MemDsbT，可取值为：
+    
+      - ALL，等待所有内存访问指令。
+      - DDR，等待GM访问指令。
+      - UB，等待UB访问指令。
+      - SEQ，预留参数，暂未启用，为后续的功能扩展做保留。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    无。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.mmad(...)
+        asc.data_sync_barrier(asc.MemDsbT.ALL)
+        asc.fixpipe(...)
+
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
 def pipe_barrier_docstring():
     func_introduction = """
     阻塞相同流水，具有数据依赖的相同流水之间需要插入此同步。
@@ -1293,8 +1339,6 @@ def metrics_prof_start_docstring():
 
     .. code-block:: python
 
-        import asc
-
         asc.metrics_prof_start()
 
     """
@@ -1334,8 +1378,6 @@ def metrics_prof_stop_docstring():
 
     .. code-block:: python
 
-        import asc
-        
         asc.metrics_prof_stop()
 
     """
@@ -1469,9 +1511,9 @@ def get_block_idx_docstring():
 
 def get_data_block_size_in_bytes_docstring():
     func_introduction = """
-    获取当前芯片版本一个datablock的大小，单位为byte。
-    开发者可以根据datablock的大小来计算API指令中待传入的repeatTime、
-    DataBlock Stride、Repeat Stride等参数值。
+    获取当前芯片版本一个data_block的大小，单位为byte。
+    开发者可以根据data_block的大小来计算API指令中待传入的repeat_time、
+    data_block、stride、repeat_stride等参数值。
     """
 
     cpp_signature = """
@@ -1491,7 +1533,7 @@ def get_data_block_size_in_bytes_docstring():
     return_list = """
     **返回值说明**
 
-    当前芯片版本一个datablock的大小，单位为byte。
+    当前芯片版本一个data_block的大小，单位为byte。
     """
 
     py_example = """
@@ -1965,7 +2007,7 @@ def load_data_docstring():
         - m_extension：M维扩展长度，取值范围：[1, 65535]。
         - k_start_pt：K维起始位置，取值范围：[0, 65535]。
         - m_start_pt：M维起始位置，取值范围：[0, 65535]。
-        - stride_w：卷积核在W维滑动步长，取值范围：[1, 63]。
+        - stride_w：卷积核在W维的滑动步长，取值范围：[1, 63]。
         - stride_h：卷积核在H维的滑动步长，取值范围：[1, 63]。
         - filter_w：卷积核width，取值范围：[1, 255]。
         - filter_h：卷积核height，取值范围：[1, 255]。
@@ -2084,91 +2126,91 @@ def load_data_docstring():
     
     - Local Memory 内部 3D 搬运（LoadData3DParamsV1）
 
-        .. code-block:: python
+      .. code-block:: python
 
-            def test_load_data_v1(mock_launcher_run):
+          def test_load_data_v1(mock_launcher_run):
 
-                @asc.jit
-                def kernel_load_data_v1(x: asc.GlobalAddress) -> None:
-                    x_local = asc.LocalTensor(
-                        dtype=asc.float16,
-                        pos=asc.TPosition.VECIN,
-                        addr=0,
-                        tile_size=512,
-                    )
-                    y_local = asc.LocalTensor(
-                        dtype=asc.float16,
-                        pos=asc.TPosition.VECOUT,
-                        addr=0,
-                        tile_size=512,
-                    )
-                    x_gm = asc.GlobalTensor()
-                    x_gm.set_global_buffer(x)
+            @asc.jit
+            def kernel_load_data_v1(x: asc.GlobalAddress) -> None:
+                x_local = asc.LocalTensor(
+                    dtype=asc.float16,
+                    pos=asc.TPosition.VECIN,
+                    addr=0,
+                    tile_size=512,
+                )
+                y_local = asc.LocalTensor(
+                    dtype=asc.float16,
+                    pos=asc.TPosition.VECOUT,
+                    addr=0,
+                    tile_size=512,
+                )
+                x_gm = asc.GlobalTensor()
+                x_gm.set_global_buffer(x)
 
-                    params_3d_v1 = asc.LoadData3DParamsV1(
-                        [0, 0, 0, 0],
-                        16, 16,
-                        0,
-                        0, 0,
-                        0, 0,
-                        1, 1,
-                        3, 3,
-                        1, 1,
-                        1,
-                        0, 1,
-                        0,
-                        0,
-                    )
+                params_3d_v1 = asc.LoadData3DParamsV1(
+                    [0, 0, 0, 0],
+                    16, 16,
+                    0,
+                    0, 0,
+                    0, 0,
+                    1, 1,
+                    3, 3,
+                    1, 1,
+                    1,
+                    0, 1,
+                    0,
+                    0,
+                )
 
-                    asc.load_data(y_local, x_local, params_3d_v1)
+                asc.load_data(y_local, x_local, params_3d_v1)
 
-                x = MockTensor(asc.float16)
-                kernel_load_data_v1[1](x)
-                assert mock_launcher_run.call_count == 1
+            x = MockTensor(asc.float16)
+            kernel_load_data_v1[1](x)
+            assert mock_launcher_run.call_count == 1
 
     - Local Memory 内部 3D 搬运（LoadData3DParamsV2）
 
-        .. code-block:: python
+      .. code-block:: python
 
-            def test_load_data_v2(mock_launcher_run):
+          def test_load_data_v2(mock_launcher_run):
 
-                @asc.jit
-                def kernel_load_data_v2(x: asc.GlobalAddress) -> None:
-                    x_local = asc.LocalTensor(
-                        dtype=asc.float16,
-                        pos=asc.TPosition.VECIN,
-                        addr=0,
-                        tile_size=512,
-                    )
-                    y_local = asc.LocalTensor(
-                        dtype=asc.float16,
-                        pos=asc.TPosition.VECOUT,
-                        addr=0,
-                        tile_size=512,
-                    )
-                    x_gm = asc.GlobalTensor()
-                    x_gm.set_global_buffer(x)
+            @asc.jit
+            def kernel_load_data_v2(x: asc.GlobalAddress) -> None:
+            x_local = asc.LocalTensor(
+                    dtype=asc.float16,
+                    pos=asc.TPosition.VECIN,
+                    addr=0,
+                    tile_size=512,
+                )
+                y_local = asc.LocalTensor(
+                    dtype=asc.float16,
+                    pos=asc.TPosition.VECOUT,
+                    addr=0,
+                    tile_size=512,
+                )
+                x_gm = asc.GlobalTensor()
+                x_gm.set_global_buffer(x)
 
-                    params_3d_v2 = asc.LoadData3DParamsV2(
-                        [0, 0, 0, 0],
-                        16, 16,
-                        16,
-                        16, 16,
-                        0, 0,
-                        1, 1,
-                        3, 3,
-                        1, 1,
-                        False,
-                        0,
-                        False, False,
-                        False,
-                    )
+                params_3d_v2 = asc.LoadData3DParamsV2(
+                    [0, 0, 0, 0],
+                    16, 16,
+                    16,
+                    16, 16,
+                    0, 0,
+                    1, 1,
+                    3, 3,
+                    1, 1,
+                    False,
+                    0,
+                    False, False,
+                    False,
+                )
 
-                    asc.load_data(y_local, x_local, params_3d_v2)
+                asc.load_data(y_local, x_local, params_3d_v2)
 
-                x = MockTensor(asc.float16)
-                kernel_load_data_v2[1](x)
-                assert mock_launcher_run.call_count == 1
+            x = MockTensor(asc.float16)
+            kernel_load_data_v2[1](x)
+            assert mock_launcher_run.call_count == 1
     """
 
     return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
@@ -2525,7 +2567,7 @@ def proposal_concat_docstring():
 
 def proposal_extract_docstring():
     func_introduction = """
-    与ProposalConcat功能相反，从Region Proposals内将相应位置的单个元素抽取后重排，每次迭代处理16个Region Proposals，抽取16个元素后连续排列。
+    与proposal_concat功能相反，从Region Proposals内将相应位置的单个元素抽取后重排，每次迭代处理16个Region Proposals，抽取16个元素后连续排列。
     """
 
     cpp_signature = """
@@ -2677,9 +2719,9 @@ def duplicate_docstring():
 def mmad_with_sparse_docstring():
     func_introduction = """
     完成矩阵乘加操作，传入的左矩阵A为稀疏矩阵， 右矩阵B为稠密矩阵 。
-    对于矩阵A，在MmadWithSparse计算时完成稠密化；
+    对于矩阵A，在mmad_with_sparse计算时完成稠密化；
     对于矩阵B，在计算执行前的输入数据准备时自行完成稠密化（按照下文中介绍的稠密算法进行稠密化），
-    所以输入本接口的B矩阵为稠密矩阵。B稠密矩阵需要通过调用LoadDataWithSparse载入，同时加载索引矩阵，
+    所以输入本接口的B矩阵为稠密矩阵。B稠密矩阵需要通过调用load_data_with_sparse载入，同时加载索引矩阵，
     索引矩阵在矩阵B稠密化的过程中生成，再用于A矩阵的稠密化。
     """
 
@@ -2866,8 +2908,8 @@ def pair_reduce_sum_docstring():
 def repeat_reduce_sum_docstring():
     func_introduction = """
     对每个 repeat 内的所有数据进行求和。
-    与 WholeReduceSum 接口相比，不支持 mask 逐比特模式。
-    建议使用功能更全面的 WholeReduceSum 接口。
+    与 whole_reduce_sum 接口相比，不支持 mask 逐比特模式。
+    建议使用功能更全面的 whole_reduce_sum 接口。
     """
 
     cpp_signature = """
@@ -3556,7 +3598,7 @@ def set_pad_value_docstring():
 
 def set_vector_mask_docstring():
     func_introduction = """
-    用于在矢量计算时设置mask。使用前需要先调用 SetMaskCount/SetMaskNorm 设置 mask 模式。
+    用于在矢量计算时设置mask。使用前需要先调用 set_mask_count/set_mask_norm 设置 mask 模式。
     在不同模式下，mask的含义不同：
 
     - **Normal 模式**
@@ -3659,6 +3701,48 @@ def set_vector_mask_docstring():
           asc.set_mask_norm()
           asc.set_vector_mask(len, dtype=asc.float32, mode=asc.MaskMode.NORMAL)
           asc.reset_mask()
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def reset_mask_docstring():
+    func_introduction = """
+    恢复mask的值为默认值（全1），表示矢量计算中每次迭代内的所有元素都将参与运算。
+
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void ResetMask()
+
+    """
+
+    param_list = """
+    **参数说明**
+
+    无。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    无。
+    """
+
+    py_example = """
+    **调用示例**
+
+      .. code-block:: python
+
+          len = 128
+          asc.set_mask_count()
+          asc.set_vector_mask(len, dtype=asc.float16, mode=asc.MaskMode.COUNTER)
+          asc.reset_mask()
+
     """
 
     return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
@@ -3971,8 +4055,8 @@ NAME_TRANS = {
 
 def set_aipp_functions_docstring():
     func_introduction = """
-    设置图片预处理（AIPP，AI core pre-process）相关参数。和LoadImageToLocal(ISASI)接口配合使用。
-    设置后，调用LoadImageToLocal(ISASI)接口可在搬运过程中完成图像预处理操作。
+    设置图片预处理（AIPP，AI core pre-process）相关参数。和load_image_to_local(ISASI)接口配合使用。
+    设置后，调用load_image_to_local(ISASI)接口可在搬运过程中完成图像预处理操作。
     """
 
     cpp_signature = """
@@ -4302,7 +4386,7 @@ def set_hf32_mode_docstring():
     constraint_list = """
     **约束说明**
 
-    - 无特殊约束。
+    无。
     """
 
     py_example = """
@@ -4319,7 +4403,7 @@ def set_hf32_mode_docstring():
 
 def set_hf32_trans_mode_docstring():
     func_introduction = """
-    调用该接口后，可设置 MMAD 的 HF32 取整模式，仅在 HF32 模式开启时有效。
+    调用该接口后，可设置 Mmad 的 HF32 取整模式，仅在 HF32 模式开启时有效。
     在 HF32 模式下，将按照给定模式对 FP32 数据进行舍入。
     """
     cpp_signature = """
@@ -4333,14 +4417,14 @@ def set_hf32_trans_mode_docstring():
     **参数说明**
 
     - hf32_trans_mode：
-      MMAD HF32 取整模式控制参数，bool 类型。
+      Mmad HF32 取整模式控制参数，bool 类型。
       - True：FP32 将以向零靠近的方式舍入为 HF32。
       - False：FP32 将以最接近偶数的方式舍入为 HF32。
     """
     constraint_list = """
     **约束说明**
 
-    - 无特殊约束。
+    无。
     """
     py_example = """
     **调用示例**
@@ -4428,7 +4512,7 @@ def set_mask_norm_docstring():
 
 def set_mm_layout_transform_docstring():
     func_introduction = """
-    调用该接口后，可设置 MMAD 的 M/N 方向优先顺序，
+    调用该接口后，可设置 Mmad 的 M/N 方向优先顺序，
     控制矩阵乘加计算时先按 N 再按 M 方向还是先按 M 再按 N 方向。
     """
     cpp_signature = """
@@ -4442,14 +4526,14 @@ def set_mm_layout_transform_docstring():
     **参数说明**
 
     - mm_layout_mode：
-      MMAD M/N 方向控制参数，bool 类型。
+      Mmad M/N 方向控制参数，bool 类型。
       - True：代表 CUBE 将首先通过 N 方向，然后通过 M 方向产生结果。
       - False：代表 CUBE 将首先通过 M 方向，然后通过 N 方向产生结果。
     """
     constraint_list = """
     **约束说明**
 
-    - 无特殊约束。
+    无。
     """
     py_example = """
     **调用示例**
@@ -5088,8 +5172,8 @@ def set_atomic_type_docstring():
 
 def set_load_data_boundary_docstring():
     func_introduction = """
-    设置 Load3D 时 A1/B1 边界值。
-    如果 Load3D 指令在处理源操作数时，源操作数在 A1/B1 上的地址超出设置的边界，则会从 A1/B1 起始地址开始读取数据。
+    设置 load_3d 时 A1/B1 边界值。
+    如果 load_3d 指令在处理源操作数时，源操作数在 A1/B1 上的地址超出设置的边界，则会从 A1/B1 起始地址开始读取数据。
     """
 
     cpp_signature = """
@@ -5103,18 +5187,18 @@ def set_load_data_boundary_docstring():
     param_list = """
     **参数说明**
 
-    - boundaryValue 
+    - boundary_value 
         边界值。
-        Load3Dv1 指令：单位是 32 字节。
-        Load3Dv2 指令：单位是字节。
+        load_3d_v1 指令：单位是 32 字节。
+        load_3d_v2 指令：单位是字节。
     """
 
     constraint_list = """
     **约束说明**
 
-    - 用于 Load3Dv1 时， boundaryValue 的最小值是 16 （单位： 32 字节）；用于 Load3Dv2 时， boundaryValue 的最小值是 1024 （单位：字节）。
-    - 如果使用 SetLoadDataBoundary 接口设置了边界值，配合 Load3D 指令使用时， Load3D 指令的 A1/B1 初始地址要在设置的边界内。
-    - 如果 boundaryValue 设置为 0 ，则表示无边界，可使用整个 A1/B1 。
+    - 用于 load_3d_v1 时， boundary_value 的最小值是 16 （单位： 32 字节）；用于 load_3d_v2 时， boundary_value 的最小值是 1024 （单位：字节）。
+    - 如果使用 SetLoadDataBoundary 接口设置了边界值，配合 load_3d 指令使用时， load_3d 指令的 A1/B1 初始地址要在设置的边界内。
+    - 如果 boundary_value 设置为 0 ，则表示无边界，可使用整个 A1/B1 。
     """
 
     py_example = """
@@ -5131,7 +5215,7 @@ def set_load_data_boundary_docstring():
 
 def set_load_data_padding_value_docstring():
     func_introduction = """
-    用于调用 Load3Dv1接口/Load3Dv2 接口时设置 Pad 填充的数值。 Load3Dv1/Load3Dv2 的模板参数 isSetPadding 设置为 true 时，用户需要通过本接口设置 Pad 填充的数值，设置为 false 时，本接口设置的填充值不生效。
+    用于调用 load_3d_v2v1接口/load_3d_v2 接口时设置 Pad 填充的数值。 load_3d_v1/load_3d_v2 的模板参数 isSetPadding 设置为 true 时，用户需要通过本接口设置 Pad 填充的数值，设置为 false 时，本接口设置的填充值不生效。
     """ 
 
     cpp_signature = """
@@ -5170,7 +5254,7 @@ def set_load_data_padding_value_docstring():
 
 def set_load_data_repeat_docstring():
     func_introduction = """
-    用于设置 Load3Dv2 接口的 repeat 参数。设置 repeat 参数后，可以通过调用一次 Load3Dv2 接口完成多个迭代的数据搬运。
+    用于设置 load_3d_v2 接口的 repeat 参数。设置 repeat 参数后，可以通过调用一次 load_3d_v2 接口完成多个迭代的数据搬运。
     """
 
     cpp_signature = """
@@ -5185,7 +5269,7 @@ def set_load_data_repeat_docstring():
     **参数说明**
 
     - repeatParams 
-        设置Load3Dv2接口的repeat参数，类型为LoadDataRepeatParam。
+        设置load_3d_v22接口的repeat参数，类型为LoadDataRepeatParam。
 
     - repeatParams 
         height/width方向上的迭代次数，取值范围：repeatTime ∈[0, 255] 。默认值为1
@@ -5707,7 +5791,7 @@ def compare_scalar_docstring() -> Callable[[T], T]:
 
 def get_cmp_mask_docstring() -> Callable[[T], T]:
     func_introduction = """
-    用于获取Compare（结果存入寄存器）指令的比较结果。
+    用于获取compare（结果存入寄存器）指令的比较结果。
     """
 
     cpp_signature = """
@@ -6196,9 +6280,9 @@ def wait_pre_block_docstring():
     cpp_signature = """
     **对应的Ascend C函数原型**
 
-        .. code-block:: c++
+    .. code-block:: c++
 
-            __aicore__ inline void WaitPreBlock(GlobalTensor<int32_t>& gmWorkspace, LocalTensor<int32_t>& ubWorkspace)
+        __aicore__ inline void WaitPreBlock(GlobalTensor<int32_t>& gmWorkspace, LocalTensor<int32_t>& ubWorkspace)
     """
 
     param_list = """
@@ -6230,9 +6314,9 @@ def wait_pre_block_docstring():
     py_example = """
     **调用示例**
 
-        .. code-block:: python
+    .. code-block:: python
 
-            asc.wait_pre_block(gm_workspace, ub_workspace)
+        asc.wait_pre_block(gm_workspace, ub_workspace)
 
     """
 
@@ -6433,6 +6517,7 @@ DOC_HANDLES = {
     "load_image_to_local": load_image_to_local_docstring,
     "mmad": mmad_docstring,
     "notify_next_block": notify_next_block_docstring,
+    "data_sync_barrier": data_sync_barrier_docstring,
     "pipe_barrier": pipe_barrier_docstring,
     "wait_flag": set_wait_flag_docstring,
     "metrics_prof_start": metrics_prof_start_docstring,
@@ -6448,6 +6533,7 @@ DOC_HANDLES = {
     "gather_mask": gather_mask_docstring,
     "mmad_with_sparse": mmad_with_sparse_docstring,
     "set_vector_mask": set_vector_mask_docstring,
+    "reset_mask": reset_mask_docstring,
     "pair_reduce_sum": pair_reduce_sum_docstring,
     "repeat_reduce_sum": repeat_reduce_sum_docstring,
     "wait_pre_block": wait_pre_block_docstring,

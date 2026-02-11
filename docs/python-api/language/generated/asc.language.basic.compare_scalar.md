@@ -35,13 +35,13 @@ __aicore__ inline void CompareScalar(const LocalTensor<U>& dst, const LocalTenso
 - dst: 目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。
 - src0: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。
 - src1_scalar: 源操作数，Scalar标量。数据类型和src0保持一致。
-- cmp_mode: CMPMODE类型，表示比较模式。  
-  - LT: src0小于（less than）src1  
-  - GT: src0大于（greater than）src1  
-  - GE: src0大于或等于（greater than or equal to）src1  
-  - EQ: src0等于（equal to）src1  
-  - NE: src0不等于（not equal to）src1  
-  - LE: src0小于或等于（less than or equal to）src1  
+- cmp_mode: CMPMODE类型，表示比较模式。
+  - LT: src0小于（less than）src1
+  - GT: src0大于（greater than）src1
+  - GE: src0大于或等于（greater than or equal to）src1
+  - EQ: src0等于（equal to）src1
+  - NE: src0不等于（not equal to）src1
+  - LE: src0小于或等于（less than or equal to）src1
 - count: 参与计算的元素个数。
 - mask: 用于控制每次迭代内参与计算的元素。
 - repeat_times: 重复迭代次数。

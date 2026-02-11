@@ -22,7 +22,5 @@ __aicore__ inline void MetricsProfStop()
 **调用示例**
 
 ```python
-import asc
-
 asc.metrics_prof_stop()
 ```

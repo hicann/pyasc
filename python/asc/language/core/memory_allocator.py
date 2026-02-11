@@ -17,6 +17,7 @@ from ..core.ir_value import IRHandle, materialize_ir_value
 from ..core.tensor import LocalTensor
 from ..core.types import DataType
 from ..core.utils import DefaultValued, OverloadDispatcher, global_builder, require_jit, set_allocator_docstring
+from .ir_value import RuntimeInt
 
 
 class LocalMemAllocator:
@@ -52,9 +53,13 @@ class LocalMemAllocator:
     def to_ir(self) -> IRHandle:
         return self.handle
 
+    @overload
+    def get_cur_addr(self) -> int:
+        ...
+
     @require_jit
     @set_allocator_docstring("LocalMemAllocator", "get_cur_addr")
-    def get_cur_addr(self) -> int:
+    def get_cur_addr(self) -> RuntimeInt:
         builder = global_builder.get_ir_builder()
         result_type = builder.get_ui32_type()
         return builder.create_asc_LocalMemAllocatorGetCurAddrOp(result_type, self.handle)

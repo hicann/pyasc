@@ -2,7 +2,7 @@
 
 ### asc.language.basic.set_load_data_repeat(param: LoadDataRepeatParam) → None
 
-用于设置 Load3Dv2 接口的 repeat 参数。设置 repeat 参数后，可以通过调用一次 Load3Dv2 接口完成多个迭代的数据搬运。
+用于设置 load_3d_v2 接口的 repeat 参数。设置 repeat 参数后，可以通过调用一次 load_3d_v2 接口完成多个迭代的数据搬运。
 
 **对应的 Ascend C 函数原型**
 
@@ -13,7 +13,7 @@ __aicore__ inline void SetLoadDataRepeat(const LoadDataRepeatParam& repeatParams
 **参数说明**
 
 - repeatParams
-  : 设置Load3Dv2接口的repeat参数，类型为LoadDataRepeatParam。
+  : 设置load_3d_v2接口的repeat参数，类型为LoadDataRepeatParam。
 - repeatParams
   : height/width方向上的迭代次数，取值范围：repeatTime ∈[0, 255] 。默认值为1
 - repeatStride

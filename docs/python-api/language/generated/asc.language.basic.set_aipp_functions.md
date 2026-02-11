@@ -4,8 +4,8 @@
 
 ### asc.language.basic.set_aipp_functions(src0: [GlobalTensor](../core.md#asc.language.core.GlobalTensor), src1: [GlobalTensor](../core.md#asc.language.core.GlobalTensor), input_format: AippInputFormat, config: AippParams) → None
 
-设置图片预处理（AIPP，AI core pre-process）相关参数。和LoadImageToLocal(ISASI)接口配合使用。
-设置后，调用LoadImageToLocal(ISASI)接口可在搬运过程中完成图像预处理操作。
+设置图片预处理（AIPP，AI core pre-process）相关参数。和load_image_to_local(ISASI)接口配合使用。
+设置后，调用load_image_to_local(ISASI)接口可在搬运过程中完成图像预处理操作。
 
 **对应的Ascend C函数原型**
 

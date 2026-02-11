@@ -4,7 +4,7 @@
 
 ### asc.language.basic.set_vector_mask(mask_high: int, mask_low: int, dtype: DataType, mode: MaskMode) → None
 
-用于在矢量计算时设置mask。使用前需要先调用 SetMaskCount/SetMaskNorm 设置 mask 模式。
+用于在矢量计算时设置mask。使用前需要先调用 set_mask_count/set_mask_norm 设置 mask 模式。
 在不同模式下，mask的含义不同：
 
 - **Normal 模式**

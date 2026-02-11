@@ -16,6 +16,7 @@ from ..core.tensor import GlobalTensor, LocalTensor
 
 
 @require_jit
+@set_common_docstring(api_name="data_sync_barrier")
 def data_sync_barrier(arg0: MemDsbT) -> None:
     global_builder.get_ir_builder().create_asc_DataSyncBarrierOp(arg0.value)
 

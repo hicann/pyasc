@@ -1,6 +1,6 @@
 # asc.language.basic.set_hccl_context
 
-### asc.language.basic.set_hccl_context(index: PlainValue | int, context: GlobalAddress) → None
+### asc.language.basic.set_hccl_context(index: int, context: GlobalAddress) → None
 
 设置通算融合算子每个通信域对应的context（消息区）地址。
 

@@ -27,6 +27,7 @@ Common operations
     data_cache_preload
     data_copy
     data_copy_pad
+    data_sync_barrier
     dump_acc_chk_point
     dump_tensor
     duplicate
@@ -58,6 +59,7 @@ Common operations
     printf
     proposal_concat
     proposal_extract
+    reset_mask
     rp_sort16
     scatter
     select

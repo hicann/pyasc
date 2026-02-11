@@ -8,11 +8,11 @@
 
 ### asc.language.basic.load_data(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src: [GlobalTensor](../core.md#asc.language.core.GlobalTensor), params: LoadData2DParamsV2) → None
 
-### asc.language.basic.load_data(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src: [LocalTensor](../core.md#asc.language.core.LocalTensor), params: LoadData3DParamsV2Pro) → None
-
 ### asc.language.basic.load_data(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src: [LocalTensor](../core.md#asc.language.core.LocalTensor), params: LoadData3DParamsV1) → None
 
 ### asc.language.basic.load_data(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src: [LocalTensor](../core.md#asc.language.core.LocalTensor), params: LoadData3DParamsV2) → None
+
+### asc.language.basic.load_data(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src: [LocalTensor](../core.md#asc.language.core.LocalTensor), params: LoadData3DParamsV2Pro) → None
 
 源操作数/目的操作数的数据类型为uint8_t/int8_t时，分形矩阵大小在A1/A2上为16\*32， 在B1/B2上为32\*16。
 源操作数/目的操作数的数据类型为uint16_t/int16_t/half/bfloat16_t时，分形矩阵在A1/B1/A2/B2上的大小为16\*16。
@@ -75,7 +75,7 @@ template <typename T,
         typename Std::enable_if<Std::is_same<PrimT<T>, U>::value, bool>::type = true>
 __aicore__ inline void LoadData(const LocalTensor<T>& dst,
                                 const LocalTensor<T>& src,
-                                const LoadData3DParamsV2<U>& loadDataParams)                            
+                                const LoadData3DParamsV2<U>& loadDataParams)
 ```
 
 **参数说明**
@@ -90,11 +90,11 @@ __aicore__ inline void LoadData(const LocalTensor<T>& dst,
   - 元素数据类型需与 dst 保持一致。
 - params：类型为下面结构体
   - LoadData2DParams 结构体
-    - start_index：分形矩阵ID，说明搬运起始位置为源操作数中第几个分形（0为源操作数中第1个分形矩阵）。取值范围：startIndex∈[0, 65535] 。单位：512B。默认为0。
-    - repeat_times：迭代次数，每个迭代可以处理512B数据。取值范围：repeatTimes∈[1, 255]。
+    - start_index：分形矩阵ID，说明搬运起始位置为源操作数中第几个分形（0为源操作数中第1个分形矩阵）。取值范围：start_index∈[0, 65535] 。单位：512B。默认为0。
+    - repeat_times：迭代次数，每个迭代可以处理512B数据。取值范围：repeat_times∈[1, 255]。
     - src_stride：相邻迭代间，源操作数前一个分形与后一个分形起始地址的间隔，单位：512B。取值范围：src_stride∈[0, 65535]。默认为0。
     - sid：预留参数，配置为0即可。
-    - dst_gap：相邻迭代间，目的操作数前一个分形结束地址与后一个分形起始地址的间隔，单位：512B。取值范围：dstGap∈[0, 65535]。默认为0。
+    - dst_gap：相邻迭代间，目的操作数前一个分形结束地址与后一个分形起始地址的间隔，单位：512B。取值范围：dst_gap∈[0, 65535]。默认为0。
     - if_transpose：是否启用转置功能，对每个分形矩阵进行转置，默认为false。
     - addr_mode：预留参数，配置为0即可。
   - LoadData2DParamsV2 结构体
@@ -144,8 +144,8 @@ __aicore__ inline void LoadData(const LocalTensor<T>& dst,
     - m_extension：M维扩展长度，取值范围：[1, 65535]。
     - k_start_pt：K维起始位置，取值范围：[0, 65535]。
     - m_start_pt：M维起始位置，取值范围：[0, 65535]。
-    - stride_w：卷积核在W维滑动步长，取值范围：[1, 63]。
-    - stride_h：卷积核在H维滑动步长，取值范围：[1, 63]。
+    - stride_w：卷积核在W维的滑动步长，取值范围：[1, 63]。
+    - stride_h：卷积核在H维的滑动步长，取值范围：[1, 63]。
     - filter_w：卷积核width，取值范围：[1, 255]。
     - filter_h：卷积核height，取值范围：[1, 255]。
     - dilation_filter_w：卷积核W维膨胀系数，取值范围：[1, 255]。

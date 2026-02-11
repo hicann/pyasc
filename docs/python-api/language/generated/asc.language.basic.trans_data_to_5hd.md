@@ -55,7 +55,6 @@ __aicore__ inline void TransDataTo5HD(const LocalTensor<uint64_t>& dst,
 
 - dst_list, src_list：定义了源数据块和目标数据块。它们可以是包含 LocalTensor 物理地址的 list/tuple，
   也可以是包含 LocalTensor 视图对象的 list/tuple，或者是将地址值连续存储的 LocalTensor<uint64_t>。
-
   ```python
   params = asc.TransDataTo5HDParams(
       dst_high_half=False,

@@ -2,7 +2,7 @@
 
 ### asc.language.basic.fixpipe(dst: [GlobalTensor](../core.md#asc.language.core.GlobalTensor), src: [LocalTensor](../core.md#asc.language.core.LocalTensor), params: FixpipeParamsV220, config: FixpipeConfig = FixpipeConfig.cfg_row_major) → None
 
-### asc.language.basic.fixpipe(dst: [GlobalTensor](../core.md#asc.language.core.GlobalTensor), src: [LocalTensor](../core.md#asc.language.core.LocalTensor), cbufWorkspace: [LocalTensor](../core.md#asc.language.core.LocalTensor), params: FixpipeParamsV220, config: FixpipeConfig = FixpipeConfig.cfg_row_major) → None
+### asc.language.basic.fixpipe(dst: [GlobalTensor](../core.md#asc.language.core.GlobalTensor), src: [LocalTensor](../core.md#asc.language.core.LocalTensor), cbuf_workspace: [LocalTensor](../core.md#asc.language.core.LocalTensor), params: FixpipeParamsV220, config: FixpipeConfig = FixpipeConfig.cfg_row_major) → None
 
 矩阵计算完成后，对结果进行处理，例如对计算结果进行量化操作，并把数据从CO1搬迁到Global Memory中。
 

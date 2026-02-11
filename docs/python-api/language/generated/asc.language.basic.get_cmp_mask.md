@@ -2,7 +2,7 @@
 
 ### asc.language.basic.get_cmp_mask(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor)) → None
 
-用于获取Compare（结果存入寄存器）指令的比较结果。
+用于获取compare（结果存入寄存器）指令的比较结果。
 
 **对应的Ascend C函数原型**
 

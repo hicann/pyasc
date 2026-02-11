@@ -34,12 +34,12 @@ __aicore__ inline void LoadDataWithTranspose(const LocalTensor<T>& dst,
   - 数据类型必须与 dst 一致。
 - params：二维转置加载参数，类型为 LoadData2dTransposeParams 或 LoadData2dTransposeParamsV2。
   - LoadData2dTransposeParams 结构体
-    - startIndex：方块矩阵ID，搬运起始位置为源操作数中第几个方块矩阵（0 为源操作数中第1个方块矩阵）。取值范围：startIndex∈[0, 65535] 。默认为0。
-    - repeatTimes：迭代次数，取值范围：repeatTimes∈[0, 255]。默认为0。
-    - srcStride：相邻迭代间，源操作数前一个分形与后一个分形起始地址的间隔。这里的单位实际上是拼接后的方块矩阵的大小。取值范围：srcStride∈[0, 65535]。默认为0。
-    - dstGap：相邻迭代间，目的操作数前一个迭代第一个分形的结束地址到下一个迭代第一个分形起始地址的间隔，单位：512B。取值范围：dstGap∈[0, 65535]。默认为0。
-    - dstFracGap：每个迭代内目的操作数转置前一个分形结束地址与后一个分形起始地址的间隔，单位为512B，仅在数据类型为float/int32_t/uint32_t/uint8_t/int8_t/int4b_t时有效。取值范围：dstFracGap∈[0, 65535]。默认为0。
-    - addrMode：预留参数
+    - start_index：方块矩阵ID，搬运起始位置为源操作数中第几个方块矩阵（0 为源操作数中第1个方块矩阵）。取值范围：start_index∈[0, 65535] 。默认为0。
+    - repeat_times：迭代次数，取值范围：repeat_times∈[0, 255]。默认为0。
+    - src_stride：相邻迭代间，源操作数前一个分形与后一个分形起始地址的间隔。这里的单位实际上是拼接后的方块矩阵的大小。取值范围：src_stride∈[0, 65535]。默认为0。
+    - dst_gap：相邻迭代间，目的操作数前一个迭代第一个分形的结束地址到下一个迭代第一个分形起始地址的间隔，单位：512B。取值范围：dst_gap∈[0, 65535]。默认为0。
+    - dst_frac_gap：每个迭代内目的操作数转置前一个分形结束地址与后一个分形起始地址的间隔，单位：512B，仅在数据类型为float/int32_t/uint32_t/uint8_t/int8_t/int4b_t时有效。取值范围：dst_frac_gap∈[0, 65535]。默认为0。
+    - addr_mode：预留参数
   - LoadData2dTransposeParamsV2 结构体
     - start_index：方块矩阵ID，搬运起始位置为源操作数中第几个方块矩阵（0 为源操作数中第1个方块矩阵）。取值范围：start_index∈[0, 65535] 。默认为0。
     - repeat_times：迭代次数，取值范围：repeat_times∈[0, 255]。默认为0。
@@ -76,7 +76,6 @@ __aicore__ inline void LoadDataWithTranspose(const LocalTensor<T>& dst,
 
       asc.load_data_with_transpose(y_local, x_local, params)
   ```
-
 - 调用示例（V2版本）
   ```python
   @asc.jit

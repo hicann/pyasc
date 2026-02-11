@@ -3,8 +3,8 @@
 ### asc.language.basic.repeat_reduce_sum(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src: [LocalTensor](../core.md#asc.language.core.LocalTensor), repeat_time: int, mask: int, dst_blk_stride: int, src_blk_stride: int, dst_rep_stride: int, src_rep_stride: int, is_set_mask: bool = True) → None
 
 对每个 repeat 内的所有数据进行求和。
-与 WholeReduceSum 接口相比，不支持 mask 逐比特模式。
-建议使用功能更全面的 WholeReduceSum 接口。
+与 whole_reduce_sum 接口相比，不支持 mask 逐比特模式。
+建议使用功能更全面的 whole_reduce_sum 接口。
 
 **对应的Ascend C函数原型**
 

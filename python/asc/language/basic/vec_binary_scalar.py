@@ -160,7 +160,7 @@ def shift_left(dst: LocalTensor, src: LocalTensor, scalar: Union[int, float], ma
 
 
 @require_jit
-@set_binary_scalar_docstring(cpp_name="ShiftLeft", append_text="对源操作数中的每个元素进行左移操作，左移的位数由输入参数scalarValue决定。")
+@set_binary_scalar_docstring(cpp_name="ShiftLeft", append_text="对源操作数中的每个元素进行左移操作，左移的位数由输入参数scalar决定。")
 def shift_left(dst: LocalTensor, src: LocalTensor, scalar: RuntimeNumeric, *args, **kwargs) -> None:
     builder = global_builder.get_ir_builder()
     op_impl("shift_left", dst, src, scalar, args, kwargs, builder.create_asc_ShiftLeftL0Op,
@@ -186,7 +186,7 @@ def shift_right(dst: LocalTensor, src: LocalTensor, scalar: Union[int, float], m
 
 
 @require_jit
-@set_binary_scalar_docstring(cpp_name="ShiftRight", append_text="对源操作数中的每个元素进行右移操作，右移的位数由输入参数scalarValue决定。")
+@set_binary_scalar_docstring(cpp_name="ShiftRight", append_text="对源操作数中的每个元素进行右移操作，右移的位数由输入参数scalar决定。")
 def shift_right(dst: LocalTensor, src: LocalTensor, scalar: RuntimeNumeric, *args, **kwargs) -> None:
     builder = global_builder.get_ir_builder()
     op_impl("shift_right", dst, src, scalar, args, kwargs, builder.create_asc_ShiftRightL0Op,

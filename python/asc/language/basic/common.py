@@ -78,6 +78,7 @@ def pop_stack_buffer(dtype: DataType, position: TPosition = TPosition.VECCALC) -
 
 
 @require_jit
+@set_common_docstring(api_name="reset_mask")
 def reset_mask() -> None:
     builder = global_builder.get_ir_builder()
     builder.create_asc_ResetMaskOp()
@@ -166,21 +167,11 @@ def set_mm_layout_transform(mm_layout_mode: RuntimeBool) -> None:
     builder.create_asc_SetMMLayoutTransformOp(mm_layout_mode.to_ir())
 
 
-@overload
-def set_mask_count() -> None:
-    ...
-
-
 @require_jit
 @set_common_docstring(api_name="set_mask_count")
 def set_mask_count() -> None:
     builder = global_builder.get_ir_builder()
     builder.create_asc_SetMaskCountOp()
-
-
-@overload
-def set_mask_norm() -> None:
-    ...
 
 
 @require_jit
