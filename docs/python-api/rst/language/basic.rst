@@ -19,7 +19,10 @@ Common operations
     :toctree: generated
     :nosignatures:
 
+    axpy
+    brcb
     cast
+    cast_deq
     copy
     cross_core_set_flag
     cross_core_wait_flag
@@ -32,6 +35,8 @@ Common operations
     dump_tensor
     duplicate
     fixpipe
+    gather
+    gatherb
     get_block_idx
     get_block_num
     get_cmp_mask
@@ -169,7 +174,13 @@ Vector reduce operations
     :toctree: generated
     :nosignatures:
 
+    block_reduce_max
+    block_reduce_min
+    block_reduce_sum
     pair_reduce_sum
+    reduce_max
+    reduce_min
+    reduce_sum
     repeat_reduce_sum
     whole_reduce_max
     whole_reduce_min

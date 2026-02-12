@@ -15,7 +15,6 @@ template <TPosition pos> __aicore__ inline bool InitBuffer(TBuf<pos>& buf, uint3
 
 **参数说明**
 
-- T：que参数的类型。
 - pos：Buffer逻辑位置，可以为VECIN、VECOUT、VECCALC、A1、B1、C1。
 - que：需要分配内存的TQue对象。
 - num：分配内存块的个数。
@@ -25,7 +24,7 @@ template <TPosition pos> __aicore__ inline bool InitBuffer(TBuf<pos>& buf, uint3
 
 **约束说明**
 
-声明TBufPool时，可以通过bufIDSize指定可分配Buffer的最大数量，默认上限为4，最大为16。TQue或TBuf的物理内存需要和TBufPool一致。
+声明TBufPool时，可以通过buf_id_size指定可分配Buffer的最大数量，默认上限为4，最大为16。TQue或TBuf的物理内存需要和TBufPool一致。
 
 **调用示例**
 

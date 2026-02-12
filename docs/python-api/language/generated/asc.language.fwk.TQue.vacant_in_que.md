@@ -16,8 +16,8 @@ __aicore__ inline bool VacantInQue()
 
 **返回值说明**
 
-- true：表示Queue未满，可以继续Enque操作
-- false：表示Queue已满，不可以继续入队
+- True：表示Queue未满，可以继续enque操作
+- False：表示Queue已满，不可以继续入队
 
 **约束说明**
 

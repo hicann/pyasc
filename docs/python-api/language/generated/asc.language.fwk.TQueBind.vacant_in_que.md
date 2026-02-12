@@ -16,8 +16,8 @@ __aicore__ inline bool VacantInQue()
 
 **返回值说明**
 
-- true：表示Queue未满，可以继续Enque操作
-- false：表示Queue已满，不可以继续入队
+- True：表示Queue未满，可以继续enque操作
+- False：表示Queue已满，不可以继续入队
 
 **约束说明**
 
@@ -26,7 +26,7 @@ __aicore__ inline bool VacantInQue()
 **调用示例**
 
 ```python
-# 根据VacantInQue判断当前que是否已满，设置当前队列深度为4
+# 根据vacant_in_que判断当前que是否已满，设置当前队列深度为4
 pipe = asc.Tpipe()
 que = asc.TQueBind(asc.TPosition.VECOUT, asc.TPosition.GM, 4)
 num = 10

@@ -14,7 +14,7 @@ __aicore__ inline void Init(__gm__ void* data, uint32_t length = 0xffffffff, uin
 
 - data: 待解析数据的首地址。
 - length: 待解析内存的长度。
-- shapeSize: 数据指针的个数。
+- shape_size: 数据指针的个数。
 
 **调用示例**
 

@@ -54,8 +54,8 @@ __aicore__ inline void WholeReduceMax(const LocalTensor<T>& dst, const LocalTens
   - 仅返回最值时，单位为 dst 数据类型所占字节长度。
   - 仅返回索引时，单位为 uint32_t 类型所占字节长度。
   - 注意：Atlas 训练系列产品不支持配置 0。
-- src_blk_stride：单次迭代内数据 block 的地址步长。详细说明请参考 dataBlockStride。
-- src_rep_stride：源操作数相邻迭代间地址步长，即每次迭代跳过的 datablock 数目。详细说明请参考 repeatStride。
+- src_blk_stride：单次迭代内数据 block 的地址步长。详细说明请参考 data_block_stride。
+- src_rep_stride：源操作数相邻迭代间地址步长，即每次迭代跳过的 data_block 数目。详细说明请参考 repeat_stride。
 - order
   可选参数，指定 dst 中 index 与 value 的相对位置以及返回结果行为，类型为 ReduceOrder。
   - 默认值为 asc.ReduceOrder.ORDER_VALUE_INDEX。

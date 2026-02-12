@@ -13,7 +13,6 @@ __aicore__ inline bool EnQue(const LocalTensor<T>& tensor)
 
 **参数说明**
 
-- T：Tensor的数据类型。
 - tensor：指定的Tensor
 
 **返回值说明**

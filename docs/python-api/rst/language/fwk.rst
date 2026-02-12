@@ -28,6 +28,7 @@ TBuf
     :toctree: generated
     :nosignatures:
 
+    TBuf.__init__
     TBuf.get
     TBuf.get_with_offset
 
@@ -39,6 +40,7 @@ TBufPool
     :toctree: generated
     :nosignatures:
 
+    TBufPool.__init__
     TBufPool.init_buf_pool
     TBufPool.init_buffer
     TBufPool.reset
@@ -51,6 +53,7 @@ TPipe
     :toctree: generated
     :nosignatures:
 
+    TPipe.__init__
     TPipe.alloc_event_id
     TPipe.destroy
     TPipe.fetch_event_id
@@ -85,6 +88,7 @@ TQueBind
     :toctree: generated
     :nosignatures:
 
+    TQueBind.__init__
     TQueBind.alloc_tensor
     TQueBind.deque
     TQueBind.enque

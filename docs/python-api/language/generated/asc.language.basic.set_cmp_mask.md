@@ -2,7 +2,7 @@
 
 ### asc.language.basic.set_cmp_mask(src: [LocalTensor](../core.md#asc.language.core.LocalTensor)) → None
 
-为Select不传入mask参数的接口设置比较寄存器。
+为select不传入mask参数的接口设置比较寄存器。
 
 **对应的Ascend C函数原型**
 

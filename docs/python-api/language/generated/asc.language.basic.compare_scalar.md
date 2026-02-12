@@ -6,7 +6,7 @@
 
 ### asc.language.basic.compare_scalar(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src0: [LocalTensor](../core.md#asc.language.core.LocalTensor), src1_scalar: int | float, cmp_mode: CMPMODE, mask: List[int], repeat_times: int, repeat_params: UnaryRepeatParams, is_set_mask: bool = True) → None
 
-逐元素比较一个tensor中的元素和另一个Scalar的大小，如果比较后的结果为真，则输出的结果的对应比特位为1，否则为0。
+逐元素比较一个tensor中的元素和另一个scalar的大小，如果比较后的结果为真，则输出的结果的对应比特位为1，否则为0。
 
 **对应的Ascend C函数原型**
 

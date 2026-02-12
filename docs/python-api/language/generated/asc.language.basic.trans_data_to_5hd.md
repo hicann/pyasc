@@ -7,7 +7,7 @@
 ### asc.language.basic.trans_data_to_5hd(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src: [LocalTensor](../core.md#asc.language.core.LocalTensor), params: TransDataTo5HDParams) → None
 
 数据格式转换，一般用于将NCHW格式转换成NC1HWC0格式，也可用于二维矩阵数据块的转置。
-相比于Transpose接口，本接口单次repeat内可处理512Byte的数据（16个datablock），
+相比于transpose接口，本接口单次repeat内可处理512Byte的数据（16个datablock），
 支持不同shape的矩阵转置，还可以支持多次repeat操作。
 
 **对应的Ascend C函数原型**

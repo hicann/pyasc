@@ -13,7 +13,7 @@ __aicore__ inline LocalTensor<T> GetWithOffset(uint32_t size, uint32_t bufOffset
 
 **参数说明**
 
-- T：待获取Tensor的数据类型。
+- dtype：待获取Tensor的数据类型。
 - size：需要获取的Tensor元素个数。
 - buf_offset：从起始位置的偏移长度，单位是字节，且需32字节对齐。
 
@@ -23,7 +23,7 @@ __aicore__ inline LocalTensor<T> GetWithOffset(uint32_t size, uint32_t bufOffset
 
 **约束说明**
 
-- size的数值是Tensor中元素的个数，size\*sizeof(T) + buf_offset不能超过TBuf初始化时的长度。
+- size的数值是Tensor中元素的个数，size\*dtype.sizeof + buf_offset不能超过TBuf初始化时的长度。
 - buf_offset需满足32字节对齐的要求。
 
 **调用示例**

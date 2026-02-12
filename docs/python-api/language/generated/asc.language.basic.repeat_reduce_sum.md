@@ -33,12 +33,12 @@ __aicore__ inline void RepeatReduceSum(const LocalTensor<T>& dst, const LocalTen
   - 操作数为 16 位：mask ∈ [1, 128]
   - 操作数为 32 位：mask ∈ [1, 64]
 - dst_blk_stride：此参数无效，可配置任意值。
-- src_blk_stride：单次迭代内数据 datablock 的地址步长。详细说明请参考 dataBlockStride。
+- src_blk_stride：单次迭代内数据 data_block 的地址步长。详细说明请参考 data_block_stride。
 - dst_rep_stride：
   目的操作数相邻迭代间的地址步长，以一个 repeat 归约后的长度为单位。
   - 单位为 dst 数据类型所占字节长度。比如当dst为half时，单位为2Bytes。
   - 注意：Atlas 训练系列产品不支持配置 0。
-- src_rep_stride：源操作数相邻迭代间的地址步长，即源操作数每次迭代跳过的datablock数目。详细说明请参考 repeatStride。
+- src_rep_stride：源操作数相邻迭代间的地址步长，即源操作数每次迭代跳过的data_block数目。详细说明请参考 repeat_stride。
 
 **约束说明**
 

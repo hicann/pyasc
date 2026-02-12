@@ -25,7 +25,7 @@ Que中已入队的Tensor数量。
 **调用示例**
 
 ```python
-# 通过GetTensorCountInQue查询que中已入队的Tensor数量，当前通过AllocTensor接口分配了内存，并加入que中，num为1。
+# 通过get_tensor_count_in_que查询que中已入队的Tensor数量，当前通过alloc_tensor接口分配了内存，并加入que中，num为1。
 pipe = asc.Tpipe()
 que = asc.TQueBind(asc.TPosition.VECOUT, asc.TPosition.GM, 4)
 num = 4

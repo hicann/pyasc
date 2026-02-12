@@ -20,7 +20,6 @@ __aicore__ inline bool InitBuffer(TBuf<bufPos>& buf, uint32_t len)
 
 **参数说明**
 
-- T：队列的类型，支持取值TQue、TQueBind。
 - que：需要分配内存的TQue等对象。
 - num：分配内存块的个数。double buffer功能通过该参数开启：num设置为1，表示不开启double buffer；num设置为2，表示开启double buffer。
 - len：每个内存块的大小，单位为字节。当传入的len不满足32字节对齐时，API内部会自动向上补齐至32字节对齐，后续的数据搬运过程会涉及非对齐处理，具体内容请参考非对齐场景。

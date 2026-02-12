@@ -20,7 +20,7 @@ __aicore__ inline LocalTensor<T> Get(uint32_t len)
 
 **参数说明**
 
-- T：待获取Tensor的数据类型。
+- dtype：待获取Tensor的数据类型。
 - len：需要获取的Tensor元素个数。
 
 **返回值说明**

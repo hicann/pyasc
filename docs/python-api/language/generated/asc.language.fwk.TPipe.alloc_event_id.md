@@ -13,7 +13,7 @@ __aicore__ inline TEventID TPipe::AllocEventID()
 
 **参数说明**
 
-- evt：HardEvent硬件同步类型。
+- event：HardEvent硬件同步类型。
 
 **返回值说明**
 

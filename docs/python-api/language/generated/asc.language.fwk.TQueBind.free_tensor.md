@@ -13,7 +13,6 @@ __aicore__ inline void FreeTensor(LocalTensor<T>& tensor)
 
 **参数说明**
 
-- T：Tensor的数据类型。
 - tensor：待释放的Tensor。
 
 **调用示例**

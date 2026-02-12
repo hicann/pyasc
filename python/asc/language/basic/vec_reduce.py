@@ -63,6 +63,7 @@ def block_reduce_sum(dst: LocalTensor, src: LocalTensor, repeat: int, mask: List
 
 
 @require_jit
+@set_common_docstring("block_reduce_sum")
 def block_reduce_sum(dst: LocalTensor, src: LocalTensor, repeat: int, mask, 
                      dst_rep_stride: int, src_blk_stride: int, src_rep_stride: int) -> None:
     builder = global_builder.get_ir_builder()
@@ -84,6 +85,7 @@ def block_reduce_max(dst: LocalTensor, src: LocalTensor, repeat: int, mask: List
 
 
 @require_jit
+@set_common_docstring("block_reduce_max")
 def block_reduce_max(dst: LocalTensor, src: LocalTensor, repeat: int, mask,
                      dst_rep_stride: int, src_blk_stride: int, src_rep_stride: int) -> None:
     builder = global_builder.get_ir_builder()
@@ -105,6 +107,7 @@ def block_reduce_min(dst: LocalTensor, src: LocalTensor, repeat: int, mask: List
 
 
 @require_jit
+@set_common_docstring("block_reduce_min")
 def block_reduce_min(dst: LocalTensor, src: LocalTensor, repeat: int, mask,
                      dst_rep_stride: int, src_blk_stride: int, src_rep_stride: int) -> None:
     builder = global_builder.get_ir_builder()
@@ -395,6 +398,7 @@ def op_impl(callee: str, dst: LocalTensor, src: LocalTensor, shared_tmp_buffer: 
 
 
 @require_jit
+@set_common_docstring("reduce_max")
 def reduce_max(dst: LocalTensor, src: LocalTensor, shared_tmp_buffer: LocalTensor, *args, **kwargs) -> None:
     builder = global_builder.get_ir_builder()
     op_impl("reduce_max", dst, src, shared_tmp_buffer, args, kwargs,
@@ -424,6 +428,7 @@ def reduce_min(dst: LocalTensor, src: LocalTensor, shared_tmp_buffer: LocalTenso
 
 
 @require_jit
+@set_common_docstring("reduce_min")
 def reduce_min(dst: LocalTensor, src: LocalTensor, shared_tmp_buffer: LocalTensor, *args, **kwargs) -> None:
     builder = global_builder.get_ir_builder()
     op_impl("reduce_min", dst, src, shared_tmp_buffer, args, kwargs,
@@ -484,6 +489,7 @@ def op_impl_sum(callee: str, dst: LocalTensor, src: LocalTensor, shared_tmp_buff
 
 
 @require_jit
+@set_common_docstring("reduce_sum")
 def reduce_sum(dst: LocalTensor, src: LocalTensor, shared_tmp_buffer: LocalTensor, *args, **kwargs) -> None:
     builder = global_builder.get_ir_builder()
     op_impl_sum("reduce_sum", dst, src, shared_tmp_buffer, args, kwargs,

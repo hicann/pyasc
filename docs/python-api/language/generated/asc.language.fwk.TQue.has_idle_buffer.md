@@ -28,7 +28,7 @@ __aicore__ inline bool HasIdleBuffer()
 ```python
 # 当前Que中已经分配了4块内存
 pipe = asc.Tpipe()
-que = asc.TQueBind(asc.TPosition.VECOUT, 1)
+que = asc.TQue(asc.TPosition.VECOUT, 1)
 num = 4
 len = 1024
 pipe.init_buffer(que=que, num=num, len=len)

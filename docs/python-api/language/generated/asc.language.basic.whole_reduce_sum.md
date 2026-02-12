@@ -35,29 +35,27 @@ __aicore__ inline void WholeReduceSum(const LocalTensor<T>& dst, const LocalTens
 - mask：
   控制每次迭代内参与计算的元素。
   - **逐bit模式**：mask为数组形式。数组长度和数组元素的取值范围和操作数的数据类型有关。可以按位控制哪些元素参与计算，bit位的值为1表示参与计算，0表示不参与。
-    > - 操作数 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
-    > - 操作数 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
-    > - 操作数 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
-    > - 例如：mask = [8, 0]，表示仅第 4 个元素参与计算
-    - **连续模式**
-
-      mask为整数形式。表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
-      - 操作数 16 位：mask ∈ [1, 128]
-      - 操作数 32 位：mask ∈ [1, 64]
-      - 操作数 64 位：mask ∈ [1, 32]
+    - 操作数 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
+    - 操作数 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
+    - 操作数 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
+    - 例如：mask = [8, 0]，表示仅第 4 个元素参与计算
+  - **连续模式**：mask为整数形式。表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+    - 操作数 16 位：mask ∈ [1, 128]
+    - 操作数 32 位：mask ∈ [1, 64]
+    - 操作数 64 位：mask ∈ [1, 32]
 - repeat_time：迭代次数，取值范围 [0, 255]。具体描述请参考 如何使用Tensor 高维切分计算API。
 - dst_rep_stride：
   目的操作数相邻迭代间地址步长，以一个 repeat 归约后的长度为单位。
   - 单位为 dst 数据类型所占字节长度。比如当dst为half时，单位为2Bytes。
   - 注意：Atlas 训练系列产品不支持配置 0。
-- src_blk_stride：单次迭代内datablock的地址步长。详细说明请参考dataBlockStride。
-- src_rep_stride：源操作数相邻迭代间的地址步长，即源操作数每次迭代跳过的DataBlock数目。详细说明请参考repeatStride。
+- src_blk_stride：单次迭代内datablock的地址步长。详细说明请参考data_block_stride。
+- src_rep_stride：源操作数相邻迭代间的地址步长，即源操作数每次迭代跳过的DataBlock数目。详细说明请参考repeat_stride。
 
 **约束说明**
 
 - 操作数地址对齐要求请参见通用地址对齐约束。
 - 操作数地址重叠约束请参考通用地址重叠约束。
-- 对于WholeReduceSum，其内部的相加方式采用二叉树方式，两两相加
+- 对于whole_reduce_sum，其内部的相加方式采用二叉树方式，两两相加
   假设源操作数为128个half类型的数据[data0,data1,data2…data127]，一个repeat可以计算完，计算过程如下。
   1. data0和data1相加得到data00，data2和data3相加得到data01…data124和data125相加得到data62，data126和data127相加得到data63；
   2. data00和data01相加得到data000，data02和data03相加得到data001…data62和data63相加得到data031；

@@ -13,8 +13,8 @@ __aicore__ inline void ReleaseEventID(TEventID id)
 
 **参数说明**
 
-- evt：HardEvent硬件同步类型。
-- id：TEventID类型，调用AllocEventID申请获得的TEventID。
+- event：HardEvent硬件同步类型。
+- id：TEventID类型，调用alloc_event_id申请获得的TEventID。
 
 **约束说明**
 

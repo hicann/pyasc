@@ -45,7 +45,7 @@ __aicore__ inline void PairReduceSum(const LocalTensor<T>& dst, const LocalTenso
   目的操作数相邻迭代间的地址步长，以一个 repeat 归约后的长度为单位。
   - PairReduce 完成后，一个 repeat 的长度减半。
   - 注意：Atlas 训练系列产品不支持配置 0。
-- src_blk_stride：单次迭代内数据 block 的地址步长，详细说明请参考 dataBlockStride。
+- src_blk_stride：单次迭代内数据 block 的地址步长，详细说明请参考 data_block_stride。
 - src_rep_stride：源操作数相邻迭代间的地址步长，即每次迭代跳过的 data block 数目。详细说明请参考 repeatStride。
 
 **约束说明**

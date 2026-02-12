@@ -4,7 +4,7 @@
 
 #### TQueBind.alloc_tensor(tensor: [LocalTensor](../core.md#asc.language.core.LocalTensor)) → None
 
-从Que中分配Tensor，Tensor所占大小为InitBuffer时设置的每块内存长度。
+从Que中分配Tensor，Tensor所占大小为init_buffer时设置的每块内存长度。
 
 **对应的Ascend C函数原型**
 
@@ -20,7 +20,7 @@ __aicore__ inline void AllocTensor(LocalTensor<T>& tensor)
 
 **参数说明**
 
-- T：Tensor的数据类型。
+- dtype：Tensor的数据类型。
 - tensor：inplace接口需要传入LocalTensor作为内存管理的对象。
 
 **返回值说明**

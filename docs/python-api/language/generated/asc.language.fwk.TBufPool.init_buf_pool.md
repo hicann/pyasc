@@ -2,7 +2,7 @@
 
 #### TBufPool.init_buf_pool(buf_pool: [TBufPool](../fwk.md#asc.language.fwk.TBufPool), len: int = 0, share_buf: [TBufPool](../fwk.md#asc.language.fwk.TBufPool) = None) → None
 
-通过Tpipe::InitBufPool接口可划分出整块资源，整块TbufPool资源可以继续通过TBufPool::InitBufPool接口划分成小块资源。
+通过Tpipe::InitBufPool接口可划分出整块资源，整块TbufPool资源可以继续通过TBufPool.init_buf_pool接口划分成小块资源。
 
 **对应的Ascend C函数原型**
 
@@ -18,7 +18,6 @@ __aicore__ inline bool InitBufPool(T& bufPool, uint32_t len, U& shareBuf)
 
 **参数说明**
 
-- T：待获取Tensor的数据类型。
 - size：需要获取的Tensor元素个数。
 - buf_offset：从起始位置的偏移长度，单位是字节，且需32字节对齐。
 

@@ -15,8 +15,6 @@ __aicore__ inline bool InitBufPool(T& bufPool, uint32_t len, U& shareBuf)
 
 **参数说明**
 
-- T：bufPool的类型。
-- U：shareBuf的类型。
 - buf_pool：新划分的资源池，类型为TBufPool。
 - len：新划分资源池长度，单位为Byte，非32Bytes对齐会自动补齐至32Bytes对齐。
 - share_buf：被复用资源池，类型为TBufPool，新划分资源池与被复用资源池共享起始地址及长度。

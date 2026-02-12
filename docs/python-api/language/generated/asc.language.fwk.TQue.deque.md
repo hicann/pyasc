@@ -18,7 +18,7 @@ __aicore__ inline void DeQue(LocalTensor<T>& tensor)
 
 **参数说明**
 
-- T：Tensor的数据类型。
+- dtype：Tensor的数据类型。
 - tensor：inplace接口需要通过出参的方式返回Tensor。
 
 **返回值说明**

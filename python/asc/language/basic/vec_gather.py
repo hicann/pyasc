@@ -13,9 +13,11 @@ from ..core.ir_value import RuntimeInt, materialize_ir_value as _mat
 from ..core.tensor import LocalTensor
 from ..core.types import GatherRepeatParams 
 from ..core.utils import OverloadDispatcher, require_jit, global_builder
+from .utils import set_common_docstring
 
 
 @require_jit
+@set_common_docstring(api_name="gatherb")
 def gatherb(dst: LocalTensor, src0: LocalTensor, offset: LocalTensor,
             repeat_times: int, repeat_params: GatherRepeatParams) -> None:
     builder = global_builder.get_ir_builder()
@@ -76,6 +78,7 @@ def gather(dst: LocalTensor, src: LocalTensor, src_offset: LocalTensor, src_base
 
 
 @require_jit
+@set_common_docstring(api_name="gather")
 def gather(dst: LocalTensor, src: LocalTensor, src_offset: LocalTensor,
            src_base: int, *args, **kwargs) -> None:
     builder = global_builder.get_ir_builder()

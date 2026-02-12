@@ -2858,7 +2858,7 @@ def pair_reduce_sum_docstring():
       - PairReduce 完成后，一个 repeat 的长度减半。
       - 注意：Atlas 训练系列产品不支持配置 0。
 
-    - src_blk_stride：单次迭代内数据 block 的地址步长，详细说明请参考 dataBlockStride。
+    - src_blk_stride：单次迭代内数据 block 的地址步长，详细说明请参考 data_block_stride。
 
     - src_rep_stride：源操作数相邻迭代间的地址步长，即每次迭代跳过的 data block 数目。详细说明请参考 repeatStride。
     """
@@ -2947,14 +2947,14 @@ def repeat_reduce_sum_docstring():
 
     - dst_blk_stride：此参数无效，可配置任意值。
 
-    - src_blk_stride：单次迭代内数据 datablock 的地址步长。详细说明请参考 dataBlockStride。
+    - src_blk_stride：单次迭代内数据 data_block 的地址步长。详细说明请参考 data_block_stride。
 
     - dst_rep_stride：
       目的操作数相邻迭代间的地址步长，以一个 repeat 归约后的长度为单位。
       - 单位为 dst 数据类型所占字节长度。比如当dst为half时，单位为2Bytes。
       - 注意：Atlas 训练系列产品不支持配置 0。
 
-    - src_rep_stride：源操作数相邻迭代间的地址步长，即源操作数每次迭代跳过的datablock数目。详细说明请参考 repeatStride。
+    - src_rep_stride：源操作数相邻迭代间的地址步长，即源操作数每次迭代跳过的data_block数目。详细说明请参考 repeat_stride。
     """
 
     constraint_list = """
@@ -3051,9 +3051,9 @@ def whole_reduce_max_docstring():
       - 仅返回索引时，单位为 uint32_t 类型所占字节长度。
       - 注意：Atlas 训练系列产品不支持配置 0。
 
-    - src_blk_stride：单次迭代内数据 block 的地址步长。详细说明请参考 dataBlockStride。
+    - src_blk_stride：单次迭代内数据 block 的地址步长。详细说明请参考 data_block_stride。
 
-    - src_rep_stride：源操作数相邻迭代间地址步长，即每次迭代跳过的 datablock 数目。详细说明请参考 repeatStride。
+    - src_rep_stride：源操作数相邻迭代间地址步长，即每次迭代跳过的 data_block 数目。详细说明请参考 repeat_stride。
 
     - order
       可选参数，指定 dst 中 index 与 value 的相对位置以及返回结果行为，类型为 ReduceOrder。
@@ -3187,9 +3187,9 @@ def whole_reduce_min_docstring():
       - 仅返回索引时，单位为 uint32_t 类型所占字节长度。
       - 注意：Atlas 训练系列产品不支持配置 0。
 
-    - src_blk_stride：单次迭代内数据 block 的地址步长。详细说明请参考 dataBlockStride。
+    - src_blk_stride：单次迭代内数据 block 的地址步长。详细说明请参考 data_block_stride。
 
-    - src_rep_stride：源操作数相邻迭代间地址步长，即每次迭代跳过的 datablock 数目。详细说明请参考 repeatStride。
+    - src_rep_stride：源操作数相邻迭代间地址步长，即每次迭代跳过的 data_block 数目。详细说明请参考 repeat_stride。
 
     - order
       可选参数，指定 dst 中 index 与 value 的相对位置以及返回结果行为，类型为 ReduceOrder。
@@ -3297,17 +3297,16 @@ def whole_reduce_sum_docstring():
 
       - **逐bit模式**：mask为数组形式。数组长度和数组元素的取值范围和操作数的数据类型有关。可以按位控制哪些元素参与计算，bit位的值为1表示参与计算，0表示不参与。
 
-          - 操作数 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
-          - 操作数 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
-          - 操作数 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
-          - 例如：mask = [8, 0]，表示仅第 4 个元素参与计算
+        - 操作数 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
+        - 操作数 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
+        - 操作数 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
+        - 例如：mask = [8, 0]，表示仅第 4 个元素参与计算
 
-        - **连续模式**
+      - **连续模式**：mask为整数形式。表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
 
-          mask为整数形式。表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
-          - 操作数 16 位：mask ∈ [1, 128]
-          - 操作数 32 位：mask ∈ [1, 64]
-          - 操作数 64 位：mask ∈ [1, 32]
+        - 操作数 16 位：mask ∈ [1, 128]
+        - 操作数 32 位：mask ∈ [1, 64]
+        - 操作数 64 位：mask ∈ [1, 32]
 
     - repeat_time：迭代次数，取值范围 [0, 255]。具体描述请参考 如何使用Tensor 高维切分计算API。
 
@@ -3316,9 +3315,9 @@ def whole_reduce_sum_docstring():
       - 单位为 dst 数据类型所占字节长度。比如当dst为half时，单位为2Bytes。
       - 注意：Atlas 训练系列产品不支持配置 0。
 
-    - src_blk_stride：单次迭代内datablock的地址步长。详细说明请参考dataBlockStride。
+    - src_blk_stride：单次迭代内datablock的地址步长。详细说明请参考data_block_stride。
 
-    - src_rep_stride：源操作数相邻迭代间的地址步长，即源操作数每次迭代跳过的DataBlock数目。详细说明请参考repeatStride。
+    - src_rep_stride：源操作数相邻迭代间的地址步长，即源操作数每次迭代跳过的data_block数目。详细说明请参考repeat_stride。
     """
 
     constraint_list = """
@@ -3326,7 +3325,7 @@ def whole_reduce_sum_docstring():
 
     - 操作数地址对齐要求请参见通用地址对齐约束。
     - 操作数地址重叠约束请参考通用地址重叠约束。
-    - 对于WholeReduceSum，其内部的相加方式采用二叉树方式，两两相加
+    - 对于whole_reduce_sum，其内部的相加方式采用二叉树方式，两两相加
       假设源操作数为128个half类型的数据[data0,data1,data2...data127]，一个repeat可以计算完，计算过程如下。
       1. data0和data1相加得到data00，data2和data3相加得到data01...data124和data125相加得到data62，data126和data127相加得到data63；
       2. data00和data01相加得到data000，data02和data03相加得到data001...data62和data63相加得到data031；
@@ -3944,7 +3943,7 @@ def transpose_docstring():
 def trans_data_to_5hd_docstring():
     func_introduction = """
     数据格式转换，一般用于将NCHW格式转换成NC1HWC0格式，也可用于二维矩阵数据块的转置。
-    相比于Transpose接口，本接口单次repeat内可处理512Byte的数据（16个datablock），
+    相比于transpose接口，本接口单次repeat内可处理512Byte的数据（16个datablock），
     支持不同shape的矩阵转置，还可以支持多次repeat操作。
     """
 
@@ -4674,9 +4673,9 @@ def gather_mask_docstring():
 
     - dst: 目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。
     - src0: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。数据类型需要与目的操作数保持一致。
-    - src1Pattern: gather mask（数据收集的掩码），分为内置固定模式和用户自定义模式两种：
+    - src1_pattern: gather mask（数据收集的掩码），分为内置固定模式和用户自定义模式两种：
 
-      - 内置固定模式：src1Pattern数据类型为uint8_t，取值范围为[1,7]，所有repeat迭代使用相同的gather mask。不支持配置src1RepeatStride。
+      - 内置固定模式：src1_pattern数据类型为uint8_t，取值范围为[1,7]，所有repeat迭代使用相同的gather mask。不支持配置src1_repeat_stride。
 
         1：01010101…0101 # 每个repeat取偶数索引元素
         2：10101010…1010 # 每个repeat取奇数索引元素
@@ -4686,26 +4685,26 @@ def gather_mask_docstring():
         6：10001000…1000 # 每个repeat内每四个元素取第四个元素
         7：11111111...1111 # 每个repeat内取全部元素
 
-      - 用户自定义模式：src1Pattern数据类型为LocalTensor，迭代间间隔由src1RepeatStride决定，迭代内src1Pattern连续消耗。
+      - 用户自定义模式：src1_pattern数据类型为LocalTensor，迭代间间隔由src1_repeat_stride决定，迭代内src1_pattern连续消耗。
 
-    - reduceMode: 用于选择mask参数模式，数据类型为bool，支持如下取值：
+    - reduce_mode: 用于选择mask参数模式，数据类型为bool，支持如下取值：
 
-      - false：Normal模式。该模式下，每次repeat操作256Bytes数据，总的数据计算量为repeatTimes * 256Bytes。mask参数无效，建议设置为0。按需配置repeatTimes、src0BlockStride、src0RepeatStride参数。支持src1Pattern配置为内置固定模式或用户自定义模式。用户自定义模式下可根据实际情况配置src1RepeatStride。
-      - true：Counter模式。根据mask等参数含义的不同，该模式有以下两种配置方式：
+      - False：Normal模式。该模式下，每次repeat操作256Bytes数据，总的数据计算量为repeat_times * 256Bytes。mask参数无效，建议设置为0。按需配置repeat_times、src0BlockStride、src0_repeat_stride参数。支持src1_pattern配置为内置固定模式或用户自定义模式。用户自定义模式下可根据实际情况配置src1_repeat_stride。
+      - True：Counter模式。根据mask等参数含义的不同，该模式有以下两种配置方式：
 
-        配置方式一：每次repeat操作mask个元素，总的数据计算量为repeatTimes * mask个元素。mask值配置为每一次repeat计算的元素个数。按需配置repeatTimes、src0BlockStride、src0RepeatStride参数。支持src1Pattern配置为内置固定模式或用户自定义模式。用户自定义模式下可根据实际情况配置src1RepeatStride。
-        配置方式二：总的数据计算量为mask个元素。mask配置为总的数据计算量。repeatTimes值不生效，指令的迭代次数由源操作数和mask共同决定。按需配置src0BlockStride、src0RepeatStride参数。支持src1Pattern配置为内置固定模式或用户自定义模式。用户自定义模式下可根据实际情况配置src1RepeatStride。
+        配置方式一：每次repeat操作mask个元素，总的数据计算量为repeat_times * mask个元素。mask值配置为每一次repeat计算的元素个数。按需配置repeat_times、src0_block_stride、src0_repeat_stride参数。支持src1_pattern配置为内置固定模式或用户自定义模式。用户自定义模式下可根据实际情况配置src1_repeat_stride。
+        配置方式二：总的数据计算量为mask个元素。mask配置为总的数据计算量。repeat_times值不生效，指令的迭代次数由源操作数和mask共同决定。按需配置src0_block_stride、src0_repeat_stride参数。支持src1_pattern配置为内置固定模式或用户自定义模式。用户自定义模式下可根据实际情况配置src1_repeat_stride。
 
-    - mask: 用于控制每次迭代内参与计算的元素。根据reduceMode，分为两种模式：
+    - mask: 用于控制每次迭代内参与计算的元素。根据reduce_mode，分为两种模式：
       - Normal模式：mask无效，建议设置为0。
-      - Counter模式：取值范围[1, 232 – 1]。不同的版本型号Counter模式下，mask参数表示含义不同。具体配置规则参考上文reduceMode参数描述。
-    - gatherMaskParams: 控制操作数地址步长的数据结构，GatherMaskParams类型。具体参数包括：
-      - src0BlockStride: 用于设置src0同一迭代不同DataBlock间的地址步长。
-      - repeatTimes: 迭代次数。
-      - src0RepeatStride: 用于设置src0相邻迭代间的地址步长。
-      - src1RepeatStride: 用于设置src1相邻迭代间的地址步长。
-    - mode: 模板参数，用于指定GatherMask的模式，当前仅支持默认模式GatherMaskMode.DEFAULT，为后续功能做预留。
-    - rsvdCnt: 该条指令筛选后保留下来的元素计数，对应dstLocal中有效元素个数，数据类型为uint64_t。
+      - Counter模式：取值范围[1, 232 – 1]。不同的版本型号Counter模式下，mask参数表示含义不同。具体配置规则参考上文reduce_mode参数描述。
+    - params: 控制操作数地址步长的数据结构，GatherMaskParams类型。具体参数包括：
+      - src0_block_stride: 用于设置src0同一迭代不同DataBlock间的地址步长。
+      - repeat_times: 迭代次数。
+      - src0_repeat_stride: 用于设置src0相邻迭代间的地址步长。
+      - src1_repeat_stride: 用于设置src1相邻迭代间的地址步长。
+    - mode: 模板参数，用于指定gather_mask的模式，当前仅支持默认模式GatherMaskMode.DEFAULT，为后续功能做预留。
+    - rsvd_cnt: 该条指令筛选后保留下来的元素计数，对应dst_local中有效元素个数，数据类型为uint64_t。
     """
 
     constraint_list = """
@@ -5699,7 +5698,7 @@ def sort_docstring():
 
 def compare_scalar_docstring() -> Callable[[T], T]:
     func_introduction = """
-    逐元素比较一个tensor中的元素和另一个Scalar的大小，如果比较后的结果为真，则输出的结果的对应比特位为1，否则为0。
+    逐元素比较一个tensor中的元素和另一个scalar的大小，如果比较后的结果为真，则输出的结果的对应比特位为1，否则为0。
     """
 
     cpp_signature = """
@@ -5831,7 +5830,7 @@ def get_cmp_mask_docstring() -> Callable[[T], T]:
 
 def set_cmp_mask_docstring() -> Callable[[T], T]:
     func_introduction = """
-    为Select不传入mask参数的接口设置比较寄存器。
+    为select不传入mask参数的接口设置比较寄存器。
     """
 
     cpp_signature = """
@@ -5888,7 +5887,7 @@ class ListTensorDescDocstring:
 
         - data: 待解析数据的首地址。
         - length: 待解析内存的长度。
-        - shapeSize: 数据指针的个数。
+        - shape_size: 数据指针的个数。
         """
 
         py_example = """
@@ -6485,6 +6484,979 @@ def fixpipe_docstring():
     return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
+def brcb_docstring():
+    func_introduction = """
+    给定一个输入张量，每一次取输入张量中的8个数填充到结果张量的8个datablock（32Bytes）中去，每个数对应一个datablock。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void Brcb(const LocalTensor<T>& dst, const LocalTensor<T>& src0,
+                                    const uint8_t repeatTime, const BrcbRepeatParams& repeatParams)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。
+    - src0：源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。数据类型和dst保持一致。
+    - repeat_time：指令迭代次数，每次迭代完成8个datablock的数据收集，数据范围：repeat_time∈[0,255]。
+    - repeat_params：用于控制指令迭代的相关参数。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 不支持src0与dst为同一块内存地址。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        brcb_params = asc.BrcbRepeatParams(1, 8)
+        asc.brcb(x_buf, y_buf, 2, brcb_params)
+          
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def axpy_docstring():
+    func_introduction = """
+    源操作数src中每个元素与标量求积后和目的操作数dst中的对应元素相加，计算公式如下：
+    dst[i] = src[i] * scalar + dst[i]
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    - tensor前n个数据计算
+
+      .. code-block:: c++
+
+          template <typename T, typename U>
+          __aicore__ inline void Axpy(const LocalTensor<T>& dst, const LocalTensor<U>& src, const U& scalarValue, const int32_t& count)
+      
+    - tensor高维切分计算
+      
+      - mask逐bit模式
+        
+        .. code-block:: c++
+            
+            template <typename T, typename U, bool isSetMask = true>
+            __aicore__ inline void Axpy(const LocalTensor<T>& dst, const LocalTensor<U>& src, const U& scalarValue, 
+                                    uint64_t mask[], const uint8_t repeatTime, const UnaryRepeatParams& repeatParams)
+
+      - mask连续模式
+
+        .. code-block:: c++ 
+
+            template <typename T, typename U, bool isSetMask = true>
+            __aicore__ inline void Axpy(const LocalTensor<T>& dst, const LocalTensor<U>& src, const U& scalarValue, 
+                                    uint64_t mask, const uint8_t repeatTime, const UnaryRepeatParams& repeatParams)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - is_set_mask：是否在接口内部设置mask。
+
+      - True，表示在接口内部设置mask。
+      - False，表示在接口外部设置mask，开发者需要使用set_vector_mask接口设置mask值。这种模式下，本接口入参中的mask值必须设置为占位符MASK_PLACEHOLDER。
+
+    - dst：目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。
+    - src: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。
+    - scalar：源操作数，scalar标量。scalar的数据类型需要和src保持一致。
+    - count：参与计算的元素个数。
+
+    - mask：
+      控制每次迭代内参与计算的元素。
+
+      - **逐bit模式**：mask为数组形式。数组长度和数组元素的取值范围和操作数的数据类型有关。可以按位控制哪些元素参与计算，bit位的值为1表示参与计算，0表示不参与。
+
+        - 操作数 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
+        - 操作数 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
+        - 操作数 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
+        - 例如：mask = [8, 0]，表示仅第 4 个元素参与计算
+
+      - **连续模式**：mask为整数形式。表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+
+        - 操作数 16 位：mask ∈ [1, 128]
+        - 操作数 32 位：mask ∈ [1, 64]
+        - 操作数 64 位：mask ∈ [1, 32]
+
+    - repeat_time：重复迭代次数。矢量计算单元，每次读取连续的256Bytes数据进行计算，为完成对输入数据的处理，
+      必须通过多次迭代（repeat）才能完成所有数据的读取与计算。repeat_time表示迭代的次数。
+    - repeat_params：控制操作数地址步长的参数。UnaryRepeatParams类型，包含操作数相邻迭代间相同data_block的地址步长，操作数同一迭代内不同data_block的地址步长等参数。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 操作数地址重叠约束请参考通用地址重叠约束。
+    使用tensor高维切分计算接口时，src和scalar的数据类型为half、dst的数据类型为float的情况下，
+    一个迭代处理的源操作数元素个数需要和目的操作数保持一致，所以每次迭代选取前4个data_block参与计算。
+    设置repeat_stride参数和mask参数以及地址重叠时，需要考虑该限制。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - tensor高维切分计算样例-mask连续模式
+
+      .. code-block:: python
+
+          params = asc.UnaryRepeatParams(1, 1, 8, 8)
+          asc.axpy(dst, src, 2.0, mask=128, repeat_time=4, repeat_params=params)
+    
+    - tensor高维切分计算样例-mask逐bit模式
+
+      .. code-block:: python
+
+          uint64_max = 2**64 - 1
+          mask = [uint64_max, uint64_max]
+          params = asc.UnaryRepeatParams(1, 1, 8, 8)
+          asc.axpy(dst, src, 2.0, mask=mask, repeat_time=4, repeat_params=params)
+    
+    - tensor前n个数据计算样例
+      
+      .. code-block:: python
+      
+          asc.axpy(dst, src, 2.0, count=512)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def cast_deq_docstring():
+    func_introduction = """
+    对输入做量化并进行精度转换。不同的数据类型，转换公式不同。
+
+    - 在输入类型为int16_t的情况下，对int16_t类型的输入做量化并进行精度转换，得到int8_t/uint8_t类型的数据。
+      使用该接口前需要调用set_deq_scale设置scale、offset、sign_mode等量化参数。
+      
+      通过模板参数is_vec_deq控制是否选择向量量化模式。
+
+      - 当is_vec_deq=false时，根据set_deq_scale设置的scale、offset、sign_mode，对输入做量化并进行精度转换。计算公式如下：
+        dst[i] = (src[i] * scale) + offset
+      - 当is_vec_deq=true时，根据set_deq_scale设置的一段128B的UB上的16组量化参数scale[0]-scale[15]、offset[0]-offset[15]、sign_mode[0]-sign_mode[15]，
+        以循环的方式对输入做量化并进行精度转换。计算公式如下：dst[i] = (src[i] * scale[j]) + offset[j], 0<=j<=15
+
+    - 在输入类型为int32_t的情况下，对int32_t类型的输入做量化并进行精度转换，得到half类型的数据。使用该接口前需要调用set_deq_scale设置scale参数。
+      dst[i] = src[i] * scale
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    - tensor前n个数据计算
+
+      .. code-block:: c++
+
+          template <typename T, typename U, bool isVecDeq = true, bool halfBlock = true>
+          __aicore__ inline void CastDeq(const LocalTensor<T>& dst, const LocalTensor<U>& src, const uint32_t count)
+      
+    - tensor高维切分计算
+      
+      - mask逐bit模式
+        
+        .. code-block:: c++
+            
+            template <typename T, typename U, bool isSetMask = true, bool isVecDeq = true, bool halfBlock = true>
+            __aicore__ inline void CastDeq(const LocalTensor<T>& dst, const LocalTensor<U>& src, 
+                                    const uint64_t mask[], uint8_t repeatTime, const UnaryRepeatParams& repeatParams)
+
+      - mask连续模式
+
+        .. code-block:: c++ 
+
+            template <typename T, typename U, bool isSetMask = true, bool isVecDeq = true, bool halfBlock = true>
+            __aicore__ inline void CastDeq(const LocalTensor<T>& dst, const LocalTensor<U>& src, 
+                                    const int32_t mask, uint8_t repeatTime, const UnaryRepeatParams& repeatParams)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - is_set_mask：是否在接口内部设置mask。
+
+      - True，表示在接口内部设置mask。
+      - False，表示在接口外部设置mask，开发者需要使用set_vector_mask接口设置mask值。这种模式下，本接口入参中的mask值必须设置为占位符MASK_PLACEHOLDER。
+    
+    - is_vec_deq：控制是否选择向量量化模式。和set_deq_scale接口配合使用，当set_deq_scale接口传入Tensor时，is_vec_deq必须为true。
+    - half_block：对int16_t类型的输入做量化并进行精度转换得到int8_t/uint8_t类型的数据时，half_block参数用于指示输出元素存放在上半还是下半Block。half_block=True时，结果存放在下半Block；half_block=False时，结果存放在上半Block。
+    - dst：目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。
+    - src: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。
+    - count：参与计算的元素个数。
+
+    - mask：
+      控制每次迭代内参与计算的元素。
+
+      - **逐bit模式**：mask为数组形式。数组长度和数组元素的取值范围和操作数的数据类型有关。可以按位控制哪些元素参与计算，bit位的值为1表示参与计算，0表示不参与。
+
+        - 操作数 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
+        - 操作数 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
+        - 操作数 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
+        - 例如：mask = [8, 0]，表示仅第 4 个元素参与计算
+
+      - **连续模式**：mask为整数形式。表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+
+        - 操作数 16 位：mask ∈ [1, 128]
+        - 操作数 32 位：mask ∈ [1, 64]
+        - 操作数 64 位：mask ∈ [1, 32]
+
+    - repeat_time：重复迭代次数。矢量计算单元，每次读取连续的256Bytes数据进行计算，
+      为完成对输入数据的处理，必须通过多次迭代（repeat）才能完成所有数据的读取与计算。repeat_time表示迭代的次数。
+    - repeat_params：控制操作数地址步长的参数。UnaryRepeatParams类型，包含操作数相邻迭代间相同data_block的地址步长，操作数同一迭代内不同data_block的地址步长等参数。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 操作数地址重叠约束请参考通用地址重叠约束。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - tensor高维切分计算样例-mask连续模式
+
+      .. code-block:: python
+
+          params = asc.UnaryRepeatParams(1, 1, 8, 8)
+          asc.cast_deq(dst, src, mask=128, repeat_time=4, repeat_params=params)
+    
+    - tensor高维切分计算样例-mask逐bit模式
+
+      .. code-block:: python
+
+          uint64_max = 2**64 - 1
+          mask = [uint64_max, uint64_max]
+          params = asc.UnaryRepeatParams(1, 1, 8, 8)
+          asc.cast_deq(dst, src, mask=mask, repeat_time=4, repeat_params=params)
+    
+    - tensor前n个数据计算样例
+      
+      .. code-block:: python
+      
+          asc.cast_deq(dst, src, count=512)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def gather_docstring():
+    func_introduction = """
+    给定输入的张量和一个地址偏移张量，本接口根据偏移地址将输入张量按元素收集到结果张量中。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    - tensor前n个数据计算
+
+      .. code-block:: c++
+
+          template <typename T>
+          __aicore__ inline void Gather(const LocalTensor<T>& dst, const LocalTensor<T>& src, 
+            const LocalTensor<uint32_t>& srcOffset, const uint32_t srcBaseAddr, const uint32_t count)
+      
+    - tensor高维切分计算
+      
+      - mask逐bit模式
+        
+        .. code-block:: c++
+            
+            template <typename T>
+            __aicore__ inline void Gather(const LocalTensor<T>& dst, const LocalTensor<T>& src, 
+                                const LocalTensor<uint32_t>& srcOffset, const uint32_t srcBaseAddr, 
+                                const uint64_t mask[], const uint8_t repeatTime, const uint16_t dstRepStride)
+
+      - mask连续模式
+
+        .. code-block:: c++ 
+
+            template <typename T>
+            __aicore__ inline void Gather(const LocalTensor<T>& dst, const LocalTensor<T>& src, 
+                                const LocalTensor<uint32_t>& srcOffset, const uint32_t srcBaseAddr, 
+                                const uint64_t mask, const uint8_t repeatTime, const uint16_t dstRepStride)
+    """
+
+    param_list = """
+    **参数说明**
+    
+    - dst：目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。
+    - src: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。
+    - src_offset：每个元素在src中对应的地址偏移。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。
+      该偏移量相对于src的起始基地址而言。单位为Bytes。取值要求如下：
+      - 取值应保证src元素类型位宽对齐。
+      - 偏移地址后不能超出UB大小数据的范围。
+      - 地址偏移的取值范围：不能超出uint32_t的范围。
+    - src_base：src的起始基地址，用于指定Gather操作中源操作数的起始位置，单位为Bytes。取值应保证src元素类型位宽对齐，否则会导致非预期行为。
+    - count：执行处理的数据个数。
+
+    - mask：
+      控制每次迭代内参与计算的元素。
+
+      - **逐bit模式**：mask为数组形式。数组长度和数组元素的取值范围和操作数的数据类型有关。可以按位控制哪些元素参与计算，bit位的值为1表示参与计算，0表示不参与。
+
+        - 操作数 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
+        - 操作数 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
+        - 操作数 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
+        - 例如：mask = [8, 0]，表示仅第 4 个元素参与计算
+
+      - **连续模式**：mask为整数形式。表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+
+        - 操作数 16 位：mask ∈ [1, 128]
+        - 操作数 32 位：mask ∈ [1, 64]
+        - 操作数 64 位：mask ∈ [1, 32]
+
+    - repeat_time：指令迭代次数，每次迭代完成8个datablock（32Bytes）的数据收集，数据范围：repeat_time∈[0,255]。
+    - dst_rep_stride：相邻迭代间的地址步长，单位是datablock（32Bytes）。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 操作数地址重叠约束请参考通用地址重叠约束。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        z_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
+        src_offset = asc.LocalTensor(dtype=asc.uint32, pos=asc.TPosition.VECIN, addr=0, tile_size=512) 
+        x_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+        asc.gather(z_local, x_local, src_offset, src_base=0, count=512)
+        asc.gather(z_local, x_local, src_offset, src_base=0, mask=512, repeat_times=1, dst_rep_stride=8)
+        uint64_max = 2**64 - 1
+        mask_bits = [uint64_max, uint64_max]
+        asc.gather(z_local, x_local, src_offset, src_base=0, mask=mask_bits, repeat_times=1, dst_rep_stride=8)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def gatherb_docstring():
+    func_introduction = """
+    给定一个输入的张量和一个地址偏移张量，本接口根据偏移地址按照data_block的粒度将输入张量收集到结果张量中。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <typename T>
+        __aicore__ inline void Gatherb(const LocalTensor<T>& dst, const LocalTensor<T>& src0, 
+            const LocalTensor<uint32_t>& offset, const uint8_t repeatTime, const GatherRepeatParams& repeatParams)
+    """
+
+    param_list = """
+    **参数说明**
+    
+    - dst：目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。
+    - src0: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。
+    - offset：每个datablock在源操作数中对应的地址偏移。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。
+      该偏移量是相对于src0的基地址而言的。每个元素值要大于等于0，单位为字节；且需要保证偏移后的地址满足32字节对齐。
+    - repeat_time：重复迭代次数，每次迭代完成8个data_block的数据收集，数据范围：repeat_time∈（0,255]。
+    - dst_rep_stride：目的操作数相邻迭代间的地址步长。以一个repeat_time归约后的长度为单位。每个repeat_time(8个data_block)归约后，得到8个元素，所以输入类型为half类型时，rep_stride单位为16Byte；输入类型为float类型时，rep_stride单位为32Byte。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    无。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        params = asc.GatherRepeatParams(1, 8)
+        asc.gatherb(y_buf, x_buf, offset_buf, repeat_time=2, repeat_params=params)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def block_reduce_sum_docstring():
+    func_introduction = """
+    对每个datablock内所有元素求和。源操作数相加采用二叉树方式，两两相加。归约指令的总体介绍请参考如何使用归约计算API。
+    以128个half类型的数据求和为例，每个datablock可以计算16个half类型数据，分成8个datablock进行计算；每个datablock内，通过二叉树的方式，两两相加。
+    需要注意的是两两相加的计算过程中，计算结果大于65504时结果保存为65504。
+    例如，源操作数为[60000,60000,-30000,100]，首先60000+60000溢出，结果为65504，然后计算-30000+100=-29900，最后计算65504-29900=35604。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    - mask逐比特模式
+
+      .. code-block:: c++
+
+          template <typename T, bool isSetMask = true>
+          __aicore__ inline void BlockReduceSum(const LocalTensor<T>& dst, const LocalTensor<T>& src, const int32_t repeatTime, 
+            const uint64_t mask[], const int32_t dstRepStride, const int32_t srcBlkStride, const int32_t srcRepStride)
+    
+    - mask连续模式
+
+      .. code-block:: c++
+
+          template <typename T, bool isSetMask = true>
+          __aicore__ inline void BlockReduceSum(const LocalTensor<T>& dst, const LocalTensor<T>& src,const int32_t repeatTime, 
+            const int32_t mask, const int32_t dstRepStride, const int32_t srcBlkStride, const int32_t srcRepStride)
+    """
+
+    param_list = """
+    **参数说明**
+    
+    - is_set_mask: 是否在接口内部设置mask。
+      - True，表示在接口内部设置mask。
+      - False，表示在接口外部设置mask，开发者需要使用set_vector_mask接口设置mask值。这种模式下，本接口入参中的mask值必须设置为占位符MASK_PLACEHOLDER。
+    - dst：目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要保证16字节对齐（针对half数据类型），32字节对齐（针对float数据类型）。
+    - src: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。
+    - repeat_time：迭代次数。取值范围为[0, 255]。
+    - mask：
+      控制每次迭代内参与计算的元素。
+
+      - **逐bit模式**：mask为数组形式。数组长度和数组元素的取值范围和操作数的数据类型有关。可以按位控制哪些元素参与计算，bit位的值为1表示参与计算，0表示不参与。
+
+        - 操作数 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
+        - 操作数 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
+        - 操作数 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
+        - 例如：mask = [8, 0]，表示仅第 4 个元素参与计算
+
+      - **连续模式**：mask为整数形式。表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+
+        - 操作数 16 位：mask ∈ [1, 128]
+        - 操作数 32 位：mask ∈ [1, 64]
+        - 操作数 64 位：mask ∈ [1, 32]
+    - dst_rep_stride：目的操作数相邻迭代间的地址步长。以一个repeat_time归约后的长度为单位。每个repeat_time(8个datablock)归约后，得到8个元素，所以输入类型为half类型时，rep_stride单位为16Byte；输入类型为float类型时，rep_stride单位为32Byte。
+    - src_blk_stride：单次迭代内datablock的地址步长。
+    - src_rep_stride：源操作数相邻迭代间的地址步长，即源操作数每次迭代跳过的datablock数目。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 为了节省地址空间，您可以定义一个Tensor，供源操作数与目的操作数同时使用（即地址重叠），需要注意计算后的目的操作数数据不能覆盖未参与计算的源操作数，需要谨慎使用。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - mask连续模式
+
+      .. code-block:: python
+
+          asc.block_reduce_sum(z_local, x_local, repeat=1, mask=128, dst_rep_stride=8, src_blk_stride=1, src_rep_stride=8)
+    
+    - mask逐bit模式
+
+      .. code-block:: python
+
+          uint64_max = 2**64 - 1
+          mask = [uint64_max, uint64_max]
+          asc.block_reduce_sum(z_local, x_local, repeat=1, mask=mask, dst_rep_stride=8, src_blk_stride=1, src_rep_stride=8)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def block_reduce_max_docstring():
+    func_introduction = """
+    对每个datablock内所有元素求最大值。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    - mask逐比特模式
+
+      .. code-block:: c++
+
+          template <typename T, bool isSetMask = true>
+          __aicore__ inline void BlockReduceMax(const LocalTensor<T>& dst, const LocalTensor<T>& src, const int32_t repeatTime,
+            const uint64_t mask[], const int32_t dstRepStride, const int32_t srcBlkStride, const int32_t srcRepStride)
+    
+    - mask连续模式
+
+      .. code-block:: c++
+
+          template <typename T, bool isSetMask = true>
+          __aicore__ inline void BlockReduceMax(const LocalTensor<T>& dst, const LocalTensor<T>& src,const int32_t repeatTime,
+            const int32_t mask, const int32_t dstRepStride, const int32_t srcBlkStride, const int32_t srcRepStride)
+    """
+
+    param_list = """
+    **参数说明**
+    
+    - is_set_mask: 是否在接口内部设置mask。
+      - True，表示在接口内部设置mask。
+      - False，表示在接口外部设置mask，开发者需要使用set_vector_mask接口设置mask值。这种模式下，本接口入参中的mask值必须设置为占位符MASK_PLACEHOLDER。
+    - dst：目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要保证16字节对齐（针对half数据类型），32字节对齐（针对float数据类型）。
+    - src: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。
+    - repeat_time：迭代次数。取值范围为[0, 255]。
+    - mask：
+      控制每次迭代内参与计算的元素。
+
+      - **逐bit模式**：mask为数组形式。数组长度和数组元素的取值范围和操作数的数据类型有关。可以按位控制哪些元素参与计算，bit位的值为1表示参与计算，0表示不参与。
+
+        - 操作数 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
+        - 操作数 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
+        - 操作数 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
+        - 例如：mask = [8, 0]，表示仅第 4 个元素参与计算
+
+      - **连续模式**：mask为整数形式。表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+
+        - 操作数 16 位：mask ∈ [1, 128]
+        - 操作数 32 位：mask ∈ [1, 64]
+        - 操作数 64 位：mask ∈ [1, 32]
+    - dst_rep_stride：目的操作数相邻迭代间的地址步长。以一个repeat_time归约后的长度为单位。每个repeat_time(8个datablock)归约后，得到8个元素，所以输入类型为half类型时，RepStride单位为16Byte；输入类型为float类型时，RepStride单位为32Byte。
+    - src_blk_stride：单次迭代内datablock的地址步长。
+    - src_rep_stride：源操作数相邻迭代间的地址步长，即源操作数每次迭代跳过的datablock数目。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 为了节省地址空间，您可以定义一个Tensor，供源操作数与目的操作数同时使用（即地址重叠），需要注意计算后的目的操作数数据不能覆盖未参与计算的源操作数，需要谨慎使用。
+    - 针对不同场景合理使用归约指令可以带来性能提升, 相关介绍请参考选择低延迟指令，优化归约操作性能。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - mask连续模式
+
+      .. code-block:: python
+
+          asc.block_reduce_max(z_local, x_local, repeat=1, mask=128, dst_rep_stride=8, src_blk_stride=1, src_rep_stride=8)
+    
+    - mask逐bit模式
+
+      .. code-block:: python
+
+          uint64_max = 2**64 - 1
+          mask = [uint64_max, uint64_max]
+          asc.block_reduce_max(z_local, x_local, repeat=1, mask=mask, dst_rep_stride=8, src_blk_stride=1, src_rep_stride=8)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def block_reduce_min_docstring():
+    func_introduction = """
+    对每个datablock内所有元素求最小值。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    - mask逐比特模式
+
+      .. code-block:: c++
+
+          template <typename T, bool isSetMask = true>
+          __aicore__ inline void BlockReduceMin(const LocalTensor<T>& dst, const LocalTensor<T>& src, const int32_t repeatTime,
+            const uint64_t mask[], const int32_t dstRepStride, const int32_t srcBlkStride, const int32_t srcRepStride)
+    
+    - mask连续模式
+
+      .. code-block:: c++
+
+          template <typename T, bool isSetMask = true>
+          __aicore__ inline void BlockReduceMin(const LocalTensor<T>& dst, const LocalTensor<T>& src,const int32_t repeatTime,
+            const int32_t mask, const int32_t dstRepStride, const int32_t srcBlkStride, const int32_t srcRepStride)
+    """
+
+    param_list = """
+    **参数说明**
+    
+    - is_set_mask: 是否在接口内部设置mask。
+      - True，表示在接口内部设置mask。
+      - False，表示在接口外部设置mask，开发者需要使用set_vector_mask接口设置mask值。这种模式下，本接口入参中的mask值必须设置为占位符MASK_PLACEHOLDER。
+    - dst：目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要保证16字节对齐（针对half数据类型），32字节对齐（针对float数据类型）。
+    - src: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。
+    - repeat_time：迭代次数。取值范围为[0, 255]。
+    - mask：
+      控制每次迭代内参与计算的元素。
+
+      - **逐bit模式**：mask为数组形式。数组长度和数组元素的取值范围和操作数的数据类型有关。可以按位控制哪些元素参与计算，bit位的值为1表示参与计算，0表示不参与。
+
+        - 操作数 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
+        - 操作数 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
+        - 操作数 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
+        - 例如：mask = [8, 0]，表示仅第 4 个元素参与计算
+
+      - **连续模式**：mask为整数形式。表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+
+        - 操作数 16 位：mask ∈ [1, 128]
+        - 操作数 32 位：mask ∈ [1, 64]
+        - 操作数 64 位：mask ∈ [1, 32]
+    - dst_rep_stride：目的操作数相邻迭代间的地址步长。以一个repeat_time归约后的长度为单位。每个repeat_time(8个datablock)归约后，得到8个元素，所以输入类型为half类型时，RepStride单位为16Byte；输入类型为float类型时，RepStride单位为32Byte。
+    - src_blk_stride：单次迭代内datablock的地址步长。
+    - src_rep_stride：源操作数相邻迭代间的地址步长，即源操作数每次迭代跳过的datablock数目。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 为了节省地址空间，您可以定义一个Tensor，供源操作数与目的操作数同时使用（即地址重叠），需要注意计算后的目的操作数数据不能覆盖未参与计算的源操作数，需要谨慎使用。
+    - 针对不同场景合理使用归约指令可以带来性能提升, 相关介绍请参考选择低延迟指令，优化归约操作性能。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - mask连续模式
+
+      .. code-block:: python
+
+          asc.block_reduce_min(z_local, x_local, repeat=1, mask=128, dst_rep_stride=8, src_blk_stride=1, src_rep_stride=8)
+    
+    - mask逐bit模式
+
+      .. code-block:: python
+
+          uint64_max = 2**64 - 1
+          mask = [uint64_max, uint64_max]
+          asc.block_reduce_min(z_local, x_local, repeat=1, mask=mask, dst_rep_stride=8, src_blk_stride=1, src_rep_stride=8)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def reduce_min_docstring():
+    func_introduction = """
+    在所有的输入数据中找出最小值及最小值对应的索引位置。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    - tensor前n个数据计算
+
+      .. code-block:: c++
+
+          template <typename T>
+          __aicore__ inline void ReduceMin(const LocalTensor<T>& dst, const LocalTensor<T>& src,
+            const LocalTensor<T>& sharedTmpBuffer, const int32_t count, bool calIndex = 0)
+
+    - tensor高维切分计算
+
+      - mask逐比特模式
+
+        .. code-block:: c++
+
+          template <typename T>
+          __aicore__ inline void ReduceMin(const LocalTensor<T>& dst, const LocalTensor<T>& src,
+                                            const LocalTensor<T>& sharedTmpBuffer, const uint64_t mask[],
+                                            const int32_t repeatTime, const int32_t srcRepStride, bool calIndex = 0)
+    
+      - mask连续模式
+
+        .. code-block:: c++
+
+          template <typename T>
+          __aicore__ inline void ReduceMin(const LocalTensor<T>& dst, const LocalTensor<T>& src,
+                                            const LocalTensor<T>& sharedTmpBuffer, const int32_t mask,
+                                            const int32_t repeatTime, const int32_t srcRepStride, bool calIndex = 0)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要保证4字节对齐（针对half数据类型），8字节对齐（针对float数据类型）。
+    - src: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。源操作数的数据类型需要与目的操作数保持一致。
+    - shared_tmp_buffer：API执行期间，部分硬件型号需要一块空间用于存储中间结果，空间大小需要满足最小所需空间的要求。
+      类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。数据类型需要与目的操作数保持一致。
+    - count：参与计算的元素个数。
+      参数取值范围和操作数的数据类型有关，数据类型不同，能够处理的元素个数最大值不同，最大处理的数据量不能超过UB大小限制。
+    - mask：
+      控制每次迭代内参与计算的元素。
+
+      - **逐bit模式**：mask为数组形式。数组长度和数组元素的取值范围和操作数的数据类型有关。可以按位控制哪些元素参与计算，bit位的值为1表示参与计算，0表示不参与。
+
+        - 操作数 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
+        - 操作数 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
+        - 操作数 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
+        - 例如：mask = [8, 0]，表示仅第 4 个元素参与计算
+
+      - **连续模式**：mask为整数形式。表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+
+        - 操作数 16 位：mask ∈ [1, 128]
+        - 操作数 32 位：mask ∈ [1, 64]
+        - 操作数 64 位：mask ∈ [1, 32]
+    - repeat_time：迭代次数。与通用参数说明中不同的是，支持更大的取值范围，保证不超过int32_t最大值的范围即可。
+    - src_rep_stride：源操作数相邻迭代间的地址步长，即源操作数每次迭代跳过的datablock数目。
+    - cal_index：指定是否获取最小值的索引，bool类型，默认值为false，取值：
+      - True：同时获取最小值和最小值索引。
+      - False：不获取索引，只获取最小值。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 操作数地址重叠约束请参考通用地址重叠约束。需要使用shared_tmp_buffer的情况下，支持dst与shared_tmp_buffer地址重叠（通常情况下dst比shared_tmp_buffer所需的空间要小），此时shared_tmp_buffer必须满足最小所需空间要求，否则不支持地址重叠。
+    - dst结果存储顺序为最小值，最小值索引，若不需要索引，只会存储最小值。返回结果中索引index数据是按照dst的数据类型进行存储的，比如dst使用half类型时，index按照half类型进行存储，如果按照half格式进行读取，index的值是不对的，因此index的读取需要使用reinterpret_cast方法转换到整数类型。
+    - 返回最小值索引时，如果存在多个最小值，返回第一个最小值的索引。
+    - 当输入类型是half的时候，只支持获取最大不超过65535（uint16_t能表示的最大值）的索引值。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - tensor高维切分计算样例-mask连续模式
+
+      .. code-block:: python
+
+          asc.reduce_min(dst, src, shared_tmp_buffer=shared_tmp, mask=128, repeat_time=128, src_rep_stride=65, cal_index=True)
+    
+    - tensor高维切分计算样例-mask逐bit模式
+
+      .. code-block:: python
+
+          uint64_max = 2**64 - 1
+          mask = [uint64_max, uint64_max]
+          asc.reduce_min(dst, src, shared_tmp_buffer=shared_tmp, mask=mask, repeat_time=65, src_rep_stride=8, cal_index=True)
+
+    - tensor前n个数据计算样例
+
+      .. code-block:: python
+
+          asc.reduce_min(dst, src, shared_tmp_buffer=shared_tmp, count=2048, cal_index=True)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def reduce_max_docstring():
+    func_introduction = """
+    在所有的输入数据中找出最小值及最小值对应的索引位置。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    - tensor前n个数据计算
+
+      .. code-block:: c++
+
+          template <typename T>
+          __aicore__ inline void ReduceMax(const LocalTensor<T>& dst, const LocalTensor<T>& src,
+            const LocalTensor<T>& sharedTmpBuffer, const int32_t count, bool calIndex = 0)
+
+    - tensor高维切分计算
+
+      - mask逐比特模式
+
+        .. code-block:: c++
+
+          template <typename T>
+          __aicore__ inline void ReduceMax(const LocalTensor<T>& dst, const LocalTensor<T>& src,
+                                            const LocalTensor<T>& sharedTmpBuffer, const uint64_t mask[],
+                                            const int32_t repeatTime, const int32_t srcRepStride, bool calIndex = 0)
+    
+      - mask连续模式
+
+        .. code-block:: c++
+
+          template <typename T>
+          __aicore__ inline void ReduceMax(const LocalTensor<T>& dst, const LocalTensor<T>& src,
+                                            const LocalTensor<T>& sharedTmpBuffer, const int32_t mask,
+                                            const int32_t repeatTime, const int32_t srcRepStride, bool calIndex = 0)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - dst：目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要保证4字节对齐（针对half数据类型），8字节对齐（针对float数据类型）。
+    - src: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。源操作数的数据类型需要与目的操作数保持一致。
+    - shared_tmp_buffer：API执行期间，部分硬件型号需要一块空间用于存储中间结果，空间大小需要满足最小所需空间的要求。
+      类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。数据类型需要与目的操作数保持一致。
+    - count：参与计算的元素个数。
+      参数取值范围和操作数的数据类型有关，数据类型不同，能够处理的元素个数最大值不同，最大处理的数据量不能超过UB大小限制。
+    - mask：
+      控制每次迭代内参与计算的元素。
+
+      - **逐bit模式**：mask为数组形式。数组长度和数组元素的取值范围和操作数的数据类型有关。可以按位控制哪些元素参与计算，bit位的值为1表示参与计算，0表示不参与。
+
+        - 操作数 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
+        - 操作数 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
+        - 操作数 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
+        - 例如：mask = [8, 0]，表示仅第 4 个元素参与计算
+
+      - **连续模式**：mask为整数形式。表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+
+        - 操作数 16 位：mask ∈ [1, 128]
+        - 操作数 32 位：mask ∈ [1, 64]
+        - 操作数 64 位：mask ∈ [1, 32]
+    - repeat_time：迭代次数。与通用参数说明中不同的是，支持更大的取值范围，保证不超过int32_t最大值的范围即可。
+    - src_rep_stride：源操作数相邻迭代间的地址步长，即源操作数每次迭代跳过的datablock数目。
+    - cal_index：指定是否获取最小值的索引，bool类型，默认值为false，取值：
+      - True：同时获取最小值和最小值索引。
+      - False：不获取索引，只获取最小值。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 操作数地址对齐要求请参见通用地址对齐约束。
+    - 操作数地址重叠约束请参考通用地址重叠约束。需要使用shared_tmp_buffer的情况下，支持dst与shared_tmp_buffer地址重叠（通常情况下dst比shared_tmp_buffer所需的空间要小），此时shared_tmp_buffer必须满足最小所需空间要求，否则不支持地址重叠。
+    - dst结果存储顺序为最大值，最大值索引，若不需要索引，只会存储最大值。返回结果中索引index数据是按照dst的数据类型进行存储的，比如dst使用half类型时，index按照half类型进行存储，如果按照half格式进行读取，index的值是不对的，因此index的读取需要使用reinterpret_cast方法转换到整数类型。
+    - 返回最大值索引时，如果存在多个最大值，返回第一个最大值的索引。
+    - 当输入类型是half的时候，只支持获取最大不超过65535（uint16_t能表示的最大值）的索引值。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - tensor高维切分计算样例-mask连续模式
+
+      .. code-block:: python
+
+          asc.reduce_max(dst, src, shared_tmp_buffer=shared_tmp, mask=128, repeat_time=128, src_rep_stride=65, cal_index=True)
+    
+    - tensor高维切分计算样例-mask逐bit模式
+
+      .. code-block:: python
+
+          uint64_max = 2**64 - 1
+          mask = [uint64_max, uint64_max]
+          asc.reduce_max(dst, src, shared_tmp_buffer=shared_tmp, mask=mask, repeat_time=65, src_rep_stride=8, cal_index=True)
+
+    - tensor前n个数据计算样例
+
+      .. code-block:: python
+
+          asc.reduce_max(dst, src, shared_tmp_buffer=shared_tmp, count=2048, cal_index=True)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def reduce_sum_docstring():
+    func_introduction = """
+    对所有的输入数据求和。ReduceSum的相加方式分为两种：
+    - 方式一：同一repeat内先按照二叉树累加、不同repeat的结果也按照二叉树累加。
+    - 方式二：同一repeat内采用二叉树累加，不同repeat的结果按顺序累加。
+    tensor前n个数据计算接口采用方式二，tensor高维切分计算接口采用方式一。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    - tensor前n个数据计算
+
+      .. code-block:: c++
+
+          template <typename T, bool isSetMask = true>
+          __aicore__ inline void ReduceSum(const LocalTensor<T>& dst, const LocalTensor<T>& src,
+            const LocalTensor<T>& sharedTmpBuffer, const int32_t count, bool calIndex = 0)
+
+    - tensor高维切分计算
+
+      - mask逐比特模式
+
+        .. code-block:: c++
+
+          template <typename T, bool isSetMask = true>
+          __aicore__ inline void ReduceSum(const LocalTensor<T>& dst, const LocalTensor<T>& src,
+                                            const LocalTensor<T>& sharedTmpBuffer, const uint64_t mask[],
+                                            const int32_t repeatTime, const int32_t srcRepStride, bool calIndex = 0)
+    
+      - mask连续模式
+
+        .. code-block:: c++
+
+          template <typename T, bool isSetMask = true>
+          __aicore__ inline void ReduceSum(const LocalTensor<T>& dst, const LocalTensor<T>& src,
+                                            const LocalTensor<T>& sharedTmpBuffer, const int32_t mask,
+                                            const int32_t repeatTime, const int32_t srcRepStride, bool calIndex = 0)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - is_set_mask：预留参数，为后续的功能做保留。保持默认值即可。
+    - dst：目的操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要保证2字节对齐（针对half数据类型），4字节对齐（针对float数据类型）。
+    - src: 源操作数。类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。源操作数的数据类型需要与目的操作数保持一致。
+    - shared_tmp_buffer：API执行期间，部分硬件型号需要一块空间用于存储中间结果，空间大小需要满足最小所需空间的要求。
+      类型为LocalTensor，支持的TPosition为VECIN/VECCALC/VECOUT。LocalTensor的起始地址需要32字节对齐。数据类型需要与目的操作数保持一致。
+    - count：参与计算的元素个数。
+      参数取值范围和操作数的数据类型有关，数据类型不同，能够处理的元素个数最大值不同，最大处理的数据量不能超过UB大小限制。
+    - mask：
+      控制每次迭代内参与计算的元素。
+
+      - **逐bit模式**：mask为数组形式。数组长度和数组元素的取值范围和操作数的数据类型有关。可以按位控制哪些元素参与计算，bit位的值为1表示参与计算，0表示不参与。
+
+        - 操作数 16 位：数组长度 2，mask[0], mask[1] ∈ [0, 2⁶⁴-1]，且不能同时为 0
+        - 操作数 32 位：数组长度 1，mask[0] ∈ (0, 2⁶⁴-1]
+        - 操作数 64 位：数组长度 1，mask[0] ∈ (0, 2³²-1]
+        - 例如：mask = [8, 0]，表示仅第 4 个元素参与计算
+
+      - **连续模式**：mask为整数形式。表示前面连续多少个元素参与计算。取值范围和操作数的数据类型有关，数据类型不同，每次迭代内能够处理的元素个数最大值不同。
+
+        - 操作数 16 位：mask ∈ [1, 128]
+        - 操作数 32 位：mask ∈ [1, 64]
+        - 操作数 64 位：mask ∈ [1, 32]
+    - repeat_time：迭代次数。与通用参数说明中不同的是，支持更大的取值范围，保证不超过int32_t最大值的范围即可。
+    - src_rep_stride：源操作数相邻迭代间的地址步长，即源操作数每次迭代跳过的datablock数目。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - [操作数地址对齐要求请参见通用地址对齐约束](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/API/ascendcopapi/atlasascendc_api_07_0004.html#ZH-CN_TOPIC_0000002534493277__section796754519912)。
+    - 操作数地址重叠约束请参考通用地址重叠约束。需要使用shared_tmp_buffer的情况下，支持dst与shared_tmp_buffer地址重叠（通常情况下dst比shared_tmp_buffer所需的空间要小），此时shared_tmp_buffer必须满足最小所需空间要求，否则不支持地址重叠。
+    - 该接口内部通过软件仿真来实现reduce_sum功能，某些场景下，性能可能不及直接使用硬件指令实现的block_reduce_sum和whole_reduce_sum接口。针对不同场景合理使用归约指令可以带来性能提升，相关介绍请参考选择低延迟指令，优化归约操作性能。
+    """
+
+    py_example = """
+    **调用示例**
+
+    - tensor高维切分计算样例-mask连续模式
+
+      .. code-block:: python
+
+          asc.reduce_sum(dst, src, shared_tmp_buffer=shared_tmp, mask=128, repeat_time=128, src_rep_stride=65, cal_index=True)
+    
+    - tensor高维切分计算样例-mask逐bit模式
+
+      .. code-block:: python
+
+          uint64_max = 2**64 - 1
+          mask = [uint64_max, uint64_max]
+          asc.reduce_sum(dst, src, shared_tmp_buffer=shared_tmp, mask=mask, repeat_time=65, src_rep_stride=8, cal_index=True)
+
+    - tensor前n个数据计算样例
+
+      .. code-block:: python
+
+          asc.reduce_sum(dst, src, shared_tmp_buffer=shared_tmp, count=2048, cal_index=True)
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
 DOC_HANDLES = {
     "cast": cast_docstring,
     "copy": copy_docstring,
@@ -6575,6 +7547,17 @@ DOC_HANDLES = {
     "set_mm_layout_transform": set_mm_layout_transform_docstring,
     "sync_all": sync_all_docstring,
     "fixpipe": fixpipe_docstring,
+    "brcb": brcb_docstring,
+    "axpy": axpy_docstring,
+    "cast_deq": cast_deq_docstring,
+    "gather": gather_docstring,
+    "gatherb": gatherb_docstring,
+    "block_reduce_sum": block_reduce_sum_docstring,
+    "block_reduce_max": block_reduce_max_docstring,
+    "block_reduce_min": block_reduce_min_docstring,
+    "reduce_sum": reduce_sum_docstring,
+    "reduce_max": reduce_max_docstring,
+    "reduce_min": reduce_min_docstring,
 }
 
 

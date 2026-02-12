@@ -24,7 +24,7 @@ class TQueBind(IRValue):
 
     """
     TQueBind绑定源逻辑位置和目的逻辑位置，根据源位置和目的位置，来确定内存分配的位置 、插入对应的同步事件，帮助开发者解决内存分配和管理、同步等问题。
-    Tque是TQueBind的简化模式。通常情况下开发者使用TQue进行编程，TQueBind对外提供一些特殊数据通路的内存管理和同步控制，涉及这些通路时可以直接使用TQueBind。
+    TQue是TQueBind的简化模式。通常情况下开发者使用TQue进行编程，TQueBind对外提供一些特殊数据通路的内存管理和同步控制，涉及这些通路时可以直接使用TQueBind。
     """
 
     @overload
@@ -37,6 +37,7 @@ class TQueBind(IRValue):
         """This contructor should not be called by user"""
         ...
 
+    @set_tpipe_docstring(pipe_name="TQueBind", api_name="construct")
     def __init__(self, src: Optional[TPosition] = TPosition.VECIN, dst: Optional[TPosition] = TPosition.VECIN, \
                     depth: Optional[int] = 0, mask: Optional[int] = 0, handle: Optional[IRHandle] = None) -> None:
         if handle is not None:
@@ -198,7 +199,7 @@ class TBuf(TQueBind):
     """
     使用Ascend C编程的过程中，可能会用到一些临时变量。
     这些临时变量占用的内存可以使用TBuf数据结构来管理，存储位置通过模板参数来设置，可以设置为不同的TPosition逻辑位置。
-    TBuf占用的存储空间通过TPipe进行管理，您可以通过InitBuffer接口为TBuf进行内存初始化操作，之后即可通过Get获取指定长度的Tensor参与计算。
+    TBuf占用的存储空间通过TPipe进行管理，您可以通过init_buffer接口为TBuf进行内存初始化操作，之后即可通过get获取指定长度的Tensor参与计算。
     """
 
     @overload
@@ -210,6 +211,7 @@ class TBuf(TQueBind):
         """This contructor should not be called by user"""
         ...
 
+    @set_tpipe_docstring(pipe_name="TBuf", api_name="construct")
     def __init__(self, pos: Optional[TPosition] = None, handle: Optional[IRHandle] = None) -> None:
         if handle is not None:
             self.handle = handle
@@ -296,6 +298,7 @@ class TBufPool(IRValue):
         """This contructor should not be called by user"""
         ...
 
+    @set_tpipe_docstring(pipe_name="TBufPool", api_name="construct")
     def __init__(self, pos: Optional[TPosition] = None, buf_id_size: RuntimeInt = 4,
                  handle: Optional[IRHandle] = None) -> None:
         if handle is not None:
@@ -366,8 +369,8 @@ class TPipe(IRValue):
     """
     TPipe用于统一管理Device端内存等资源，一个Kernel函数必须且只能初始化一个TPipe对象。其主要功能包括：  
     
-    - 内存资源管理：通过TPipe的InitBuffer接口，可以为TQue和TBuf分配内存，分别用于队列的内存初始化和临时变量内存的初始化。
-    - 同步事件管理：通过TPipe的AllocEventID、ReleaseEventID等接口，可以申请和释放事件ID，用于同步控制。
+    - 内存资源管理：通过TPipe的init_buffer接口，可以为TQue和TBuf分配内存，分别用于队列的内存初始化和临时变量内存的初始化。
+    - 同步事件管理：通过TPipe的alloc_event_id、release_event_id等接口，可以申请和释放事件ID，用于同步控制。
     """
 
     @overload
@@ -379,6 +382,7 @@ class TPipe(IRValue):
         """This contructor should not be called by user"""
         ...
 
+    @set_tpipe_docstring(pipe_name="TPipe", api_name="construct")
     def __init__(self, handle: Optional[IRHandle] = None) -> None:
         if handle is not None:
             self.handle = handle

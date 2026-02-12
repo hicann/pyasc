@@ -22,7 +22,7 @@ __aicore__ inline void DeQue(LocalTensor<T>& tensor)
 
 **参数说明**
 
-- T：Tensor的数据类型。
+- dtype：Tensor的数据类型。
 - tensor：inplace接口需要通过出参的方式返回Tensor。
 
 **返回值说明**
@@ -31,7 +31,7 @@ non-inplace接口的返回值为从队列中取出的LocalTensor；inplace接口
 
 **约束说明**
 
-- 对空队列执行DeQue是一种异常行为，会在CPU调测时报错。
+- 对空队列执行deque是一种异常行为，会在CPU调测时报错。
 - non-inplace接口，需要将TQueBind的depth模板参数设置为非零值；inplace接口，需要将TQueBind的depth模板参数设置为0。
 
 **调用示例**

@@ -108,6 +108,7 @@ def cast_deq(dst: LocalTensor, src: LocalTensor, mask: List[int], repeat_times: 
 
 
 @require_jit
+@set_common_docstring(api_name="cast_deq")
 def cast_deq(dst: LocalTensor, src: LocalTensor, *args, **kwargs) -> None:
     builder = global_builder.get_ir_builder()
     unary_op_impl("cast_deq", dst, src, args, kwargs, builder.create_asc_CastDeqL0Op, 

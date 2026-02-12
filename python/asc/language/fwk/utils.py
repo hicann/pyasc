@@ -17,9 +17,38 @@ class TQueBindDocstring:
         ...
     
     @staticmethod
+    def construct_docstring():
+        func_introduction = """
+        创建TQueBind对象。
+        """
+
+        cpp_signature = """
+        **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            __aicore__ inline TQueBind()
+
+        """
+
+        param_list = """
+        **参数说明**
+
+        无。
+        """
+
+        constraint_list = """
+        **约束说明**
+
+        无。
+        """
+
+        return [func_introduction, cpp_signature, param_list, "", constraint_list, ""]
+
+    @staticmethod
     def alloc_tensor_docstring():
         func_introduction = """
-        从Que中分配Tensor，Tensor所占大小为InitBuffer时设置的每块内存长度。
+        从Que中分配Tensor，Tensor所占大小为init_buffer时设置的每块内存长度。
         """
 
         cpp_signature = """
@@ -40,7 +69,7 @@ class TQueBindDocstring:
         param_list = """
         **参数说明**
 
-        - T：Tensor的数据类型。
+        - dtype：Tensor的数据类型。
         - tensor：inplace接口需要传入LocalTensor作为内存管理的对象。
         """
 
@@ -105,7 +134,6 @@ class TQueBindDocstring:
         param_list = """
         **参数说明**
 
-        - T：Tensor的数据类型。
         - tensor：待释放的Tensor。
         """
 
@@ -145,7 +173,6 @@ class TQueBindDocstring:
         param_list = """
         **参数说明**
 
-        - T：Tensor的数据类型。
         - tensor：指定的Tensor
         """
 
@@ -197,7 +224,7 @@ class TQueBindDocstring:
         param_list = """
         **参数说明**
 
-        - T：Tensor的数据类型。
+        - dtype：Tensor的数据类型。
         - tensor：inplace接口需要通过出参的方式返回Tensor。
         """
 
@@ -210,7 +237,7 @@ class TQueBindDocstring:
         constraint_list = """
         **约束说明**
 
-        - 对空队列执行DeQue是一种异常行为，会在CPU调测时报错。
+        - 对空队列执行deque是一种异常行为，会在CPU调测时报错。
         - non-inplace接口，需要将TQueBind的depth模板参数设置为非零值；inplace接口，需要将TQueBind的depth模板参数设置为0。
         """
 
@@ -272,8 +299,8 @@ class TQueBindDocstring:
         return_list = """
         **返回值说明**
 
-        - true：表示Queue未满，可以继续Enque操作
-        - false：表示Queue已满，不可以继续入队
+        - True：表示Queue未满，可以继续enque操作
+        - False：表示Queue已满，不可以继续入队
         """
 
         constraint_list = """
@@ -287,7 +314,7 @@ class TQueBindDocstring:
 
         .. code-block:: python
 
-            # 根据VacantInQue判断当前que是否已满，设置当前队列深度为4
+            # 根据vacant_in_que判断当前que是否已满，设置当前队列深度为4
             pipe = asc.Tpipe()
             que = asc.TQueBind(asc.TPosition.VECOUT, asc.TPosition.GM, 4)
             num = 10
@@ -396,7 +423,7 @@ class TQueBindDocstring:
 
         .. code-block:: python
 
-            # 通过GetTensorCountInQue查询que中已入队的Tensor数量，当前通过AllocTensor接口分配了内存，并加入que中，num为1。
+            # 通过get_tensor_count_in_que查询que中已入队的Tensor数量，当前通过alloc_tensor接口分配了内存，并加入que中，num为1。
             pipe = asc.Tpipe()
             que = asc.TQueBind(asc.TPosition.VECOUT, asc.TPosition.GM, 4)
             num = 4
@@ -470,7 +497,7 @@ class TQueBindDocstring:
     @staticmethod
     def free_all_event_docstring():
         func_introduction = """
-        释放队列中申请的所有同步事件。队列分配的Buffer关联着同步事件的eventID，因为同步事件的数量有限制，
+        释放队列中申请的所有同步事件。队列分配的Buffer关联着同步事件的event_id，因为同步事件的数量有限制，
         如果同时使用的队列Buffer数量超过限制，将无法继续申请队列，使用本接口释放队列中的事件后，可以再次申请队列。
         """
 
@@ -534,7 +561,6 @@ class TQueBindDocstring:
         param_list = """
         **参数说明**
 
-        - T：bufPool的数据类型。
         - buf_pool：用户自定义的TBufPool对象。
         - index：需要设置的内存块的偏移下标值，第一块为0，第二块为1，...，依次类推。
         - buf_handle：需要设置的内存块指针，类型为TBufHandle(实际为uint8_t*)。
@@ -611,6 +637,36 @@ class TBufDocstring:
         ...
 
     @staticmethod
+    def construct_docstring():
+        func_introduction = """
+        创建TBuf对象时，初始化数据成员。
+        """
+
+        cpp_signature = """
+        **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            template <TPosition pos = TPosition::LCM>
+            __aicore__ inline TBuf();
+
+        """
+
+        param_list = """
+        **参数说明**
+
+        - pos：TBuf所在的逻辑位置，取值为VECCALC。
+        """
+
+        constraint_list = """
+        **约束说明**
+
+        无。
+        """
+
+        return [func_introduction, cpp_signature, param_list, "", constraint_list, ""]
+
+    @staticmethod
     def get_docstring():
         func_introduction = """
         从TBuf上获取指定长度的Tensor，或者获取全部长度的Tensor。
@@ -634,7 +690,7 @@ class TBufDocstring:
         param_list = """
         **参数说明**
 
-        - T：待获取Tensor的数据类型。
+        - dtype：待获取Tensor的数据类型。
         - len：需要获取的Tensor元素个数。
         """
 
@@ -688,7 +744,7 @@ class TBufDocstring:
         param_list = """
         **参数说明**
 
-        - T：待获取Tensor的数据类型。
+        - dtype：待获取Tensor的数据类型。
         - size：需要获取的Tensor元素个数。
         - buf_offset：从起始位置的偏移长度，单位是字节，且需32字节对齐。
         """
@@ -702,7 +758,7 @@ class TBufDocstring:
         constraint_list = """
         **约束说明**
 
-        - size的数值是Tensor中元素的个数，size*sizeof(T) + buf_offset不能超过TBuf初始化时的长度。
+        - size的数值是Tensor中元素的个数，size*dtype.sizeof + buf_offset不能超过TBuf初始化时的长度。
         - buf_offset需满足32字节对齐的要求。
         """
 
@@ -730,9 +786,42 @@ class TBufPoolDocstring:
         ...
 
     @staticmethod
+    def construct_docstring():
+        func_introduction = """
+        创建TBufPool对象时，初始化数据成员。
+        """
+
+        cpp_signature = """
+        **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            template <TPosition pos, uint32_t bufIDSize = defaultBufIDSize>
+            __aicore__ inline TBufPool();
+
+        """
+
+        param_list = """
+        **参数说明**
+
+        - pos：TBufPool逻辑位置，可以为VECIN、VECOUT、VECCALC、A1、B1、C1。
+        - buf_id_size：TBufPool可分配Buffer数量，默认为4，不超过16。
+          对于非共享模式的资源分配，在本TBufPool上再次申请TBufPool时，申请的buf_id_size不能超过原TBufPool剩余可用的Buffer数量；
+          对于共享模式的资源分配，在本TBufPool上再次申请TBufPool时，申请的buf_id_size不能超过原TBufPool设置的Buffer数量。
+        """
+
+        constraint_list = """
+        **约束说明**
+
+        无。
+        """
+
+        return [func_introduction, cpp_signature, param_list, "", constraint_list, ""]
+
+    @staticmethod
     def init_buf_pool_docstring():
         func_introduction = """
-        通过Tpipe::InitBufPool接口可划分出整块资源，整块TbufPool资源可以继续通过TBufPool::InitBufPool接口划分成小块资源。
+        通过Tpipe::InitBufPool接口可划分出整块资源，整块TbufPool资源可以继续通过TBufPool.init_buf_pool接口划分成小块资源。
         """
 
         cpp_signature = """
@@ -753,7 +842,6 @@ class TBufPoolDocstring:
         param_list = """
         **参数说明**
 
-        - T：待获取Tensor的数据类型。
         - size：需要获取的Tensor元素个数。
         - buf_offset：从起始位置的偏移长度，单位是字节，且需32字节对齐。
         """
@@ -826,7 +914,6 @@ class TBufPoolDocstring:
         param_list = """
         **参数说明**
 
-        - T：que参数的类型。
         - pos：Buffer逻辑位置，可以为VECIN、VECOUT、VECCALC、A1、B1、C1。
         - que：需要分配内存的TQue对象。
         - num：分配内存块的个数。
@@ -838,7 +925,7 @@ class TBufPoolDocstring:
         constraint_list = """
         **约束说明**
 
-        声明TBufPool时，可以通过bufIDSize指定可分配Buffer的最大数量，默认上限为4，最大为16。TQue或TBuf的物理内存需要和TBufPool一致。
+        声明TBufPool时，可以通过buf_id_size指定可分配Buffer的最大数量，默认上限为4，最大为16。TQue或TBuf的物理内存需要和TBufPool一致。
         """
 
         py_example = """
@@ -939,6 +1026,45 @@ class TPipeDocstring:
 
     def __init__(self) -> None:
         ...
+
+    @staticmethod
+    def construct_docstring():
+        func_introduction = """
+        构造用来管理内存和同步的TPipe对象。
+        """
+
+        cpp_signature = """
+        **对应的Ascend C函数原型**
+
+        .. code-block:: c++
+
+            __aicore__ inline TPipe()
+
+        """
+
+        param_list = """
+        **参数说明**
+
+        无。
+        """
+
+        constraint_list = """
+        **约束说明**
+
+        - 避免TPipe在对象内创建和初始化，TPipe在对象内创建时，可能会影响编译器对对象内常量的优化，引起scalar性能劣化，具体原理请参考避免TPipe在对象内创建和初始化。
+        - TPipe对象同一时刻全局只能存在一份，同时定义多个TPipe对象，会出现卡死等随机行为。如果需要使用多个TPipe时，请先调用destroy接口释放前一个TPipe。
+        """
+
+        py_example = """
+        **调用示例**
+
+        .. code-block:: python
+                
+            pipe = asc.Tpipe()
+
+        """
+
+        return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
     @staticmethod
     def init_docstring():
@@ -1057,7 +1183,6 @@ class TPipeDocstring:
         param_list = """
         **参数说明**
 
-        - T：队列的类型，支持取值TQue、TQueBind。
         - que：需要分配内存的TQue等对象。
         - num：分配内存块的个数。double buffer功能通过该参数开启：num设置为1，表示不开启double buffer；num设置为2，表示开启double buffer。
         - len：每个内存块的大小，单位为字节。当传入的len不满足32字节对齐时，API内部会自动向上补齐至32字节对齐，后续的数据搬运过程会涉及非对齐处理，具体内容请参考非对齐场景。
@@ -1153,7 +1278,7 @@ class TPipeDocstring:
         param_list = """
         **参数说明**
 
-        - evt：HardEvent硬件同步类型。
+        - event：HardEvent硬件同步类型。
         """
 
         return_list = """
@@ -1202,8 +1327,8 @@ class TPipeDocstring:
         param_list = """
         **参数说明**
 
-        - evt：HardEvent硬件同步类型。
-        - id：TEventID类型，调用AllocEventID申请获得的TEventID。
+        - event：HardEvent硬件同步类型。
+        - id：TEventID类型，调用alloc_event_id申请获得的TEventID。
         """
         
         constraint_list = """
@@ -1247,7 +1372,7 @@ class TPipeDocstring:
         param_list = """
         **参数说明**
 
-        - evt：HardEvent硬件同步类型。
+        - event：HardEvent硬件同步类型。
         """
         
         return_list = """
@@ -1336,8 +1461,6 @@ class TPipeDocstring:
         param_list = """
         **参数说明**
 
-        - T：bufPool的类型。
-        - U：shareBuf的类型。
         - buf_pool：新划分的资源池，类型为TBufPool。
         - len：新划分资源池长度，单位为Byte，非32Bytes对齐会自动补齐至32Bytes对齐。
         - share_buf：被复用资源池，类型为TBufPool，新划分资源池与被复用资源池共享起始地址及长度。
@@ -1580,6 +1703,7 @@ class TQueDocstring:
 
 DOC_HANDLERS = {
     "TQueBind": {
+        "construct": TQueBindDocstring.construct_docstring,
         "alloc_tensor": TQueBindDocstring.alloc_tensor_docstring,
         "free_tensor": TQueBindDocstring.free_tensor_docstring,
         "enque": TQueBindDocstring.enque_docstring,
@@ -1593,15 +1717,18 @@ DOC_HANDLERS = {
         "init_start_buf_handle": TQueBindDocstring.init_start_buf_handle_docstring,
     },
     "TBuf": {
+        "construct": TBufDocstring.construct_docstring,
         "get": TBufDocstring.get_docstring,
         "get_with_offset": TBufDocstring.get_with_offset_docstring,
     },
     "TBufPool": {
+        "construct": TBufPoolDocstring.construct_docstring,
         "init_buf_pool": TBufPoolDocstring.init_buf_pool_docstring,
         "init_buffer": TBufPoolDocstring.init_buffer_docstring,
         "reset": TBufPoolDocstring.reset_docstring,
     },
     "TPipe": {
+        "construct": TPipeDocstring.construct_docstring,
         "init": TPipeDocstring.init_docstring,
         "destroy": TPipeDocstring.destroy_docstring,
         "init_buffer": TPipeDocstring.init_buffer_docstring,

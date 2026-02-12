@@ -12,9 +12,11 @@ from ..core.ir_value import materialize_ir_value as _mat
 from ..core.tensor import LocalTensor
 from ..core.types import BrcbRepeatParams
 from ..core.utils import require_jit, global_builder
+from .utils import set_common_docstring
 
 
 @require_jit
+@set_common_docstring(api_name="brcb")
 def brcb(dst: LocalTensor, src0: LocalTensor,
          repeat_times: int, repeat_params: BrcbRepeatParams) -> None:
     builder = global_builder.get_ir_builder()
