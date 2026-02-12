@@ -1219,11 +1219,13 @@ class LocalTensorDocstring:
         return [func_introduction, cpp_signature, param_list, "", "", py_example]
 
 
-ALLOCATOR_DOC_HANDLERS = {
+
+CLASS_DOC_HANDLERS = {
     "LocalMemAllocator": {
         "get_cur_addr": LocalMemAllocatorDocstring.get_cur_addr_docstring,
         "alloc": LocalMemAllocatorDocstring.alloc_docstring,
-    }
+    },
+    "ShapeInfo": {}
 }
 
 
@@ -1259,7 +1261,7 @@ TENSOR_DOC_HANDLERS = {
 }
 
 
-def set_allocator_docstring(allocator_name: Optional[str] = None, api_name: Optional[str] = None) -> Callable[[T], T]:
+def set_class_docstring(class_name: Optional[str] = None, api_name: Optional[str] = None) -> Callable[[T], T]:
     func_introduction = ""
     cpp_signature = ""
     param_list = ""
@@ -1267,12 +1269,12 @@ def set_allocator_docstring(allocator_name: Optional[str] = None, api_name: Opti
     constraint_list = ""
     py_example = ""
     
-    if ALLOCATOR_DOC_HANDLERS.get(allocator_name) is None:
-        raise RuntimeError(f"Invalid allocator name {allocator_name}")
-    if ALLOCATOR_DOC_HANDLERS.get(allocator_name, {}).get(api_name) is None:
-        raise RuntimeError(f"Unsupported API [{api_name}] for allocator type [{allocator_name}]")
+    if CLASS_DOC_HANDLERS.get(class_name) is None:
+        raise RuntimeError(f"Invalid class name {class_name}")
+    if CLASS_DOC_HANDLERS.get(class_name, {}).get(api_name) is None:
+        raise RuntimeError(f"Unsupported API [{api_name}] for allocator type [{class_name}]")
     
-    handler = ALLOCATOR_DOC_HANDLERS.get(allocator_name, {}).get(api_name)
+    handler = CLASS_DOC_HANDLERS.get(class_name, {}).get(api_name)
     func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example = handler()
     
     docstr = f"""

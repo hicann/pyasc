@@ -297,6 +297,10 @@ class InitConstValueParams(IRValue):
 
 
 class ShapeInfo(IRValue):
+    
+    """
+    ShapeInfo用来存放LocalTensor或GlobalTensor的shape信息。
+    """
 
     @overload
     def __init__(self) -> None:
@@ -365,6 +369,45 @@ class ShapeInfo(IRValue):
 
     def to_ir(self) -> IRHandle:
         return self.handle
+
+
+@overload
+def get_shape_size(shape_info: ShapeInfo) -> int:
+    ...
+
+
+@require_jit
+def get_shape_size(shape_info: ShapeInfo) -> RuntimeInt:
+    """
+    获取Shape中所有dim的累乘结果
+
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+        
+        __aicore__ inline int GetShapeSize(const ShapeInfo& shapeInfo)
+
+    **参数说明**
+
+    - shape_info：ShapeInfo类型，LocalTensor或GlobalTensor的shape信息。
+
+    **返回值说明**
+
+    输入的shape_info中所有dim的累乘结果。
+
+    **约束说明**
+
+    无。
+
+    **调用示例**
+
+    .. code-block:: python
+
+        size = asc.get_shape_size(shape_info)
+    """
+    builder = global_builder.get_ir_builder()
+    handle = builder.create_asc_GetShapeSizeOp(builder.get_i32_type(), shape_info.to_ir())
+    return PlainValue(handle)
 
 
 class SliceInfo(IRValue):

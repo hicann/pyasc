@@ -166,6 +166,7 @@ func.func @emit_construct(%arg0: i8, %arg1: i16, %arg2: i32, %arg3: i64, %arg4: 
 // CHECK-NEXT:  AscendC::ShapeInfo v8{v1, v2};
 // CHECK-NEXT:  v6.SetShapeInfo(v7);
 // CHECK-NEXT:  v6.SetShapeInfo(v8);
+// CHECK-NEXT:  int32_t v9 = AscendC::GetShapeSize(v7);
 // CHECK-NEXT:  return;
 // CHECK-NEXT: }
 func.func @emit_shape_info(%arg0: i8, %arg1: memref<?xi32>, %arg2: i8, %arg3: memref<?xi32>, %arg4: i8, %arg5: !ascendc.local_tensor<*xf16>) {
@@ -173,5 +174,6 @@ func.func @emit_shape_info(%arg0: i8, %arg1: memref<?xi32>, %arg2: i8, %arg3: me
   %1 = ascendc.construct !ascendc.shape_info (%arg0, %arg1) : i8, memref<?xi32>
   ascendc.local_tensor.set_shape_info %arg5, %0 : !ascendc.local_tensor<*xf16>, !ascendc.shape_info
   ascendc.local_tensor.set_shape_info %arg5, %1 : !ascendc.local_tensor<*xf16>, !ascendc.shape_info
+  %2 = ascendc.get_shape_size %0 : !ascendc.shape_info -> i32
   return
 }

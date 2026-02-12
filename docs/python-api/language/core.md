@@ -67,3 +67,16 @@ LocalTensor用于存放AI Core中Local Memory（内部存储）的数据，支�
 | [`LocalTensor.set_size`](generated/asc.language.core.LocalTensor.set_size.md#asc.language.core.LocalTensor.set_size)                                     | 设置当前LocalTensor Size大小。单位为元素。当用户重用local tensor变量且使用长度发生变化的时候，需要使用此接口重新设置Size。            |
 | [`LocalTensor.set_user_tag`](generated/asc.language.core.LocalTensor.set_user_tag.md#asc.language.core.LocalTensor.set_user_tag)                         | 为Tensor添加用户自定义信息，用户可以根据需要设置对应的Tag。后续可通过GetUserTag获取指定Tensor的Tag信息，并根据Tag信息对Tensor进行相应操作。 |
 | [`LocalTensor.set_value`](generated/asc.language.core.LocalTensor.set_value.md#asc.language.core.LocalTensor.set_value)                                  | 设置LocalTensor中的某个值。 该接口仅在LocalTensor的TPosition为VECIN/VECCALC/VECOUT时支持。                  |
+
+## ShapeInfo
+
+### *class* asc.language.core.ShapeInfo
+
+### *class* asc.language.core.ShapeInfo(shape: Array, original_shape: Array | None = None, data_format: DataFormat = DataFormat.ND)
+
+### *class* asc.language.core.ShapeInfo(handle: Value)
+
+ShapeInfo用来存放LocalTensor或GlobalTensor的shape信息。
+
+| [`get_shape_size`](generated/asc.language.core.get_shape_size.md#asc.language.core.get_shape_size)   | 获取Shape中所有dim的累乘结果   |
+|------------------------------------------------------------------------------------------------------|----------------------|

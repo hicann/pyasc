@@ -73,6 +73,7 @@ def test_shape_info(mock_launcher_run):
         x.set_shape_info(s0)
         x.set_shape_info(s1)
         x.set_shape_info(s2)
+        size = asc.get_shape_size(s0)
 
     kernel_shape_info[1]()
     assert mock_launcher_run.call_count == 1

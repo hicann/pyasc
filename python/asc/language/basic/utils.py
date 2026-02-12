@@ -1239,7 +1239,7 @@ def dump_acc_chk_point_docstring():
     return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
-def dump_tensor_docstring_docstring():
+def dump_tensor_docstring():
     func_introduction = """
     基于算子工程开发的算子，可以使用该接口Dump指定Tensor的内容。
     """
@@ -1427,6 +1427,50 @@ def printf_docstring():
         #浮点型打印
         x = 3.14
         asc.printf("%f", x)
+
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def print_time_stamp_docstring():
+    func_introduction = """
+    提供时间戳打点功能，用于在算子Kernel代码中标记关键执行点。调用后会打印如下信息：
+
+    - desc_id： 用户自定义标识符，用于区分不同打点位置；
+    - rsv ：保留值，默认为0，无需关注；
+    - time_stamp ： 当前系统cycle数，用于计算时间差，时间换算规则可参考GetSystemCycle(ISASI)；
+    - pc_ptr：pc指针数值，若无特殊需求，用户无需关注。
+    - entry：预留字段，用户无需关注。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+        __aicore__ inline void PrintTimeStamp(uint32_t descId)
+    """
+
+    param_list = """
+    **参数说明**
+
+    - desc_id：用户自定义标识符（自定义数字），用于区分不同打点位置。[0, 0xffff]是预留给Ascend C内部各个模块使用的id值，用户自定义的desc_id建议使用大于0xffff的数值。
+    """
+
+    constraint_list = """
+    **约束说明**
+
+    - 该功能仅用于NPU上板调试。
+    - 暂不支持算子入图场景的打印。
+    - 单次调用本接口打印的数据总量不可超过1MB（还包括少量框架需要的头尾信息，通常可忽略）。使用时应注意，如果超出这个限制，则数据不会被打印。在使用自定义算子工程进行工程化算子开发时，一个算子所有使用Dump功能的接口在每个核上Dump的数据总量不可超过1MB。请开发者自行控制待打印的内容数据量，超出则不会打印。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.print_time_stamp(65577)
 
     """
 
@@ -7458,27 +7502,42 @@ def reduce_sum_docstring():
 
 
 DOC_HANDLES = {
+    "axpy": axpy_docstring,
+    "block_reduce_sum": block_reduce_sum_docstring,
+    "block_reduce_max": block_reduce_max_docstring,
+    "block_reduce_min": block_reduce_min_docstring,
+    "brcb": brcb_docstring,
     "cast": cast_docstring,
+    "cast_deq": cast_deq_docstring,
+    "compare": compare_docstring,
+    "compare_scalar": compare_scalar_docstring,
     "copy": copy_docstring,
+    "count_bits_cnt_same_as_sign_bit": count_bits_cnt_same_as_sign_bit_docstring,
     "cross_core_set_flag": cross_core_set_flag_docstring,
     "cross_core_wait_flag": cross_core_wait_flag_docstring,
-    "set_flag": set_wait_flag_docstring,
-    "get_block_num": get_block_num_docstring,
-    "get_block_idx": get_block_idx_docstring,
-    "get_data_block_size_in_bytes": get_data_block_size_in_bytes_docstring,
-    "get_program_counter": get_program_counter_docstring,
-    "get_sub_block_idx": get_sub_block_idx_docstring,
-    "get_system_cycle": get_system_cycle_docstring,
-    "get_task_ratio": get_task_ratio_docstring,
-    "trap": trap_docstring,
     "data_cache_clean_and_invalid": data_cache_clean_and_invalid_docstring,
     "data_cache_preload": data_cache_preload_docstring,
     "data_copy": data_copy_docstring,
     "data_copy_pad": data_copy_pad_docstring,
+    "data_sync_barrier": data_sync_barrier_docstring,
+    "dump_acc_chk_point": dump_acc_chk_point_docstring,
+    "dump_tensor": dump_tensor_docstring,
     "duplicate": duplicate_docstring,
-    "get_icache_preload_status": get_icache_preload_status_docstring,
+    "fixpipe": fixpipe_docstring,
+    "gather": gather_docstring,
+    "gatherb": gatherb_docstring,
+    "gather_mask": gather_mask_docstring,
+    "get_block_idx": get_block_idx_docstring,
+    "get_block_num": get_block_num_docstring,
+    "get_cmp_mask": get_cmp_mask_docstring,
+    "get_data_block_size_in_bytes": get_data_block_size_in_bytes_docstring,
     "get_hccl_context": get_hccl_context_docstring,
+    "get_icache_preload_status": get_icache_preload_status_docstring,
+    "get_program_counter": get_program_counter_docstring,
+    "get_sub_block_idx": get_sub_block_idx_docstring,
     "get_sys_workspace": get_sys_workspace_docstring,
+    "get_system_cycle": get_system_cycle_docstring,
+    "get_task_ratio": get_task_ratio_docstring,
     "ib_set": ib_set_docstring,
     "ib_wait": ib_wait_docstring,
     "icache_preload": icache_preload_docstring,
@@ -7487,77 +7546,63 @@ DOC_HANDLES = {
     "load_data_with_sparse": load_data_with_sparse_docstring,
     "load_data_with_transpose": load_data_with_transpose_docstring,
     "load_image_to_local": load_image_to_local_docstring,
-    "mmad": mmad_docstring,
-    "notify_next_block": notify_next_block_docstring,
-    "data_sync_barrier": data_sync_barrier_docstring,
-    "pipe_barrier": pipe_barrier_docstring,
-    "wait_flag": set_wait_flag_docstring,
     "metrics_prof_start": metrics_prof_start_docstring,
     "metrics_prof_stop": metrics_prof_stop_docstring,
+    "mmad": mmad_docstring,
+    "mmad_with_sparse": mmad_with_sparse_docstring,
+    "mrg_sort": mrg_sort_docstring,
+    "mrg_sort4": mrg_sort4_docstring,
+    "notify_next_block": notify_next_block_docstring,
+    "pair_reduce_sum": pair_reduce_sum_docstring,
+    "pipe_barrier": pipe_barrier_docstring,
+    "print_time_stamp": print_time_stamp_docstring,
     "printf": printf_docstring,
-    "count_bits_cnt_same_as_sign_bit": count_bits_cnt_same_as_sign_bit_docstring,
+    "proposal_concat": proposal_concat_docstring,
+    "proposal_extract": proposal_extract_docstring,
+    "reduce_sum": reduce_sum_docstring,
+    "reduce_max": reduce_max_docstring,
+    "reduce_min": reduce_min_docstring,
+    "repeat_reduce_sum": repeat_reduce_sum_docstring,
+    "reset_mask": reset_mask_docstring,
+    "rp_sort16": rp_sort16_docstring,
     "scalar_cast": scalar_cast_docstring,
     "scalar_count_leading_zero": scalar_count_leading_zero_docstring,
     "scalar_get_count_of_value": scalar_get_count_of_value_docstring,
     "scalar_get_sff_value": scalar_get_sff_value_docstring,
-    "dump_acc_chk_point": dump_acc_chk_point_docstring,
-    "dump_tensor": dump_tensor_docstring_docstring,
-    "gather_mask": gather_mask_docstring,
-    "mmad_with_sparse": mmad_with_sparse_docstring,
-    "set_vector_mask": set_vector_mask_docstring,
-    "reset_mask": reset_mask_docstring,
-    "pair_reduce_sum": pair_reduce_sum_docstring,
-    "repeat_reduce_sum": repeat_reduce_sum_docstring,
-    "wait_pre_block": wait_pre_block_docstring,
-    "whole_reduce_max": whole_reduce_max_docstring,
-    "whole_reduce_min": whole_reduce_min_docstring,
-    "whole_reduce_sum": whole_reduce_sum_docstring, 
     "scatter": scatter_docstring,
+    "select": select_docstring,
     "set_aipp_functions": set_aipp_functions_docstring,
-    "set_deq_scale": set_deq_scale_docstring,
-    "set_fix_pipe_pre_quant_flag": set_fix_pipe_pre_quant_flag_docstring,
-    "set_pad_value": set_pad_value_docstring,
-    "transpose": transpose_docstring,
-    "trans_data_to_5hd": trans_data_to_5hd_docstring,
-    "proposal_concat": proposal_concat_docstring,
-    "proposal_extract": proposal_extract_docstring,
     "set_atomic_add": set_atomic_add_docstring,
     "set_atomic_max": set_atomic_max_docstring,
     "set_atomic_min": set_atomic_min_docstring,
     "set_atomic_none": set_atomic_none_docstring,
     "set_atomic_type": set_atomic_type_docstring,
-    "compare": compare_docstring,
-    "compare_scalar": compare_scalar_docstring,
-    "get_cmp_mask": get_cmp_mask_docstring,
-    "mrg_sort": mrg_sort_docstring,
-    "mrg_sort4": mrg_sort4_docstring,
-    "rp_sort16": rp_sort16_docstring,
     "set_cmp_mask": set_cmp_mask_docstring,
-    "select": select_docstring,
-    "set_load_data_boundary": set_load_data_boundary_docstring,
-    "set_load_data_padding_value": set_load_data_padding_value_docstring,
-    "set_load_data_repeat": set_load_data_repeat_docstring,
-    "sort": sort_docstring,
-    "sort32": sort32_docstring,
+    "set_deq_scale": set_deq_scale_docstring,
+    "set_flag": set_wait_flag_docstring,
+    "set_fix_pipe_pre_quant_flag": set_fix_pipe_pre_quant_flag_docstring,
     "set_hccl_context": set_hccl_context_docstring,
     "set_hf32_mode": set_hf32_mode_docstring,
     "set_hf32_trans_mode": set_hf32_trans_mode_docstring,
+    "set_load_data_boundary": set_load_data_boundary_docstring,
+    "set_load_data_padding_value": set_load_data_padding_value_docstring,
+    "set_load_data_repeat": set_load_data_repeat_docstring,
     "set_mask_count": set_mask_count_docstring,
     "set_mask_norm": set_mask_norm_docstring,
     "set_mm_layout_transform": set_mm_layout_transform_docstring,
+    "set_pad_value": set_pad_value_docstring,
+    "set_vector_mask": set_vector_mask_docstring,
+    "sort": sort_docstring,
+    "sort32": sort32_docstring,
     "sync_all": sync_all_docstring,
-    "fixpipe": fixpipe_docstring,
-    "brcb": brcb_docstring,
-    "axpy": axpy_docstring,
-    "cast_deq": cast_deq_docstring,
-    "gather": gather_docstring,
-    "gatherb": gatherb_docstring,
-    "block_reduce_sum": block_reduce_sum_docstring,
-    "block_reduce_max": block_reduce_max_docstring,
-    "block_reduce_min": block_reduce_min_docstring,
-    "reduce_sum": reduce_sum_docstring,
-    "reduce_max": reduce_max_docstring,
-    "reduce_min": reduce_min_docstring,
+    "trans_data_to_5hd": trans_data_to_5hd_docstring,
+    "transpose": transpose_docstring,
+    "trap": trap_docstring,
+    "wait_flag": set_wait_flag_docstring,
+    "wait_pre_block": wait_pre_block_docstring,
+    "whole_reduce_max": whole_reduce_max_docstring,
+    "whole_reduce_min": whole_reduce_min_docstring,
+    "whole_reduce_sum": whole_reduce_sum_docstring,
 }
 
 

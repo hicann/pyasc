@@ -16,7 +16,7 @@ from ..core.enums import Hardware, TPosition
 from ..core.ir_value import IRHandle, materialize_ir_value
 from ..core.tensor import LocalTensor
 from ..core.types import DataType
-from ..core.utils import DefaultValued, OverloadDispatcher, global_builder, require_jit, set_allocator_docstring
+from ..core.utils import DefaultValued, OverloadDispatcher, global_builder, require_jit, set_class_docstring
 from .ir_value import RuntimeInt
 
 
@@ -58,7 +58,7 @@ class LocalMemAllocator:
         ...
 
     @require_jit
-    @set_allocator_docstring("LocalMemAllocator", "get_cur_addr")
+    @set_class_docstring("LocalMemAllocator", "get_cur_addr")
     def get_cur_addr(self) -> RuntimeInt:
         builder = global_builder.get_ir_builder()
         result_type = builder.get_ui32_type()
@@ -73,7 +73,7 @@ class LocalMemAllocator:
         ...
 
     @require_jit
-    @set_allocator_docstring("LocalMemAllocator", "alloc")
+    @set_class_docstring("LocalMemAllocator", "alloc")
     def alloc(self, pos: TPosition, data_type: DataType, tile_size: Union[ConstExpr[int], int]) -> LocalTensor:
         builder = global_builder.get_ir_builder()
         result_type = ir.get_local_tensor_type(data_type.to_ir())

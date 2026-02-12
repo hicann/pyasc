@@ -62,6 +62,7 @@ Common operations
     notify_next_block
     pipe_barrier
     printf
+    print_time_stamp
     proposal_concat
     proposal_extract
     reset_mask

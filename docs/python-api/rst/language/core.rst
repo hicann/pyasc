@@ -61,3 +61,13 @@ LocalTensor
     LocalTensor.set_size
     LocalTensor.set_user_tag
     LocalTensor.set_value
+
+
+ShapeInfo
+-----------------
+.. autoclass:: ShapeInfo
+.. autosummary::
+    :toctree: generated
+    :nosignatures:
+
+    get_shape_size

@@ -69,6 +69,7 @@ def print_time_stamp(desc_id: int) -> None:
 
 
 @require_jit
+@set_common_docstring(api_name="print_time_stamp")
 def print_time_stamp(desc_id: RuntimeInt) -> None:
     global_builder.get_ir_builder().create_asc_PrintTimeStampOp(_mat(desc_id, KnownTypes.int_).to_ir())
 

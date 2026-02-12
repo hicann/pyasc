@@ -36,6 +36,12 @@ def AscendC_ShapeInfoOriginalShapeOp : AscendC_Op<"shape_info.original_shape"> {
   let assemblyFormat = "$base `,` $dim attr-dict type($dim) `,` type($result)";
 }
 
+def AscendC_GetShapeSizeOp : APIOp<"get_shape_size", "GetShapeSize", [AscFunc]> {
+  let arguments = (ins AscendC_ShapeInfo:$shapeInfo);
+  let results = (outs AnySignlessIntegerOrIndex:$result);
+  let assemblyFormat = "$shapeInfo attr-dict `:` qualified(type($shapeInfo)) `->` type($result)";
+}
+
 //===----------------------------------------------------------------------===//
 // GlobalTensor operations
 //===----------------------------------------------------------------------===//
