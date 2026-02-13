@@ -32,9 +32,9 @@ def mrg_sort(dst: LocalTensor, sort_list: MrgSortSrcList, *args, **kwargs) -> No
     builder = global_builder.get_ir_builder()
     dispatcher = OverloadDispatcher("mrg_sort")
 
-    @dispatcher.register(element_count_list=List[int], sorted_num=List[int], valid_bit=RuntimeInt,
+    @dispatcher.register(element_count_list=List, sorted_num=List, valid_bit=RuntimeInt,
           repeat_time=RuntimeInt, is_exhausted_suspension=DefaultValued(RuntimeBool, False))
-    def _(element_count_list: List[int], sorted_num: List[int], valid_bit: RuntimeInt,
+    def _(element_count_list: List, sorted_num: List, valid_bit: RuntimeInt,
           repeat_time: RuntimeInt, is_exhausted_suspension: bool = False):
         
         if is_exhausted_suspension not in (True, False):

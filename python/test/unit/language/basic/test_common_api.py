@@ -855,3 +855,67 @@ def test_sort_kernel(mock_launcher_run):
 
     sort_kernel[1]()
     assert mock_launcher_run.call_count == 1
+
+
+def test_transpose_kernel(mock_launcher_run):
+
+    @asc.jit
+    def transpose_kernel():
+        x_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+        z_local = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
+        asc.transpose(z_local, x_local)
+        params = asc.TransposeParamsExt(
+            n_size=1,
+            c_size=16,
+            h_size=4,
+            w_size=4,
+            transpose_type=asc.TransposeType.TRANSPOSE_NCHW2NHWC
+        )
+        tmp_buffer = asc.LocalTensor(dtype=asc.uint8, pos=asc.TPosition.VECCALC, addr=0, tile_size=512)
+        asc.transpose(z_local, x_local, tmp_buffer, params)
+
+    transpose_kernel[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_trans_data_to_5hd_kernel(mock_launcher_run):
+
+    @asc.jit
+    def trans_data_to_5hd_kernel():
+        x = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+        z = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=512)
+        x_local = asc.LocalTensor(dtype=asc.uint64)
+        z_local = asc.LocalTensor(dtype=asc.uint64)
+        src_addr = x[0].get_phy_addr()
+        x_local.set_value(0, src_addr)
+        dst_addr = z[0].get_phy_addr()
+        z_local.set_value(0, dst_addr)
+        params = asc.TransDataTo5HDParams(
+            dst_high_half=False,
+            src_high_half=False,
+            repeat_times=16,
+            dst_rep_stride=16,
+            src_rep_stride=1
+        )
+        asc.trans_data_to_5hd(z_local, x_local, params)
+        dst_list = [z[0], z[1], z[2], z[3], z[4], z[5], z[6], z[7],
+                    z[8], z[9], z[10], z[11], z[12], z[13], z[14], z[15]]
+        src_list = [x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7],
+                    x[8], x[9], x[10], x[11], x[12], x[13], x[14], x[15]]
+        asc.trans_data_to_5hd(dst_list, src_list, params)
+        addr_dst_list = [
+            dst_addr, dst_addr, dst_addr, dst_addr,
+            dst_addr, dst_addr, dst_addr, dst_addr,
+            dst_addr, dst_addr, dst_addr, dst_addr,
+            dst_addr, dst_addr, dst_addr, dst_addr
+        ]
+        addr_src_list = [
+            src_addr, src_addr, src_addr, src_addr,
+            src_addr, src_addr, src_addr, src_addr,
+            src_addr, src_addr, src_addr, src_addr,
+            src_addr, src_addr, src_addr, src_addr
+        ]
+        asc.trans_data_to_5hd(addr_dst_list, addr_src_list, params)
+
+    trans_data_to_5hd_kernel[1]()
+    assert mock_launcher_run.call_count == 1

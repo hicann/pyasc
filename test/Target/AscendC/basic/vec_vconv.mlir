@@ -69,3 +69,17 @@ func.func @emit_set_deq_scale(%arg0: f16, %arg1: f32, %arg2: i16) {
   ascendc.set_deq_scale %arg1, %arg2, %false : f32, i16, i1
   return
 }
+
+// CHECK-LABEL:void emit_cast_deq(AscendC::LocalTensor<float> v1, AscendC::LocalTensor<float> v2, uint8_t v3, AscendC::UnaryRepeatParams v4, uint64_t v5, uint64_t v6, int32_t v7) {
+// CHECK-NEXT:   AscendC::CastDeq<float, float, 0, 0>(v1, v2, v7);
+// CHECK-NEXT:   AscendC::CastDeq<float, float, 1, 0, 0>(v1, v2, v5, v3, v4);
+// CHECK-NEXT:   uint64_t v1_mask_list0[] = {v5, v6};
+// CHECK-NEXT:   AscendC::CastDeq<float, float, 1, 0, 0>(v1, v2, v1_mask_list0, v3, v4);
+// CHECK-NEXT:   return;
+// CHECK-NEXT: }
+func.func @emit_cast_deq(%dst : !ascendc.local_tensor<1024xf32>, %src : !ascendc.local_tensor<1024xf32>, %repeatTime : ui8, %params: !ascendc.unary_repeat_params, %maskArray1_0: ui64, %maskArray1_1: ui64, %count: i32) {
+  ascendc.cast_deq_l2 %dst, %src, %count : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, i32
+  ascendc.cast_deq_l0 %dst, %src, %maskArray1_0, %repeatTime, %params {isSetMask} : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, ui64, ui8, !ascendc.unary_repeat_params
+  ascendc.cast_deq_l1 %dst, %src, %maskArray1_0, %maskArray1_1, %repeatTime, %params {isSetMask} : !ascendc.local_tensor<1024xf32>, !ascendc.local_tensor<1024xf32>, ui64, ui64, ui8, !ascendc.unary_repeat_params  
+  return
+}

@@ -10,7 +10,7 @@ from typing import Any, Callable, Dict, Optional, Tuple, TypeVar
 
 from ..._C import ir
 from ..core.dtype import KnownTypes as KT
-from ..core.ir_value import RuntimeInt, RuntimeNumeric, materialize_ir_value as _mat
+from ..core.ir_value import PlainValue, RuntimeInt, RuntimeNumeric, materialize_ir_value as _mat
 from ..core.tensor import LocalTensor
 from ..core.utils import DefaultValued, OverloadDispatcher
 from ..core.types import BinaryRepeatParams, UnaryRepeatParams
@@ -98,8 +98,8 @@ def check_type_5hd(callee: str, dst_or_list, src_or_list) -> None:
                any(t.dtype != first_dtype for t in src_or_list):
                 raise TypeError(f"For {callee}, all tensors in dst_list and src_list must have the same dtype.")
         else:
-            if not all(isinstance(x, RuntimeInt) for x in dst_or_list) or \
-               not all(isinstance(x, RuntimeInt) for x in src_or_list):
+            if not all(isinstance(x, (PlainValue, int)) for x in dst_or_list) or \
+               not all(isinstance(x, (PlainValue, int)) for x in src_or_list):
                 raise TypeError(f"For {callee}, address lists must contain only RuntimeInt.")
     else:
         raise TypeError(f"Unsupported input types for {callee}: {type(dst_or_list)}")
