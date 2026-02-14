@@ -475,3 +475,29 @@ func.func @emit_set_vector_mask(%len: i32, %maskHigh: i64, %maskLow: i64) {
   ascendc.set_vector_mask_l1 %maskHigh, %maskLow {dtype = f32, mode = 0 : i32} : i64, i64
   return
 }
+
+
+// CHECK-LABEL:void emit_common_test() {
+// CHECK-NEXT:  AscendC::InitSocState();
+// CHECK-NEXT:  AscendC::SetStoreAtomicConfig<AscendC::AtomicDtype::ATOMIC_F32, AscendC::AtomicOp::ATOMIC_SUM>();
+// CHECK-NEXT:  uint16_t v1;
+// CHECK-NEXT:  uint16_t v2;
+// CHECK-NEXT:  AscendC::GetStoreAtomicConfig(v1, v2);
+// CHECK-NEXT:  constexpr uint8_t v3 = 0;
+// CHECK-NEXT:  constexpr uint32_t v4 = 0;
+// CHECK-NEXT:  constexpr bool c0_i1 = false;
+// CHECK-NEXT:  AscendC::CheckLocalMemoryIAParam v5{v3, v4, v4, c0_i1, c0_i1, c0_i1, c0_i1, c0_i1, c0_i1, c0_i1};
+// CHECK-NEXT:  AscendC::CheckLocalMemoryIA(v5); 
+// CHECK-NEXT:  return;
+// CHECK-NEXT:}
+func.func @emit_common_test() {
+  ascendc.init_soc_state
+  ascendc.set_store_atomic_config atomic_f32, atomic_sum
+  %type, %op = ascendc.get_store_atomic_config  : ui16, ui16
+  %val_8 = "emitc.constant"() <{value = 0 : ui8}> : () -> ui8
+  %val_32 = "emitc.constant"() <{value = 0 : ui32}> : () -> ui32
+  %false = arith.constant false 
+  %param = ascendc.construct !ascendc.check_local_memory_ia_param(%val_8, %val_32, %val_32, %false, %false, %false, %false, %false, %false, %false) [ui8, ui32, ui32, i1, i1, i1, i1, i1, i1, i1] : ui8, ui32, ui32, i1, i1, i1, i1, i1, i1, i1
+  ascendc.check_local_memory_ia %param : !ascendc.check_local_memory_ia_param
+  return
+}

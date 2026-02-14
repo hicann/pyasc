@@ -1,8 +1,8 @@
 # asc.language.basic.gather_mask
 
-### asc.language.basic.gather_mask(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src0: [LocalTensor](../core.md#asc.language.core.LocalTensor), src1_pattern: [LocalTensor](../core.md#asc.language.core.LocalTensor), reduce_mode: bool, mask: int, params: GatherMaskParams, rsvd_cnt: int, gather_mask_mode=GatherMaskMode.DEFAULT)
+### asc.language.basic.gather_mask(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src0: [LocalTensor](../core.md#asc.language.core.LocalTensor), src1_pattern: [LocalTensor](../core.md#asc.language.core.LocalTensor), reduce_mode: bool, mask: int, params: GatherMaskParams, gather_mask_mode=GatherMaskMode.DEFAULT) → int
 
-### asc.language.basic.gather_mask(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src0: [LocalTensor](../core.md#asc.language.core.LocalTensor), src1_pattern: int, reduce_mode: bool, mask: int, params: GatherMaskParams, rsvd_cnt: int, gather_mask_mode=GatherMaskMode.DEFAULT)
+### asc.language.basic.gather_mask(dst: [LocalTensor](../core.md#asc.language.core.LocalTensor), src0: [LocalTensor](../core.md#asc.language.core.LocalTensor), src1_pattern: int, reduce_mode: bool, mask: int, params: GatherMaskParams, gather_mask_mode=GatherMaskMode.DEFAULT) → int
 
 以内置固定模式对应的二进制或者用户自定义输入的Tensor数值对应的二进制为gather mask（数据收集的掩码），从源操作数中选取元素写入目的操作数中。
 
@@ -40,7 +40,7 @@ __aicore__ inline void GatherMask(const LocalTensor<T>& dst, const LocalTensor<T
     7：11111111…1111 # 每个repeat内取全部元素
   - 用户自定义模式：src1_pattern数据类型为LocalTensor，迭代间间隔由src1_repeat_stride决定，迭代内src1_pattern连续消耗。
 - reduce_mode: 用于选择mask参数模式，数据类型为bool，支持如下取值：
-  - False：Normal模式。该模式下，每次repeat操作256Bytes数据，总的数据计算量为repeat_times \* 256Bytes。mask参数无效，建议设置为0。按需配置repeat_times、src0BlockStride、src0_repeat_stride参数。支持src1_pattern配置为内置固定模式或用户自定义模式。用户自定义模式下可根据实际情况配置src1_repeat_stride。
+  - False：Normal模式。该模式下，每次repeat操作256Bytes数据，总的数据计算量为repeat_times \* 256Bytes。mask参数无效，建议设置为0。按需配置repeat_times、src0_block_stride、src0_repeat_stride参数。支持src1_pattern配置为内置固定模式或用户自定义模式。用户自定义模式下可根据实际情况配置src1_repeat_stride。
   - True：Counter模式。根据mask等参数含义的不同，该模式有以下两种配置方式：
 
     配置方式一：每次repeat操作mask个元素，总的数据计算量为repeat_times \* mask个元素。mask值配置为每一次repeat计算的元素个数。按需配置repeat_times、src0_block_stride、src0_repeat_stride参数。支持src1_pattern配置为内置固定模式或用户自定义模式。用户自定义模式下可根据实际情况配置src1_repeat_stride。
@@ -54,7 +54,10 @@ __aicore__ inline void GatherMask(const LocalTensor<T>& dst, const LocalTensor<T
   - src0_repeat_stride: 用于设置src0相邻迭代间的地址步长。
   - src1_repeat_stride: 用于设置src1相邻迭代间的地址步长。
 - mode: 模板参数，用于指定gather_mask的模式，当前仅支持默认模式GatherMaskMode.DEFAULT，为后续功能做预留。
-- rsvd_cnt: 该条指令筛选后保留下来的元素计数，对应dst_local中有效元素个数，数据类型为uint64_t。
+
+**返回值说明**
+
+该条指令筛选后保留下来的元素计数，对应dst_local中有效元素个数，数据类型为uint64_t。
 
 **约束说明**
 
@@ -72,6 +75,5 @@ reduce_mode = False
 gather_mask_mode = asc.GatherMaskMode.DEFAULT
 mask = 0
 params = asc.GatherMaskParams(src0_block_stride=1, repeat_times=1, src0_repeat_stride=0, src1_repeat_stride=0)
-rsvd_cnt = 0
-asc.gather_mask(dst_local, src0_local, pattern_value, reduce_mode, mask, params, rsvd_cnt, gather_mask_mode)
+rsvd_cnt = asc.gather_mask(dst_local, src0_local, pattern_value, reduce_mode, mask, params, gather_mask_mode)
 ```

@@ -1448,6 +1448,7 @@ def print_time_stamp_docstring():
     **对应的Ascend C函数原型**
 
     .. code-block:: c++
+
         __aicore__ inline void PrintTimeStamp(uint32_t descId)
     """
 
@@ -1626,6 +1627,82 @@ def get_icache_preload_status_docstring():
     """
 
     return [func_introduction, cpp_signature, param_list, return_list, "", py_example]
+
+
+def get_mrg_sort_result_docstring():
+    func_introduction = """
+    获取mrg_sort已经处理过的队列里的Region Proposal个数，并依次存储在四个出参中。
+
+    本接口和mrg_sort相关指令的配合关系如下：
+
+    - 配合mrg_sort_4指令使用，获取mrg_sort_4指令处理过的队列里的Region Proposal个数。使用时，需要将mrg_sort_4中的mrg_sort_4_info.if_exhausted_suspension参数配置为TTrue，该配置模式下某条队列耗尽后，mrg_sort_4指令即停止。
+      以上说明适用于如下型号：
+    
+      - Atlas 推理系列产品AI Core
+
+    - 配合mrg_sort指令使用，获取mrg_sort指令处理过的队列里的Region Proposal个数。使用时，需要将mrg_sort中的mrg_sort_4_info.if_exhausted_suspension参数配置为True，该配置模式下某条队列耗尽后，mrg_sort指令即停止。
+      以上说明适用于如下型号：
+
+      - Atlas A3 训练系列产品/Atlas A3 推理系列产品
+      - Atlas A2 训练系列产品/Atlas A2 推理系列产品
+      - Atlas 200I/500 A2 推理产品
+
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void GetMrgSortResult(uint16_t &mrgSortList1, uint16_t &mrgSortList2, uint16_t &mrgSortList3, uint16_t &mrgSortList4)
+
+
+    """
+
+    param_list = """
+    **参数说明**
+    
+    无。
+
+    """
+
+    return_list = """
+    **返回值说明**
+
+    - mrg_sort_list1（第一个返回值）：类型为uint16_t，表示mrg_sort第一个队列里已经处理过的Region Proposal个数。
+    - mrg_sort_list2（第二个返回值）：类型为uint16_t，表示mrg_sort第二个队列里已经处理过的Region Proposal个数。
+    - mrg_sort_list3（第三个返回值）：类型为uint16_t，表示mrg_sort第三个队列里已经处理过的Region Proposal个数。
+    - mrg_sort_list4（第四个返回值）：类型为uint16_t，表示mrg_sort第四个队列里已经处理过的Region Proposal个数。
+    """
+
+    constraint_list = """
+    **约束说明**
+    
+    无。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        src1 = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=0, tile_size=512)
+        src2 = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=512, tile_size=512)
+        src3 = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=1024, tile_size=512)
+        src4 = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECIN, addr=1536, tile_size=512)
+        dst = asc.LocalTensor(dtype=asc.float16, pos=asc.TPosition.VECOUT, addr=0, tile_size=2048)
+        element_count_list = [128, 128, 128, 128]
+        sorted_num = [0, 0, 0, 0]
+        asc.mrg_sort(dst, sort_list, element_count_list, sorted_num, valid_bit=15, repeat_time=1)
+        asc.mrg_sort(dst, sort_list, element_count_list, sorted_num, valid_bit=15, repeat_time=1, is_exhausted_suspension=True)
+        mrg_sort4_info = asc.MrgSort4Info(element_count_list, if_exhausted_suspension=False, valid_bit=7, repeat_times=1)
+        asc.mrg_sort(dst, sort_list, mrg_sort4_info)
+
+        mrg1, mrg2, mrg3, mrg4 = asc.get_mrg_sort_result()
+    
+    """
+
+    return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
 
 def get_program_counter_docstring():
@@ -4745,7 +4822,7 @@ def gather_mask_docstring():
 
     - reduce_mode: 用于选择mask参数模式，数据类型为bool，支持如下取值：
 
-      - False：Normal模式。该模式下，每次repeat操作256Bytes数据，总的数据计算量为repeat_times * 256Bytes。mask参数无效，建议设置为0。按需配置repeat_times、src0BlockStride、src0_repeat_stride参数。支持src1_pattern配置为内置固定模式或用户自定义模式。用户自定义模式下可根据实际情况配置src1_repeat_stride。
+      - False：Normal模式。该模式下，每次repeat操作256Bytes数据，总的数据计算量为repeat_times * 256Bytes。mask参数无效，建议设置为0。按需配置repeat_times、src0_block_stride、src0_repeat_stride参数。支持src1_pattern配置为内置固定模式或用户自定义模式。用户自定义模式下可根据实际情况配置src1_repeat_stride。
       - True：Counter模式。根据mask等参数含义的不同，该模式有以下两种配置方式：
 
         配置方式一：每次repeat操作mask个元素，总的数据计算量为repeat_times * mask个元素。mask值配置为每一次repeat计算的元素个数。按需配置repeat_times、src0_block_stride、src0_repeat_stride参数。支持src1_pattern配置为内置固定模式或用户自定义模式。用户自定义模式下可根据实际情况配置src1_repeat_stride。
@@ -4760,7 +4837,13 @@ def gather_mask_docstring():
       - src0_repeat_stride: 用于设置src0相邻迭代间的地址步长。
       - src1_repeat_stride: 用于设置src1相邻迭代间的地址步长。
     - mode: 模板参数，用于指定gather_mask的模式，当前仅支持默认模式GatherMaskMode.DEFAULT，为后续功能做预留。
-    - rsvd_cnt: 该条指令筛选后保留下来的元素计数，对应dst_local中有效元素个数，数据类型为uint64_t。
+    """
+
+    return_list = """
+    **返回值说明**
+
+    该条指令筛选后保留下来的元素计数，对应dst_local中有效元素个数，数据类型为uint64_t。
+
     """
 
     constraint_list = """
@@ -4783,11 +4866,10 @@ def gather_mask_docstring():
         gather_mask_mode = asc.GatherMaskMode.DEFAULT
         mask = 0
         params = asc.GatherMaskParams(src0_block_stride=1, repeat_times=1, src0_repeat_stride=0, src1_repeat_stride=0)
-        rsvd_cnt = 0
-        asc.gather_mask(dst_local, src0_local, pattern_value, reduce_mode, mask, params, rsvd_cnt, gather_mask_mode)
+        rsvd_cnt = asc.gather_mask(dst_local, src0_local, pattern_value, reduce_mode, mask, params, gather_mask_mode)
 
     """
-    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+    return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
 
 
 def scalar_cast_docstring():
@@ -7513,6 +7595,230 @@ def reduce_sum_docstring():
     return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
 
 
+def init_soc_state_docstring():
+    func_introduction = """
+    在由于AI Core上存在一些全局状态，如原子累加状态、Mask模式等，在实际运行中，这些值可以被前序执行的算子修改而导致计算出现不符合预期的行为，在静态Tensor编程的场景中用户必须在Kernel入口处调用此函数来初始化AI Core状态 。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void InitSocState()
+
+    """
+
+    param_list = """
+    **参数说明**
+    
+    无。
+    """
+
+    constraint_list = """
+    **约束说明**
+    
+    不调用该接口，在部分场景下可能导致计算结果出现精度错误或者卡死等问题。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.init_soc_state()
+    
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def set_store_atomic_config_docstring():
+    func_introduction = """
+    设置原子操作使能位与原子操作类型。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        template <AtomicDtype type, AtomicOp op>
+        __aicore__ inline void SetStoreAtomicConfig()
+
+
+    """
+
+    param_list = """
+    **参数说明**
+    
+    - type：原子操作使能位，AtomicDtype枚举类的定义如下：
+
+      .. code-block:: python
+
+          class AtomicDtype(IntEnum):
+              ATOMIC_NONE = 0   // 无原子操作
+              ATOMIC_F32 = 1    // 使能原子操作，进行原子操作的数据类型为float
+              ATOMIC_F16 = 2    // 使能原子操作，进行原子操作的数据类型为half
+              ATOMIC_S16 = 3    // 使能原子操作，进行原子操作的数据类型为int16_t
+              ATOMIC_S32 = 4    // 使能原子操作，进行原子操作的数据类型为int32_t
+              ATOMIC_S8 = 5     // 使能原子操作，进行原子操作的数据类型为int8_t
+              ATOMIC_BF16 = 6   // 使能原子操作，进行原子操作的数据类型为bfloat16_t
+
+    - op：原子操作类型，仅当使能原子操作时有效（即“type”为非“ATOMIC_NONE”的场景），当前仅支持求和操作。
+
+      .. code-block:: python
+
+          class AtomicOp(IntEnum):
+              ATOMIC_SUM = 0    // 求和操作
+
+    """
+
+    constraint_list = """
+    **约束说明**
+    
+    无。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.set_store_atomic_config(asc.AtomicDtype.ATOMIC_F16, asc.AtomicOp.ATOMIC_SUM)
+    
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
+def get_store_atomic_config_docstring():
+    func_introduction = """
+    获取原子操作使能位与原子操作类型的值。
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void GetStoreAtomicConfig(uint16_t& atomicType, uint16_t& atomicOp)
+
+    """
+
+    param_list = """
+    **参数说明**
+    
+    无。
+
+    """
+
+    return_list = """
+    **返回值说明**
+
+    - atomic_type（第一个返回值）：原子操作使能位。
+      
+      - 0：无原子操作
+      - 1：使能原子操作，进行原子操作的数据类型为float
+      - 2：使能原子操作，进行原子操作的数据类型为half
+      - 3：使能原子操作，进行原子操作的数据类型为int16_t
+      - 4：使能原子操作，进行原子操作的数据类型为int32_t
+      - 5：使能原子操作，进行原子操作的数据类型为int8_t
+      - 6：使能原子操作，进行原子操作的数据类型为bfloat16_t
+
+    - atomic_op（第二个返回值）：原子操作类型。
+
+      - 0：求和操作
+    """
+
+    constraint_list = """
+    **约束说明**
+    
+    此接口需要与set_store_atomic_config(ISASI)配合使用，用以获取原子操作使能位与原子操作类型的值。
+    """
+
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        asc.set_store_atomic_config(asc.AtomicDtype.ATOMIC_F16, asc.AtomicOp.ATOMIC_SUM)
+        atomic_type, atomic_op = asc.get_store_atomic_config()
+    
+    """
+
+    return [func_introduction, cpp_signature, param_list, return_list, constraint_list, py_example]
+
+
+def check_local_memory_ia_docstring():
+    func_introduction = """
+    Check设定范围内的UB读写行为，如果有设定范围的读写行为则会出现EXCEPTION报错，无设定范围的读写行为则不会报错。
+    
+    """
+
+    cpp_signature = """
+    **对应的Ascend C函数原型**
+
+    .. code-block:: c++
+
+        __aicore__ inline void CheckLocalMemoryIA(const CheckLocalMemoryIAParam& checkParams)
+
+    """
+
+    param_list = """
+    **参数说明**
+    
+    - check_params：用于配置对UB访问的检查行为，类型为CheckLocalMemoryIAParam。
+      - enable_bit：配置的异常寄存器，取值范围：enable_bit∈[0,3]，默认为0。
+        - 0：异常寄存器0。
+        - 1：异常寄存器1。
+        - 2：异常寄存器2。
+        - 3：异常寄存器3。
+      - start_addr：Check的起始地址，32B对齐，取值范围：start_addr∈[0, 65535]，默认值为0。比如，可通过LocalTensor.get_phy_addr()/32来获取start_addr。
+      - end_addr：Check的结束地址，32B对齐，取值范围：end_addr∈[0, 65535]。默认值为0。
+      - is_scalar_read：Check标量读访问。
+        - false：不开启，默认为false。
+        - true：开启。
+      - is_scalar_write： Check标量写访问。
+        - false：不开启，默认为false。
+        - true：开启。
+      - is_vector_read： Check矢量读访问。
+        - false：不开启，默认为false。
+        - true：开启。
+      - is_vector_write： Check矢量写访问。
+        - false：不开启，默认为false。
+        - true：开启。
+      - is_mte_read： Check MTE读访问。
+        - false：不开启，默认为false。
+        - true：开启。
+      - is_mte_write： Check MTE写访问。
+        - false：不开启，默认为false。
+        - true：开启。
+      - is_enable： 是否使能enable_bit参数配置的异常寄存器。
+        - false：不使能，默认为false。
+        - true：使能。
+    
+    """
+    constraint_list = """
+    **约束说明**
+    
+    - start_addr/end_addr的单位是32B，check的范围不包含start_addr，包含end_addr，即(start_addr, end_addr]。
+    - 每次调用完该接口需要进行复位（配置is_enable为False进行复位）。
+
+    """
+    py_example = """
+    **调用示例**
+
+    .. code-block:: python
+
+        params = asc.CheckLocalMemoryIAParam()
+        asc.check_local_memory_ia(params)
+    
+    """
+
+    return [func_introduction, cpp_signature, param_list, "", constraint_list, py_example]
+
+
 DOC_HANDLES = {
     "axpy": axpy_docstring,
     "block_reduce_sum": block_reduce_sum_docstring,
@@ -7521,6 +7827,7 @@ DOC_HANDLES = {
     "brcb": brcb_docstring,
     "cast": cast_docstring,
     "cast_deq": cast_deq_docstring,
+    "check_local_memory_ia": check_local_memory_ia_docstring,
     "compare": compare_docstring,
     "compare_scalar": compare_scalar_docstring,
     "copy": copy_docstring,
@@ -7545,7 +7852,9 @@ DOC_HANDLES = {
     "get_data_block_size_in_bytes": get_data_block_size_in_bytes_docstring,
     "get_hccl_context": get_hccl_context_docstring,
     "get_icache_preload_status": get_icache_preload_status_docstring,
+    "get_mrg_sort_result": get_mrg_sort_result_docstring, 
     "get_program_counter": get_program_counter_docstring,
+    "get_store_atomic_config": get_store_atomic_config_docstring,
     "get_sub_block_idx": get_sub_block_idx_docstring,
     "get_sys_workspace": get_sys_workspace_docstring,
     "get_system_cycle": get_system_cycle_docstring,
@@ -7554,6 +7863,7 @@ DOC_HANDLES = {
     "ib_wait": ib_wait_docstring,
     "icache_preload": icache_preload_docstring,
     "init_const_value": init_const_value_docstring,
+    "init_soc_state": init_soc_state_docstring,
     "load_data": load_data_docstring,
     "load_data_with_sparse": load_data_with_sparse_docstring,
     "load_data_with_transpose": load_data_with_transpose_docstring,
@@ -7585,6 +7895,7 @@ DOC_HANDLES = {
     "select": select_docstring,
     "set_aipp_functions": set_aipp_functions_docstring,
     "set_atomic_add": set_atomic_add_docstring,
+    "set_store_atomic_config": set_store_atomic_config_docstring,
     "set_atomic_max": set_atomic_max_docstring,
     "set_atomic_min": set_atomic_min_docstring,
     "set_atomic_none": set_atomic_none_docstring,

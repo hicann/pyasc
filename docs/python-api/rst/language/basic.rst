@@ -23,6 +23,7 @@ Common operations
     brcb
     cast
     cast_deq
+    check_local_memory_ia
     copy
     cross_core_set_flag
     cross_core_wait_flag
@@ -43,7 +44,9 @@ Common operations
     get_data_block_size_in_bytes
     get_hccl_context
     get_icache_preload_status
+    get_mrg_sort_result
     get_program_counter
+    get_store_atomic_config
     get_sub_block_idx
     get_system_cycle
     get_sys_workspace
@@ -51,6 +54,7 @@ Common operations
     ib_set
     ib_wait
     icache_preload
+    init_soc_state
     load_data
     load_data_with_transpose
     load_image_to_local
@@ -89,6 +93,7 @@ Common operations
     set_mask_norm
     set_mm_layout_transform
     set_pad_value
+    set_store_atomic_config
     set_vector_mask
     sort
     sort32

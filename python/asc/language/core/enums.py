@@ -298,3 +298,17 @@ class SelMode(IntEnum):
     VSEL_CMPMASK_SPR = 0, 
     VSEL_TENSOR_SCALAR_MODE = 1,
     VSEL_TENSOR_TENSOR_MODE = 2,
+
+
+class AtomicDtype(IntEnum):
+    ATOMIC_NONE = 0
+    ATOMIC_F32 = 1
+    ATOMIC_F16 = 2
+    ATOMIC_S16 = 3
+    ATOMIC_S32 = 4
+    ATOMIC_S8 = 5
+    ATOMIC_BF16 = 6
+
+
+class AtomicOp(IntEnum):
+    ATOMIC_SUM = 0

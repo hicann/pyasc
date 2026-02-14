@@ -20,6 +20,10 @@ using namespace mlir::ascendc;
 LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::GatherMaskOp op)
 {
     auto &os = emitter.ostream();
+    Value rsvdCntVal = op.getRsvdCnt();
+    os << "uint64_t " << emitter.getOrCreateName(rsvdCntVal) << ";\n";
+
+
     auto dstType = op.getDst().getType();
     auto src1PatternType = op.getSrc1Pattern().getType();
     if (auto dstLocalTensorType = dyn_cast<ascendc::LocalTensorType>(dstType)) {
@@ -40,12 +44,7 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::Gathe
     } else {
         return op.emitOpError("dst operand must be LocalTensor type");
     }
-    Value rsvd_cnt_val = op.getRsvdCnt();
-    if (isa<MemRefType>(rsvd_cnt_val.getType())) {
-        os << "*" << emitter.getOrCreateName(rsvd_cnt_val);
-    } else {
-        os << emitter.getOrCreateName(rsvd_cnt_val);
-    }
+    os << emitter.getOrCreateName(rsvdCntVal);
     os << ")";
 
     return success();

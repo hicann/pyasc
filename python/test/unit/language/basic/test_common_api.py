@@ -782,6 +782,15 @@ def test_set_vector_mask_kernel(mock_launcher_run):
     assert mock_launcher_run.call_count == 1
 
 
+def test_get_mrg_sort_result(mock_launcher_run): 
+    @asc.jit
+    def kernel_get_mrg_sort_result():
+        mrg1, mrg2, mrg3, mrg4 = asc.get_mrg_sort_result()
+
+    result = kernel_get_mrg_sort_result[1]()
+    assert mock_launcher_run.call_count == 1
+
+
 def test_mrg_sort_kernel(mock_launcher_run):
 
     @asc.jit
@@ -924,3 +933,42 @@ def test_trans_data_to_5hd_kernel(mock_launcher_run):
 
     trans_data_to_5hd_kernel[1]()
     assert mock_launcher_run.call_count == 1
+
+
+def test_init_soc_state(mock_launcher_run):
+    @asc.jit
+    def kernel_init_soc_state() -> None:
+        asc.init_soc_state()
+
+    kernel_init_soc_state[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_set_store_atomic_config(mock_launcher_run):
+    @asc.jit
+    def kernel_set_store_atomic_config() -> None:
+        asc.set_store_atomic_config(asc.AtomicDtype.ATOMIC_F16, asc.AtomicOp.ATOMIC_SUM)
+
+    kernel_set_store_atomic_config[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_get_store_atomic_config(mock_launcher_run):
+    @asc.jit
+    def kernel_get_store_atomic_config() -> None:
+        asc.set_store_atomic_config(asc.AtomicDtype.ATOMIC_F16, asc.AtomicOp.ATOMIC_SUM)
+        atomic_type, atomic_op = asc.get_store_atomic_config()
+
+    kernel_get_store_atomic_config[1]()
+    assert mock_launcher_run.call_count == 1
+
+
+def test_check_local_memory_ia(mock_launcher_run):
+    @asc.jit
+    def kernel_check_local_memory_ia() -> None:
+        params = asc.CheckLocalMemoryIAParam()
+        asc.check_local_memory_ia(params)
+
+    kernel_check_local_memory_ia[1]()
+    assert mock_launcher_run.call_count == 1
+

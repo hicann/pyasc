@@ -22,9 +22,12 @@ from .cache import data_cache_clean_and_invalid, get_icache_preload_status, icac
 from .common import (
     ascend_is_aic,
     ascend_is_aiv,
+    check_local_memory_ia,
     data_cache_preload,
     get_hccl_context,
+    get_store_atomic_config,
     get_sys_workspace,
+    init_soc_state,
     reset_mask,
     set_aipp_functions,
     set_hccl_context,
@@ -33,6 +36,7 @@ from .common import (
     set_mask_count,
     set_mask_norm,
     set_mm_layout_transform,
+    set_store_atomic_config,
     set_sys_workspace,
     set_vector_mask,
 )
@@ -125,6 +129,7 @@ from .vec_gather import (
 )
 from .vec_gather_mask import gather_mask, get_gather_mask_remain_count
 from .proposal import (
+    get_mrg_sort_result,
     mrg_sort,
     mrg_sort4,
     proposal_concat,
@@ -181,10 +186,12 @@ __all__ = [
     # .common
     "ascend_is_aic",
     "ascend_is_aiv",
+    "check_local_memory_ia",
     "data_cache_preload",
-    
     "get_hccl_context",
+    "get_store_atomic_config",
     "get_sys_workspace",
+    "init_soc_state",
     "reset_mask",
     "set_aipp_functions",
     "set_hccl_context",
@@ -193,6 +200,7 @@ __all__ = [
     "set_mask_count",
     "set_mask_norm",
     "set_mm_layout_transform",
+    "set_store_atomic_config",
     "set_sys_workspace",
     "set_vector_mask",
     # .data_cache
@@ -300,8 +308,14 @@ __all__ = [
     "gather",
     "gatherb",
     # .vec_proposal
+    "get_mrg_sort_result",
+    "mrg_sort",
+    "mrg_sort4",
     "proposal_concat",
     "proposal_extract",
+    "rp_sort16",
+    "sort",
+    "sort32",
     # .vec_reduce
     "block_reduce_sum",
     "block_reduce_max",
@@ -316,12 +330,6 @@ __all__ = [
     "reduce_sum",
     # .vec_scatter
     "scatter",
-    # .vec_sort
-    "mrg_sort",
-    "mrg_sort4",
-    "rp_sort16",
-    "sort",
-    "sort32",
     # .vec_ternary_scalar
     "axpy",
     # .vec_unary

@@ -172,6 +172,28 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::FftsC
     return success();
 }
 
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::GetMrgSortResultOp op)
+{
+    auto &os = emitter.ostream();
+    Value mrgSortList1Value = op.getMrgSortList1();
+    Value mrgSortList2Value = op.getMrgSortList2();
+    Value mrgSortList3Value = op.getMrgSortList3();
+    Value mrgSortList4Value = op.getMrgSortList4();
+
+    os << "uint16_t " << emitter.getOrCreateName(mrgSortList1Value) << ";\n";
+    os << "uint16_t " << emitter.getOrCreateName(mrgSortList2Value) << ";\n";
+    os << "uint16_t " << emitter.getOrCreateName(mrgSortList3Value) << ";\n";
+    os << "uint16_t " << emitter.getOrCreateName(mrgSortList4Value) << ";\n";
+
+    os << ascNamespace << "::" << op.getAPIName();
+    os << "("  << emitter.getOrCreateName(mrgSortList1Value);
+    os << ", " << emitter.getOrCreateName(mrgSortList2Value);
+    os << ", " << emitter.getOrCreateName(mrgSortList3Value);
+    os << ", " << emitter.getOrCreateName(mrgSortList4Value) << ")";
+    
+    return success();
+}
+
 LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::MrgSortOp op)
 {
    static int elementCountListCounter = 0;
@@ -257,5 +279,22 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::Fixpi
        << emitter.getOrCreateName(op.getSrc()) << ", "
        << emitter.getOrCreateName(op.getCbufWorkspace()) << ", "
        << emitter.getOrCreateName(op.getIntriParams()) << ")";
+    return success();
+}
+
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::GetStoreAtomicConfigOp op)
+{
+    auto &os = emitter.ostream();
+    Value atomicTypeValue = op.getAtomicType();
+    Value atomicOpValue = op.getAtomicOp();
+
+
+    os << "uint16_t " << emitter.getOrCreateName(atomicTypeValue) << ";\n";
+    os << "uint16_t " << emitter.getOrCreateName(atomicOpValue) << ";\n";
+
+    os << ascNamespace << "::" << op.getAPIName();
+    os << "("  << emitter.getOrCreateName(atomicTypeValue);
+    os << ", " << emitter.getOrCreateName(atomicOpValue) << ")";
+    
     return success();
 }

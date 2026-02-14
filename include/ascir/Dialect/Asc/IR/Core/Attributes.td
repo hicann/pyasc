@@ -180,7 +180,7 @@ def AscendC_FmatrixModeAttr : I32EnumAttr<"FmatrixMode", "", [
 }
 
 def AscendC_GatherMaskModeAttr : I32EnumAttr<"GatherMaskMode", "", [
-  I32EnumAttrCase<"DEFAULT", 0>,
+  I32EnumAttrCase<"DEFAULT", 0, "default">,
 ]> {
   let cppNamespace = "::mlir::ascendc";
   let description = "Represents AscendC::GatherMaskMode";
@@ -513,6 +513,29 @@ def AscendC_MemDsbAttr : I32EnumAttr<"MemDsbT", "", [
 ]> {
   let cppNamespace = "::mlir::ascendc";
   let description = "Represents AscendC::MemDsbT, indicating memory positions to wait for in DataSyncBarrier";
+  let underlyingType = "uint8_t";
+}
+
+
+def AscendC_AtomicDtypeAttr : I32EnumAttr<"AtomicDtype", "", [
+  I32EnumAttrCase<"ATOMIC_NONE", 0, "atomic_none">,
+  I32EnumAttrCase<"ATOMIC_F32", 1, "atomic_f32">,
+  I32EnumAttrCase<"ATOMIC_F16", 2, "atomic_f16">,
+  I32EnumAttrCase<"ATOMIC_S16", 3, "atomic_s16">,
+  I32EnumAttrCase<"ATOMIC_S32", 4, "atomic_s32">,
+  I32EnumAttrCase<"ATOMIC_S8", 5, "atomic_s8">,
+  I32EnumAttrCase<"ATOMIC_BF16", 6, "atomic_bf16">
+]> {
+  let cppNamespace = "::mlir::ascendc";
+  let description = "Represents AscendC::AtomicDtype";
+  let underlyingType = "uint8_t";
+}
+
+def AscendC_AtomicOpAttr : I32EnumAttr<"AtomicOp", "", [
+  I32EnumAttrCase<"ATOMIC_SUM", 0, "atomic_sum">,
+]> {
+  let cppNamespace = "::mlir::ascendc";
+  let description = "Represents AscendC::AtomicOp";
   let underlyingType = "uint8_t";
 }
 

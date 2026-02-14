@@ -32,6 +32,11 @@
 // CHECK-NEXT:   v18[c3_idx] = v17;
 // CHECK-NEXT:   AscendC::MrgSort4Info v19{v18, c0_i1, c15_i16, c1_i16};
 // CHECK-NEXT:   AscendC::MrgSort(v1, v16, v19);
+// CHECK-NEXT:   uint16_t v20;
+// CHECK-NEXT:   uint16_t v21;
+// CHECK-NEXT:   uint16_t v22;
+// CHECK-NEXT:   uint16_t v23;
+// CHECK-NEXT:   AscendC::GetMrgSortResult(v20, v21, v22, v23);
 // CHECK-NEXT:   return;
 // CHECK-NEXT: }
 func.func @emit_mrg_sort(%dst: !ascendc.local_tensor<1024xf32>,
@@ -69,6 +74,7 @@ func.func @emit_mrg_sort(%dst: !ascendc.local_tensor<1024xf32>,
   memref.store %c16_ui16, %alloca[%c3_idx] : memref<4xui16>
   %mrg_sort4_info = ascendc.construct !ascendc.mrg_sort4_info(%alloca, %c0_i1, %c15, %c1) [memref<4xui16>, i1, i16, i16] : memref<4xui16>, i1, i16, i16
   ascendc.mrg_sort_with_info %dst, %mrg_sort_src_list, %mrg_sort4_info : !ascendc.local_tensor<1024xf32>, !ascendc.mrg_sort_src_list<f32>, !ascendc.mrg_sort4_info
+  %mrg1, %mrg2 , %mrg3, %mrg4 = ascendc.get_mrg_sort_result  : ui16, ui16, ui16, ui16
   return
 }
 

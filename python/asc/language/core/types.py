@@ -517,7 +517,7 @@ class TensorShape(Tuple[int, ...]):
         return cls.new_impl((cls.as_int(arg), ))
 
     @staticmethod
-    def as_int(value: Any) -> Optional[int]:
+    def as_int(value: Any) -> RuntimeInt:
         try:
             return int(value)
         except Exception as e:
@@ -1925,14 +1925,12 @@ class VdeqInfo(IRValue):
         offset: List[int],
         sign_mode: List[bool],
     ) -> None:
-
         ...
 
     @overload
     def __init__(self, handle: IRHandle) -> None:
         """This contructor should not be called by user"""
         ...
-
 
     @require_jit
     def __init__(
@@ -1977,5 +1975,87 @@ class VdeqInfo(IRValue):
     def from_ir(cls, handle: IRHandle) -> "VdeqInfo":
         return cls(handle=handle)
 
+    def to_ir(self) -> IRHandle:
+        return self.handle
+
+
+class CheckLocalMemoryIAParam(IRValue):
+
+    @overload
+    def __init__(self, 
+                 enable_bit: int = 0,
+                 start_addr: int = 0,
+                 end_addr: int = 0,
+                 is_scalar_read: bool = False,
+                 is_scalar_write: bool = False,
+                 is_vector_read: bool = False,
+                 is_vector_write: bool = False,
+                 is_mte_read: bool = False,
+                 is_mte_write: bool = False,
+                 is_enable: bool = False) -> None:
+        ...
+
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+
+        """This constructor should not be called by user"""
+        ...
+
+    @require_jit
+    def __init__(self,
+                 enable_bit: RuntimeInt = 0,
+                 start_addr: RuntimeInt = 0,
+                 end_addr: RuntimeInt = 0,
+                 is_scalar_read: RuntimeBool = False,
+                 is_scalar_write: RuntimeBool = False,
+                 is_vector_read: RuntimeBool = False,
+                 is_vector_write: RuntimeBool = False,
+                 is_mte_read: RuntimeBool = False,
+                 is_mte_write: RuntimeBool = False,
+                 is_enable: RuntimeBool = False,
+                 handle: Optional[IRHandle] = None) -> None:
+        
+        if handle is not None:
+            self.handle = handle
+            return
+                
+        builder = global_builder.get_ir_builder()
+        
+        enable_bit_ir = _mat(enable_bit, KT.uint8).to_ir()
+        start_addr_ir = _mat(start_addr, KT.uint32).to_ir()
+        end_addr_ir = _mat(end_addr, KT.uint32).to_ir()
+        is_scalar_read_ir = _mat(is_scalar_read, KT.int1).to_ir()
+        is_scalar_write_ir = _mat(is_scalar_write, KT.int1).to_ir()
+        is_vector_read_ir = _mat(is_vector_read, KT.int1).to_ir()
+        is_vector_write_ir = _mat(is_vector_write, KT.int1).to_ir()
+        is_mte_read_ir = _mat(is_mte_read, KT.int1).to_ir()
+        is_mte_write_ir = _mat(is_mte_write, KT.int1).to_ir()
+        is_enable_ir = _mat(is_enable, KT.int1).to_ir()
+        
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_CheckLocalMemoryIAParamType(),
+            [enable_bit_ir, start_addr_ir, end_addr_ir,
+             is_scalar_read_ir, is_scalar_write_ir,
+             is_vector_read_ir, is_vector_write_ir,
+             is_mte_read_ir, is_mte_write_ir,
+             is_enable_ir],
+            builder.get_type_array_attr([
+                builder.get_ui8_type(),
+                builder.get_ui32_type(),
+                builder.get_ui32_type(),
+                builder.get_i1_type(),
+                builder.get_i1_type(),
+                builder.get_i1_type(),
+                builder.get_i1_type(),
+                builder.get_i1_type(),
+                builder.get_i1_type(),
+                builder.get_i1_type(),
+            ])
+        )
+    
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> "CheckLocalMemoryIAParam":
+        return cls(handle=handle)
+    
     def to_ir(self) -> IRHandle:
         return self.handle

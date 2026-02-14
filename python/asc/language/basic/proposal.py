@@ -6,12 +6,26 @@
 # INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
 # See LICENSE in the root of the software repository for the full text of the License.
 
-from typing import List, overload
-from ..core.ir_value import RuntimeBool, RuntimeInt, materialize_ir_value as _mat
+from typing import List, Tuple, overload
+from ..core.ir_value import PlainValue, RuntimeBool, RuntimeInt, materialize_ir_value as _mat
 from ..core.tensor import LocalTensor, MrgSortSrcList
-from ..core.types import KnownTypes, MrgSort4Info
+from ..core.types import KnownTypes as KT, MrgSort4Info
 from ..core.utils import DefaultValued, require_jit, global_builder, OverloadDispatcher
 from .utils import set_common_docstring
+
+
+@overload
+def get_mrg_sort_result() -> tuple[int, int, int, int]:
+    ...
+
+
+@require_jit
+@set_common_docstring("get_mrg_sort_result")
+def get_mrg_sort_result() -> Tuple[RuntimeInt, RuntimeInt, RuntimeInt, RuntimeInt]:
+    builder = global_builder.get_ir_builder()
+    arg1, arg2, arg3, arg4 = builder.create_asc_GetMrgSortResults(KT.uint16.to_ir(), 
+                                KT.uint16.to_ir(), KT.uint16.to_ir(), KT.uint16.to_ir())
+    return PlainValue(arg1), PlainValue(arg2), PlainValue(arg3), PlainValue(arg4)
 
 
 @overload
@@ -44,15 +58,15 @@ def mrg_sort(dst: LocalTensor, sort_list: MrgSortSrcList, *args, **kwargs) -> No
                 f"This parameter must be a compile-time constant."
             )
 
-        element_count_list_ir = [_mat(count, KnownTypes.uint16).to_ir() for count in element_count_list]
-        sorted_num_ir = [_mat(num, KnownTypes.uint32).to_ir() for num in sorted_num]
+        element_count_list_ir = [_mat(count, KT.uint16).to_ir() for count in element_count_list]
+        sorted_num_ir = [_mat(num, KT.uint32).to_ir() for num in sorted_num]
         
         builder.create_asc_MrgSortOp(
             dst.to_ir(), sort_list.to_ir(),
             element_count_list_ir,
             sorted_num_ir,
-            _mat(valid_bit, KnownTypes.uint16).to_ir(),
-            _mat(repeat_time, KnownTypes.uint16).to_ir(),
+            _mat(valid_bit, KT.uint16).to_ir(),
+            _mat(repeat_time, KT.uint16).to_ir(),
             is_exhausted_suspension
         )
 
@@ -106,7 +120,7 @@ def rp_sort16(dst: LocalTensor, src: LocalTensor, repeat_time: RuntimeInt) -> No
     builder.create_asc_RpSort16Op(
         dst.to_ir(),
         src.to_ir(),
-        _mat(repeat_time, KnownTypes.int32).to_ir()
+        _mat(repeat_time, KT.int32).to_ir()
     )
 
 
@@ -133,7 +147,7 @@ def sort(dst: LocalTensor, concat: LocalTensor, index: LocalTensor, tmp: LocalTe
             concat.to_ir(),
             index.to_ir(),
             tmp.to_ir(),
-            _mat(repeat_time, KnownTypes.int32).to_ir(),
+            _mat(repeat_time, KT.int32).to_ir(),
             is_full_sort
         )
 
@@ -151,5 +165,5 @@ def sort32(dst: LocalTensor, src0: LocalTensor, src1: LocalTensor, repeat_time: 
         dst.to_ir(),
         src0.to_ir(),
         src1.to_ir(),
-        _mat(repeat_time, KnownTypes.int32).to_ir()
+        _mat(repeat_time, KT.int32).to_ir()
     )

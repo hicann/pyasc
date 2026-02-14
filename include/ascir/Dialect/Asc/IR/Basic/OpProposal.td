@@ -91,4 +91,10 @@ def AscendC_SortOp : APIOp<"sort", "Sort"> {
                    UnitAttr:$isFullSort);
 }
 
+def AscendC_GetMrgSortResultOp : VectorOp<"get_mrg_sort_result", "GetMrgSortResult"> {
+ 	let description = "Get merge sort result";
+ 	let results = (outs AnyType:$mrgSortList1, AnyType:$mrgSortList2, AnyType:$mrgSortList3, AnyType:$mrgSortList4);
+  let assemblyFormat = "attr-dict `:` type($mrgSortList1) `,` type($mrgSortList2) `,`  type($mrgSortList3) `,` type($mrgSortList4)";
+}
+
 #endif //ASC_BASIC_OP_PROPOSAL_TD

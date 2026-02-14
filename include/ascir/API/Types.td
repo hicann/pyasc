@@ -109,6 +109,11 @@ def BrcbRepeatParams : APIType<"BrcbRepeatParams"> {
   let apiName = "AscendC::BrcbRepeatParams";
 }
 
+def CheckLocalMemoryIAParam : APIType<"CheckLocalMemoryIAParam"> {
+  let mnemonic = "check_local_memory_ia_param";
+  let apiName = "AscendC::CheckLocalMemoryIAParam";
+}
+
 def CopyRepeatParams : APIType<"CopyRepeatParams"> {
   let mnemonic = "copy_repeat_params";
   let apiName = "AscendC::CopyRepeatParams";

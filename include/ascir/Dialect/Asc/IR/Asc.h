@@ -53,16 +53,7 @@ void printPrettyLayoutMode(AsmPrinter &odsPrinter, const LayoutModeAttr &attr);
 ParseResult parsePrettyCO2Layout(AsmParser &odsParser, CO2LayoutAttr &attr);
 void printPrettyCO2Layout(AsmPrinter &odsPrinter, const CO2LayoutAttr &attr);
 
-ParseResult parsePrettyAippInputFormat(AsmParser &odsParser, AippInputFormatAttr &attr);
-void printPrettyAippInputFormat(AsmPrinter &odsPrinter, const AippInputFormatAttr &attr);
-
 void registerExternalModels(DialectRegistry &registry);
-
-ParseResult parsePrettyCmpMode(AsmParser &odsParser, CMPMODEAttr &attr);
-void printPrettyCmpMode(AsmPrinter &odsPrinter, const CMPMODEAttr &attr);
-
-ParseResult parsePrettySelMode(AsmParser &odsParser, SELMODEAttr &attr);
-void printPrettySelMode(AsmPrinter &odsPrinter, const SELMODEAttr &attr);
 
 } // namespace ascendc
 } // namespace mlir

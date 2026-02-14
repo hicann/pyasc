@@ -9,12 +9,12 @@
 from typing import overload
 
 from ..._C import ir
+from ..core.aipp_types import AippParams
 from ..core.dtype import DataType, KnownTypes, KnownTypes as KT
-from ..core.enums import MaskMode, TPosition
+from ..core.enums import AippInputFormat, MaskMode, TPosition, AtomicDtype, AtomicOp
 from ..core.ir_value import GlobalAddress, PlainValue, materialize_ir_value as _mat, RuntimeBool, RuntimeInt
 from ..core.tensor import LocalTensor, GlobalTensor
-from ..core.aipp_types import AippParams
-from ..core.enums import AippInputFormat
+from ..core.types import CheckLocalMemoryIAParam
 from ..core.utils import require_jit, global_builder, OverloadDispatcher
 from .utils import set_common_docstring
 
@@ -221,3 +221,39 @@ def set_vector_mask(*args, dtype: DataType, mode: MaskMode) -> None:
         )
 
     dispatcher(*args, dtype=dtype, mode=mode)
+
+
+@require_jit
+@set_common_docstring("init_soc_state")
+def init_soc_state() -> None:
+    global_builder.get_ir_builder().create_asc_InitSocStateOp()
+
+
+@overload
+def set_store_atomic_config(atomic_type: AtomicDtype, atomic_op: AtomicOp) -> None:
+    ...
+
+
+@require_jit
+@set_common_docstring("set_store_atomic_config")
+def set_store_atomic_config(atomic_type: AtomicDtype, atomic_op: AtomicOp) -> None:
+    global_builder.get_ir_builder().create_asc_SetStoreAtomicConfigOp(atomic_type, atomic_op)
+
+
+@overload
+def get_store_atomic_config() -> tuple[int, int]:
+    ...
+
+
+@require_jit
+@set_common_docstring("get_store_atomic_config")
+def get_store_atomic_config() -> tuple[RuntimeInt, RuntimeInt]:
+    builder = global_builder.get_ir_builder()
+    atomic_type, atomic_op = builder.create_asc_GetStoreAtomicConfigAndResult(KT.int16.to_ir(), KT.int16.to_ir())
+    return PlainValue(atomic_type), PlainValue(atomic_op)
+
+
+@require_jit
+@set_common_docstring("check_local_memory_ia")
+def check_local_memory_ia(check_params: CheckLocalMemoryIAParam):
+    global_builder.get_ir_builder().create_asc_CheckLocalMemoryIAOp(check_params.to_ir())

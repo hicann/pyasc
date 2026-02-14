@@ -32,9 +32,12 @@ from .basic.cache import data_cache_clean_and_invalid, get_icache_preload_status
 from .basic.common import (
     ascend_is_aic,
     ascend_is_aiv,
+    check_local_memory_ia,
     data_cache_preload,
     get_hccl_context,
+    get_store_atomic_config,
     get_sys_workspace,
+    init_soc_state,
     reset_mask,
     set_aipp_functions,
     set_hccl_context,
@@ -43,6 +46,7 @@ from .basic.common import (
     set_mask_count,
     set_mask_norm,
     set_mm_layout_transform,
+    set_store_atomic_config,
     set_sys_workspace,
     set_vector_mask,
 )
@@ -132,6 +136,7 @@ from .basic.vec_gather import gather, gatherb
 from .basic.vec_gather_mask import gather_mask, get_gather_mask_remain_count
 from .basic.vec_transpose import transpose, trans_data_to_5hd
 from .basic.proposal import (
+    get_mrg_sort_result,
     mrg_sort,
     mrg_sort4,
     proposal_concat,
@@ -226,6 +231,8 @@ from .core.enums import (
     QuantModes,
     MatmulConfigMode,
     SelMode,
+    AtomicDtype,
+    AtomicOp,
 )
 from .core.ir_value import GlobalAddress
 from .core.memory_allocator import LocalMemAllocator
@@ -242,6 +249,7 @@ from .core.tensor import GlobalTensor, LocalTensor, LocalTensorAuto, MrgSortSrcL
 from .core.types import (
     BinaryRepeatParams,
     BrcbRepeatParams,
+    CheckLocalMemoryIAParam,
     CopyRepeatParams,
     DataCopyParams,
     DataCopyEnhancedParams,

@@ -8,12 +8,11 @@
 
 from typing import Union, overload
 
-from ..._C import ir
 from ..core.dtype import KnownTypes as KT
 from ..core.enums import GatherMaskMode
-from ..core.ir_value import materialize_ir_value as _mat
+from ..core.ir_value import materialize_ir_value as _mat, PlainValue, RuntimeBool, RuntimeInt
 from ..core.tensor import LocalTensor
-from ..core.utils import require_jit, global_builder
+from ..core.utils import require_jit, global_builder, DefaultValued
 from ..core.types import GatherMaskParams
 from .utils import OverloadDispatcher, set_common_docstring
 
@@ -69,46 +68,50 @@ def check_type_gather_mask(dst: LocalTensor, src0: LocalTensor, src1_pattern: Un
 @overload
 def gather_mask(dst: LocalTensor, src0: LocalTensor, src1_pattern: LocalTensor,
                reduce_mode: bool, mask: int, params: GatherMaskParams,
-               rsvd_cnt: int, gather_mask_mode=GatherMaskMode.DEFAULT):
+               gather_mask_mode=GatherMaskMode.DEFAULT) -> int:
     ...
 
 
 @overload
 def gather_mask(dst: LocalTensor, src0: LocalTensor, src1_pattern: int,
                reduce_mode: bool, mask: int, params: GatherMaskParams,
-               rsvd_cnt: int, gather_mask_mode=GatherMaskMode.DEFAULT):
+               gather_mask_mode=GatherMaskMode.DEFAULT) -> int:
     ...
 
 
 @require_jit
 @set_common_docstring("gather_mask")
-def gather_mask(dst: LocalTensor, src0: LocalTensor, *args, **kwargs):
+def gather_mask(dst: LocalTensor, src0: LocalTensor, *args, **kwargs) -> RuntimeInt:
     builder = global_builder.get_ir_builder()
     
     dispatcher = OverloadDispatcher("gather_mask")
     
-    @dispatcher.register_auto
-    def _(src1_pattern: LocalTensor, reduce_mode: bool, mask: int,
-          params: GatherMaskParams, rsvd_cnt: int, gather_mask_mode: GatherMaskMode):
+    @dispatcher.register(src1_pattern=LocalTensor, reduce_mode=RuntimeBool, mask=RuntimeInt, params=GatherMaskParams,
+               gather_mask_mode=DefaultValued(GatherMaskMode, GatherMaskMode.DEFAULT))
+    def _(src1_pattern: LocalTensor, reduce_mode: RuntimeBool, mask: RuntimeInt,
+          params: GatherMaskParams, gather_mask_mode: GatherMaskMode):
         check_type_gather_mask(dst, src0, src1_pattern)
-        rsvd_cnt_var = builder.create_memref_AllocaOp(ir.get_memref_type(builder.get_ui64_type(), 1), False)
-        builder.create_asc_GatherMaskOp(
+        rsvd_cnt = builder.create_asc_GatherMaskAndResult(KT.uint64.to_ir(),
             dst.to_ir(), src0.to_ir(), src1_pattern.to_ir(),
             _mat(reduce_mode, KT.bool_).to_ir(), _mat(mask, KT.uint32).to_ir(),
-            params.to_ir(), rsvd_cnt_var, gather_mask_mode
+            params.to_ir(), gather_mask_mode
         )
+        return PlainValue(rsvd_cnt)
 
-    @dispatcher.register_auto
-    def _(src1_pattern: int, reduce_mode: bool, mask: int,
-          params: GatherMaskParams, rsvd_cnt: int, gather_mask_mode: GatherMaskMode):
+    @dispatcher.register(src1_pattern=RuntimeInt, reduce_mode=RuntimeBool, mask=RuntimeInt, params=GatherMaskParams,
+               gather_mask_mode=DefaultValued(GatherMaskMode, GatherMaskMode.DEFAULT))
+    def _(src1_pattern: RuntimeInt, reduce_mode: RuntimeBool, mask: RuntimeInt,
+          params: GatherMaskParams, gather_mask_mode: GatherMaskMode):
         check_type_gather_mask(dst, src0, src1_pattern)
-        rsvd_cnt_var = builder.create_memref_AllocaOp(ir.get_memref_type(builder.get_ui64_type(), 1), False)
-        builder.create_asc_GatherMaskOp(
+        
+        rsvd_cnt = builder.create_asc_GatherMaskAndResult(KT.uint64.to_ir(),
             dst.to_ir(), src0.to_ir(), _mat(src1_pattern, KT.uint8).to_ir(),
             _mat(reduce_mode, KT.bool_).to_ir(), _mat(mask, KT.uint32).to_ir(),
-            params.to_ir(), rsvd_cnt_var, gather_mask_mode
+            params.to_ir(), gather_mask_mode
         )
-    dispatcher(*args, **kwargs)
+        return PlainValue(rsvd_cnt)
+
+    return dispatcher(*args, **kwargs)
 
 
 @require_jit

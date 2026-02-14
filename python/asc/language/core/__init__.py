@@ -67,6 +67,8 @@ from .enums import (
     TPosition,
     TransposeType,  
     MatmulConfigMode,
+    AtomicDtype,
+    AtomicOp,
 )
 from .ir_value import GlobalAddress
 from .memory_allocator import LocalMemAllocator
@@ -83,6 +85,7 @@ from .tensor import GlobalTensor, LocalTensor, LocalTensorAuto, MrgSortSrcList
 from .types import (
     BinaryRepeatParams,
     BrcbRepeatParams,
+    CheckLocalMemoryIAParam,
     CopyRepeatParams,
     DataCopyParams,
     DataCopyEnhancedParams,
@@ -181,6 +184,8 @@ __all__ = [
     "CacheLine",
     "DcciDst",
     "MatmulConfigMode",
+    "AtomicDtype",
+    "AtomicOp",
     # .ir_value
     "GlobalAddress",
     # .memory_allocator
@@ -205,6 +210,7 @@ __all__ = [
     # .core.types
     "BinaryRepeatParams",
     "BrcbRepeatParams",
+    "CheckLocalMemoryIAParam",
     "CopyRepeatParams",
     "DataCopyEnhancedParams",
     "DataCopyExtParams",

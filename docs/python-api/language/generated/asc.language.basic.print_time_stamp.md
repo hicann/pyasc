@@ -12,6 +12,9 @@
 
 **对应的Ascend C函数原型**
 
+```c++
+__aicore__ inline void PrintTimeStamp(uint32_t descId)
+```
 **参数说明**
 
 - desc_id：用户自定义标识符（自定义数字），用于区分不同打点位置。[0, 0xffff]是预留给Ascend C内部各个模块使用的id值，用户自定义的desc_id建议使用大于0xffff的数值。

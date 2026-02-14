@@ -901,20 +901,44 @@ void bind_create_asc_event_operations(py::class_<PyOpBuilder> &clss)
         ;
 }
 
-void bind_vec_operations(py::class_<PyOpBuilder> &clss)
+void bind_create_asc_common_operations(py::class_<PyOpBuilder> &clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
 
-    clss.def("create_asc_GatherMaskOp", [](PyOpBuilder &self, const Value &dst, const Value &src0,
+    clss.def("create_asc_GatherMaskAndResult", [](PyOpBuilder &self, const Type &type, const Value &dst, const Value &src0,
                                            const Value &src1Pattern, const Value &reduceMode, const Value &mask,
-                                           const Value &params, const Value &rsvdCnt, uint8_t mode) {
+                                           const Value &params, uint8_t mode) {
         auto modeAttr = ascendc::symbolizeGatherMaskMode(mode);
         if (!modeAttr) {
             throw std::runtime_error("Unknown mode for GatherMaskOp");
         }
-        self.create<ascendc::GatherMaskOp>(dst, src0, src1Pattern, reduceMode, mask, params, rsvdCnt, *modeAttr);
+        return self.create<ascendc::GatherMaskOp>(type, dst, src0, src1Pattern, reduceMode, mask, params, *modeAttr).getResult();
     });
+    clss.def("create_asc_GetMrgSortResults", [](PyOpBuilder &self, 
+             const Type &type1, const Type &type2, const Type &type3, const Type &type4) {
+        auto operation = self.create<ascendc::GetMrgSortResultOp>(type1, type2, type3, type4);
+        return py::make_tuple(operation.getResult(0), operation.getResult(1), operation.getResult(2), operation.getResult(3));
+    });
+    clss.def("create_asc_GetStoreAtomicConfigAndResult", [](PyOpBuilder &self, const Type &type, const Type &op) {
+        auto operation = self.create<ascendc::GetStoreAtomicConfigOp>(type, op);
+        return py::make_tuple(operation.getResult(0), operation.getResult(1));
+    }, "type"_a, "op"_a);
+    clss.def("create_asc_SetStoreAtomicConfigOp", [](PyOpBuilder &self, uint8_t type, uint8_t op) {
+        auto typeAttr = ascendc::symbolizeAtomicDtype(type);
+        if (!typeAttr) {
+            throw std::runtime_error("Unknown type for AtomicDtype");
+        }
+        auto opAttr = ascendc::symbolizeAtomicOp(op);
+        if (!opAttr) {
+            throw std::runtime_error("Unknown type for AtomicOp");
+        }
+        self.create<ascendc::SetStoreAtomicConfigOp>(*typeAttr, *opAttr);
+    });
+    clss.def("create_asc_GetStoreAtomicConfigAndResult", [](PyOpBuilder &self, const Type &type, const Type &op) {
+        auto operation = self.create<ascendc::GetStoreAtomicConfigOp>(type, op);
+        return py::make_tuple(operation.getResult(0), operation.getResult(1));
+    }, "type"_a, "op"_a);
 }
 
 void pyasc_init_ir_builder(py::module &m)
@@ -945,7 +969,7 @@ void pyasc_init_ir_builder(py::module &m)
     bind_create_emitasc_operations(clss);
     bind_create_asc_pipe_operations(clss);
     bind_create_asc_event_operations(clss);
-    bind_vec_operations(clss);
+    bind_create_asc_common_operations(clss);
 }
 } // namespace asc
 } // namespace pybind11

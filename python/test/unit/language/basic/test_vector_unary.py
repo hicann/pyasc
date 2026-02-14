@@ -178,8 +178,7 @@ def test_gather_mask_kernel(mock_launcher_run):
         gather_mask_mode = asc.GatherMaskMode.DEFAULT
         mask = 0
         params = asc.GatherMaskParams(src0_block_stride=1, repeat_times=1, src0_repeat_stride=0, src1_repeat_stride=0)
-        rsvd_cnt = 0
-        asc.gather_mask(dst_local, src0_local, pattern_value, reduce_mode, mask, params, rsvd_cnt, gather_mask_mode)
+        rsvd_cnt = asc.gather_mask(dst_local, src0_local, pattern_value, reduce_mode, mask, params, gather_mask_mode)
 
     gather_mask_kernel[1]()
     assert mock_launcher_run.call_count == 1

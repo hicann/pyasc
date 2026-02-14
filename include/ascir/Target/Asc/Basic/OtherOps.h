@@ -38,6 +38,8 @@ LogicalResult printOperation(CodeEmitter &emitter, ascendc::ConstructOp op);
 
 LogicalResult printOperation(CodeEmitter &emitter, ascendc::FftsCrossCoreSyncOp op);
 
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::GetMrgSortResultOp op);
+
 LogicalResult printOperation(CodeEmitter &emitter, ascendc::MrgSortOp op);
 
 LogicalResult printOperation(CodeEmitter &emitter, ascendc::SortOp op);
@@ -51,6 +53,8 @@ LogicalResult printOperation(CodeEmitter &emitter, ascendc::ResetMaskOp op);
 LogicalResult printOperation(CodeEmitter &emitter, ascendc::FixpipeOp op);
 
 LogicalResult printOperation(CodeEmitter &emitter, ascendc::FixpipeWithWorkspaceOp op);
+
+LogicalResult printOperation(CodeEmitter &emitter, ascendc::GetStoreAtomicConfigOp op);
 
 template <typename FixpipeOp>
 auto printFixpipeTemplate(CodeEmitter &emitter, FixpipeOp op)

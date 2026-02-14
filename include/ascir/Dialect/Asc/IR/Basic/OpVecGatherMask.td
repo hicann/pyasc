@@ -31,9 +31,14 @@ def AscendC_GatherMaskOp : APIOp<"gather_mask", "GatherMask"> {
   let arguments = (ins AscendC_LocalTensor:$dst, AscendC_LocalTensor:$src0,
                   AnyType:$src1Pattern,
                   AnyType:$reduceMode, AnyType:$mask,
-                  AscendC_GatherMaskParams:$params, AnyType:$rsvdCnt,
-                  DefaultValuedAttr<AscendC_GatherMaskModeAttr, 
-                  "::mlir::ascendc::GatherMaskMode::DEFAULT">:$gatherMaskMode);
+                  AscendC_GatherMaskParams:$params,
+                  AscendC_GatherMaskModeAttr:$gatherMaskMode);
+  let results = (outs AnyType:$rsvdCnt);
+  let assemblyFormat = [{
+    $dst `,` $src0 `,` $src1Pattern `,` $reduceMode `,` $mask `,` $params `,` $gatherMaskMode
+    attr-dict `:` qualified(type($dst)) `,` qualified(type($src0)) `,` qualified(type($src1Pattern)) `,` 
+    type($reduceMode) `,` type($mask) `,` type($params)  `->` type($rsvdCnt)
+  }];
 }
 
 def AscendC_GetGatherMaskRemainCountOp : APIOp<"get_gather_mask_remain_count", "GetGatherMaskRemainCount",[AscFunc]> {
