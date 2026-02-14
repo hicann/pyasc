@@ -576,7 +576,12 @@ def test_set_deq_scale(mock_launcher_run):
     def kernel_set_deq_scale() -> None:
         asc.set_deq_scale(1.0)
         asc.set_deq_scale(1.0, 5, False)
-
+        vdeq_local = asc.LocalTensor(dtype=asc.uint64, pos=asc.TPosition.VECIN, addr=0, tile_size=16)
+        vdeq_scale = [1.0] * 16  
+        vdeq_offset = [5] * 16    
+        vdeq_sign_mode = [False] * 16  
+        vdeq_info = asc.VdeqInfo(vdeq_scale, vdeq_offset, vdeq_sign_mode)
+        asc.set_deq_scale(vdeq_local, vdeq_info)
     kernel_set_deq_scale[1]()
     assert mock_launcher_run.call_count == 1
 

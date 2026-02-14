@@ -76,6 +76,7 @@ LogicalResult printOperation(CodeEmitter &emitter, ascendc::CastDeqL2Op op);
 
 LogicalResult printOperation(CodeEmitter &emitter, ascendc::SetDeqScaleOp op);
 
+LogicalResult printOperation(CodeEmitter& emitter, ascendc::SetDeqScaleL4Op op);
 } // namespace ascendc
 } // namespace mlir
 

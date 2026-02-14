@@ -438,4 +438,9 @@ def UnaryRepeatParams : APIType<"UnaryRepeatParams"> {
   let mnemonic = "unary_repeat_params";
   let apiName = "AscendC::UnaryRepeatParams";
 }
+
+def VdeqInfo : APIType<"VdeqInfo"> {
+  let mnemonic = "vdeq_info";
+  let apiName = "AscendC::VdeqInfo";
+}
 #endif // API_TYPES_TD

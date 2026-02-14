@@ -47,6 +47,8 @@ class AscendC_InterfaceMethods {
     "getIsExhaustedSuspension", "bool">;
   InterfaceMethod getIsFullSort = GetMethod<"isFullSort", 
     "getIsFullSort", "bool">;
+  InterfaceMethod getVdeq = GetMethod<"vdeq", "getVdeq">;
+  InterfaceMethod getVdeqInfo = GetMethod<"vdeqInfo", "getVdeqInfo">;
 }
 
 class AscendC_OpInterface<string name, list<Interface> baseInterfaces = []>

@@ -275,6 +275,7 @@ from .core.types import (
     LoadData3DParamsV2Pro,
     LoadDataRepeatParam,
     get_shape_size,
+    VdeqInfo,
 )
 from .core.aipp_types import (
     AippParams,

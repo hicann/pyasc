@@ -215,7 +215,7 @@ using PrintableOpTypes = std::tuple<
     ascendc::RsqrtL2Op, ascendc::SqrtL2Op, ascendc::NegL2Op,
     // VecVcon (Type conversion) operations
     ascendc::CastL0Op, ascendc::CastL1Op, ascendc::CastL2Op, ascendc::CastDeqL0Op, ascendc::CastDeqL1Op,
-    ascendc::CastDeqL2Op,
+    ascendc::CastDeqL2Op, ascendc::SetDeqScaleL4Op,
     // Vector gatherMask operations
     ascendc::GatherMaskOp, ascendc::GetGatherMaskRemainCountOp,
 

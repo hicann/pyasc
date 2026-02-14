@@ -86,3 +86,12 @@ LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::CastD
     printUnaryL2Params(emitter, op);
     return success();
 }
+
+LogicalResult mlir::ascendc::printOperation(CodeEmitter &emitter, ascendc::SetDeqScaleL4Op op) {
+    auto &os = emitter.ostream();
+    os << ascNamespace << "::" << op.getAPIName() << "("
+       << emitter.getOrCreateName(op.getVdeq()) << ", "
+       << emitter.getOrCreateName(op.getVdeqInfo()) << ")";
+    
+    return success();
+}

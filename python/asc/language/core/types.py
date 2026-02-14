@@ -1915,3 +1915,67 @@ class FixpipeParamsV220(IRValue):
     def to_ir(self) -> IRHandle:
         return self.handle
 
+
+class VdeqInfo(IRValue):
+
+    @overload
+    def __init__(
+        self,
+        scale: List[float],
+        offset: List[int],
+        sign_mode: List[bool],
+    ) -> None:
+
+        ...
+
+    @overload
+    def __init__(self, handle: IRHandle) -> None:
+        """This contructor should not be called by user"""
+        ...
+
+
+    @require_jit
+    def __init__(
+        self,
+        scale: Optional[List[float]] = None,
+        offset: Optional[List[int]] = None,
+        sign_mode: Optional[List[bool]] = None,
+        handle: Optional[IRHandle] = None,
+    ) -> None:
+        if handle is not None:
+            self.handle = handle
+            return
+
+        if scale is None or offset is None or sign_mode is None:
+            raise ValueError("VdeqInfo requires scale / offset / sign_mode")
+        if len(scale) != 16 or len(offset) != 16 or len(sign_mode) != 16:
+            raise ValueError("VdeqInfo expects exactly 16 elements per field")
+
+        builder = global_builder.get_ir_builder()
+
+        from .array import array
+        
+        scale_array = array(KnownTypes.float32, scale)
+        offset_array = array(KnownTypes.int16, offset)
+        sign_mode_array = array(KnownTypes.bit, [1 if x else 0 for x in sign_mode])
+
+        self.handle = builder.create_asc_ConstructOp(
+            builder.get_asc_VdeqInfoType(),
+            [
+                scale_array.to_ir(),
+                offset_array.to_ir(),
+                sign_mode_array.to_ir(),
+            ],
+            builder.get_type_array_attr([
+                scale_array.to_ir().get_type(),
+                offset_array.to_ir().get_type(),
+                sign_mode_array.to_ir().get_type(),
+            ]),
+        )
+
+    @classmethod
+    def from_ir(cls, handle: IRHandle) -> "VdeqInfo":
+        return cls(handle=handle)
+
+    def to_ir(self) -> IRHandle:
+        return self.handle

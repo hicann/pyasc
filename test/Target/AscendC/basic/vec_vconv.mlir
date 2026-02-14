@@ -70,6 +70,15 @@ func.func @emit_set_deq_scale(%arg0: f16, %arg1: f32, %arg2: i16) {
   return
 }
 
+// CHECK-LABEL:void emit_set_deq_scale_l4(AscendC::LocalTensor<float> v1, AscendC::VdeqInfo v2) {
+// CHECK-NEXT:   AscendC::SetDeqScale(v1, v2);
+// CHECK-NEXT:   return;
+// CHECK-NEXT: }
+func.func @emit_set_deq_scale_l4(%vdeq: !ascendc.local_tensor<32xf32>, %vdeq_info: !ascendc.vdeq_info) {
+  ascendc.set_deq_scale_l4 %vdeq, %vdeq_info : !ascendc.local_tensor<32xf32>, !ascendc.vdeq_info
+  return
+}
+
 // CHECK-LABEL:void emit_cast_deq(AscendC::LocalTensor<float> v1, AscendC::LocalTensor<float> v2, uint8_t v3, AscendC::UnaryRepeatParams v4, uint64_t v5, uint64_t v6, int32_t v7) {
 // CHECK-NEXT:   AscendC::CastDeq<float, float, 0, 0>(v1, v2, v7);
 // CHECK-NEXT:   AscendC::CastDeq<float, float, 1, 0, 0>(v1, v2, v5, v3, v4);

@@ -114,7 +114,8 @@ from .types import (
     LoadData3DParamsV2,
     LoadData3DParamsV2Pro,
     LoadDataRepeatParam,
-    get_shape_size
+    get_shape_size,
+    VdeqInfo,
 )
 from .utils import ceildiv, static_assert
 
@@ -236,6 +237,7 @@ __all__ = [
     "LoadData3DParamsV2Pro",
     "LoadDataRepeatParam",
     "get_shape_size",
+    "VdeqInfo",
     # .core.utils
     "ceildiv",
     "static_assert",

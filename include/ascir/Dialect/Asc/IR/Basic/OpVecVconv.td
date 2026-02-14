@@ -70,6 +70,12 @@ def AscendC_SetDeqScaleOp : APIOp<"set_deq_scale", "SetDeqScale", [AttrSizedOper
   }];
 }
 
+def AscendC_SetDeqScaleL4Op : VectorOp<"set_deq_scale_l4", "SetDeqScale"> {
+    let description = "Set dequantization scale, offset and sign mode information";
+    let arguments = (ins AscendC_LocalTensor:$vdeq, AscendC_VdeqInfo:$vdeqInfo
+    );
+}
+
 defm AddReluCast : BinaryCastL012Op<"add_relu_cast", "AddReluCast">;
 defm SubReluCast : BinaryCastL012Op<"sub_relu_cast", "SubReluCast">;
 

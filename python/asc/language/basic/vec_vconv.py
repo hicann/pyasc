@@ -6,7 +6,7 @@
 # INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
 # See LICENSE in the root of the software repository for the full text of the License.
 
-from typing import List, overload, Optional
+from typing import List, overload
 
 from ..._C import ir
 from ..core.dtype import KnownTypes, KnownTypes as KT
@@ -14,7 +14,7 @@ from ..core.enums import RoundMode
 from ..core.ir_value import RuntimeBool, RuntimeInt, RuntimeFloat, materialize_ir_value as _mat
 from ..core.tensor import LocalTensor
 from ..core.utils import require_jit, global_builder, DefaultValued, OverloadDispatcher
-from ..core.types import BinaryRepeatParams, UnaryRepeatParams
+from ..core.types import BinaryRepeatParams, UnaryRepeatParams, VdeqInfo
 from .utils import op_impl, set_binary_docstring, set_common_docstring
 from .vec_unary import op_impl as unary_op_impl
 
@@ -125,15 +125,29 @@ def set_deq_scale(scale: float, offset: int, sign_mode: bool) -> None:
     ...
 
 
+@overload
+def set_deq_scale(vdeq: LocalTensor, vdeq_info: VdeqInfo) -> None:
+    ...
+
+
 @require_jit
 @set_common_docstring(api_name="set_deq_scale")
-def set_deq_scale(scale: RuntimeFloat, offset: Optional[RuntimeInt] = None, 
-                    sign_mode: Optional[RuntimeBool] = None) -> None:
-    if offset is None and sign_mode is None:
-        global_builder.get_ir_builder().create_asc_SetDeqScaleOp(_mat(scale, KnownTypes.half).to_ir())
-    else:
-        global_builder.get_ir_builder().create_asc_SetDeqScaleOp(_mat(scale, KnownTypes.float32).to_ir(), \
-            _mat(offset, KnownTypes.int16).to_ir(), _mat(sign_mode, KnownTypes.bit).to_ir())
+def set_deq_scale(*args, **kwargs) -> None:
+    builder = global_builder.get_ir_builder()
+    dispatcher = OverloadDispatcher("set_deq_scale")
+    @dispatcher.register(vdeq=LocalTensor, vdeq_info=VdeqInfo)
+    def _(vdeq: LocalTensor, vdeq_info: VdeqInfo):
+        builder.create_asc_SetDeqScaleL4Op(vdeq.to_ir(), vdeq_info.to_ir())
+    @dispatcher.register(scale=RuntimeFloat)
+    def _(scale: RuntimeFloat):
+        builder.create_asc_SetDeqScaleOp(_mat(scale, KnownTypes.half).to_ir())
+    @dispatcher.register(scale=RuntimeFloat, offset=RuntimeInt, sign_mode=RuntimeBool)
+    def _(scale: RuntimeFloat, offset: RuntimeInt, sign_mode: RuntimeBool):
+        builder.create_asc_SetDeqScaleOp(_mat(scale, KnownTypes.float32).to_ir(), 
+                                         _mat(offset, KnownTypes.int16).to_ir(), 
+                                         _mat(sign_mode, KnownTypes.bit).to_ir())
+    dispatcher(*args, **kwargs)
+
 
 
 @overload
