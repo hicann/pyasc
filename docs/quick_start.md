@@ -263,7 +263,7 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
 
    编译运行torch输入输出tensor的算子时必须安装本包。
 
-   根据实际环境，选择对应的版本进行安装，具体可以查看[Ascend Extension for PyTorch文档](https://www.hiascend.com/document/detail/zh/Pytorch/720/configandinstg/instg/insg_0004.html)。
+   根据实际环境，选择对应的版本进行安装，具体可以查看[Ascend Extension for PyTorch文档](https://www.hiascend.com/document/detail/zh/Pytorch/730/configandinstg/instg/docs/zh/installation_guide/installation_via_binary_package.md)。
 
    以`Python3.9`，`x86_64`，`PyTorch2.7.1`，`torch_npu7.2.0`版本为例。
    - 安装`PyTorch`框架：
