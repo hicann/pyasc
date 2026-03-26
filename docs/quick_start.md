@@ -162,6 +162,29 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
 
 ### 运行环境准备<a name="runtimeenv"></a>
 
+软件安装方式请根据如下描述进行选择：
+
+| 安装方式 | 说明 |使用场景|
+| :--- | :--- | :--- |
+| 使用WebIDE安装 | WebIDE可提供在线直接运行的昇腾环境，当前可提供单机算力，默认安装最新商发版CANN软件包和固件/驱动包。目前仅适用于Atlas A2系列产品，ARM架构。| 适用于没有昇腾设备的开发者。|
+| 手动安装软件包 | - |适用有昇腾设备，想体验手动安装CANN包的开发者。|
+
+#### 使用WebIDE安装
+
+对于无环境的用户，可直接使用WebIDE开发平台，即“**一站式开发平台**”，该平台为您提供在线可直接运行的昇腾环境，环境中已安装必备的软件包，无需手动安装。更多关于开发平台的介绍请参考[LINK](https://gitcode.com/org/cann/discussions/54)。
+
+1. 进入开源项目，单击“`云开发`”按钮，使用已认证过的华为云账号登录。若未注册或认证，请根据页面提示进行注册和认证。
+
+   <img src="./figures/cloudIDE.png" alt="云平台"  width="750px" height="90px">
+
+2. 根据页面提示创建并启动云开发环境，单击“`连接 > WebIDE `”进入算子一站式开发平台，开源项目的资源默认在`/mnt/workspace`目录下。
+
+   <img src="./figures/webIDE.png" alt="云平台"  width="1000px" height="150px">
+
+#### 手动安装软件包
+
+若您选择手动安装软件包，请按照如下步骤选择正确的版本进行安装。
+
 使用基于源码安装时，建议安装社区版<a href="https://www.hiascend.com/developer/download/community/result?module=cann&cann=8.5.0.alpha001">8.5.0.alpha001</a>及以上版本。
 
 使用快速安装时，不同pyasc发行版可支持的硬件平台及所需的[CANN](https://www.hiascend.com/developer/download/community/result?module=cann)版本如下表：
@@ -196,12 +219,8 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
 </table>
 
 在运行Ascend C Python实现的算子前，请根据如下步骤完成相关环境准备。
-1. **安装python依赖**
-   ```shell
-   python3 -m pip install -r requirements-runtime.txt
-   ```
 
-2. **安装社区版CANN toolkit包**
+1. **安装社区版CANN toolkit包**
 
     根据实际环境，下载对应`Ascend-cann-toolkit_${cann_version}_linux-${arch}.run`包。
     
@@ -215,7 +234,7 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
     - \$\{arch\}：表示CPU架构，如aarch64、x86_64。
     - \$\{install\_path\}：表示指定安装路径，默认安装在`/usr/local/Ascend`目录。
 
-3. **安装社区版CANN ops包（可选）**
+2. **安装社区版CANN ops包（可选）**
 
     运行接入torch的算子时必须安装本包，若仅编译算子，可跳过本操作。
 
@@ -230,7 +249,37 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
     - \$\{soc\_name\}：表示NPU型号名称，例如910b。
     - \$\{install\_path\}：表示指定安装路径，需要与toolkit包安装在相同路径，默认安装在`/usr/local/Ascend`目录。
 
-4. **配置环境变量**<a name=envset></a>
+3. **安装PyTorch框架和torch_npu插件**
+
+   编译运行torch输入输出tensor的算子时必须安装本包。
+
+   根据实际环境，选择对应的版本进行安装，具体可以查看[Ascend Extension for PyTorch文档](https://www.hiascend.com/document/detail/zh/Pytorch/730/configandinstg/instg/docs/zh/installation_guide/installation_via_binary_package.md)。
+
+   以`Python3.9`，`x86_64`，`PyTorch2.7.1`，`torch_npu7.2.0`版本为例。
+   - 安装`PyTorch`框架：
+      ```bash
+      # 下载软件包
+      wget https://download.pytorch.org/whl/cpu/torch-2.7.1%2Bcpu-cp39-cp39-manylinux_2_28_x86_64.whl
+      # 安装命令
+      pip3 install torch-2.7.1+cpu-cp39-cp39-manylinux_2_28_x86_64.whl
+      ```
+   - 安装`torch_npu`插件：
+      ```bash
+      # 下载插件包
+      wget https://gitcode.com/Ascend/pytorch/releases/download/v7.2.0-pytorch2.7.1/torch_npu-2.7.1-cp39-cp39-manylinux_2_28_x86_64.whl
+      # 安装命令
+      pip3 install torch_npu-2.7.1-cp39-cp39-manylinux_2_28_x86_64.whl
+      ```
+
+      注意事项：
+      - torch_npu当前不支持python3.12及以上版本。关于torch_npu的更多详细信息可参考[torch_npu](https://gitcode.com/Ascend/pytorch)。
+
+#### python依赖安装
+   ```shell
+   python3 -m pip install -r requirements-runtime.txt
+   ```
+
+#### 配置环境变量<a name=envset></a>
 
    - 默认路径，root用户安装
 
@@ -265,31 +314,6 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
 
    **注意：若环境中已安装多个版本的CANN软件包，设置上述环境变量时，请确保${cann_install_path}/latest目录指向的是配套版本的软件包。**
 
-5. **安装PyTorch框架和torch_npu插件**
-
-   编译运行torch输入输出tensor的算子时必须安装本包。
-
-   根据实际环境，选择对应的版本进行安装，具体可以查看[Ascend Extension for PyTorch文档](https://www.hiascend.com/document/detail/zh/Pytorch/730/configandinstg/instg/docs/zh/installation_guide/installation_via_binary_package.md)。
-
-   以`Python3.9`，`x86_64`，`PyTorch2.7.1`，`torch_npu7.2.0`版本为例。
-   - 安装`PyTorch`框架：
-      ```bash
-      # 下载软件包
-      wget https://download.pytorch.org/whl/cpu/torch-2.7.1%2Bcpu-cp39-cp39-manylinux_2_28_x86_64.whl
-      # 安装命令
-      pip3 install torch-2.7.1+cpu-cp39-cp39-manylinux_2_28_x86_64.whl
-      ```
-   - 安装`torch_npu`插件：
-      ```bash
-      # 下载插件包
-      wget https://gitcode.com/Ascend/pytorch/releases/download/v7.2.0-pytorch2.7.1/torch_npu-2.7.1-cp39-cp39-manylinux_2_28_x86_64.whl
-      # 安装命令
-      pip3 install torch_npu-2.7.1-cp39-cp39-manylinux_2_28_x86_64.whl
-      ```
-
-      注意事项：
-      - torch_npu当前不支持python3.12及以上版本。关于torch_npu的更多详细信息可参考[torch_npu](https://gitcode.com/Ascend/pytorch)。
-
 ## 样例运行验证（可选）
 开发者使用Ascend C Python编程语言实现自定义算子后，可以进行算子功能验证。本代码仓提供了部分算子实现的样例，具体请参考[tutorials](../python/tutorials/)目录下的样例。
 以Add算子为例，执行如下命令可进行功能验证。
@@ -297,7 +321,7 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
 cd pyasc
 python3 ./python/tutorials/01_add/add.py
 ```
-注：完整的运行命令如下所示，通过参数[RUN_MODE]配置运行模式、参数[SOC_VERSION]配置运行环境，具体请参考[编译执行](../python/tutorials/01_add/README.md/#编译执行)。若缺省参数[RUN_MODE]默认是仿真器模式，缺省参数[SOC_VERSION]，仿真器模式下默认是`Ascend910B1`环境，NPU上板模式下默认自动检测，请确保已完成[运行环境准备](#运行环境准备)中的[配置环境变量](#envset)步骤。
+注：完整的运行命令如下所示，通过参数[RUN_MODE]配置运行模式、参数[SOC_VERSION]配置运行环境，具体请参考[编译执行](../python/tutorials/01_add/README.md/#编译执行)。若缺省参数[RUN_MODE]默认是仿真器模式，缺省参数[SOC_VERSION]，仿真器模式下默认是`Ascend910B1`环境，NPU上板模式下默认自动检测，请确保已完成[运行环境准备](#运行环境准备)中的[配置环境变量](#配置环境变量)步骤。
 ```bash
 python3 ./python/tutorials/01_add/add.py -r [RUN_MODE] -v [SOC_VERSION]
 ```
