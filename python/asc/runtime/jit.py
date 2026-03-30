@@ -183,7 +183,7 @@ class JITFunction(Function[P, T]):
 
     def _run_codegen(self, spec: Specialization, options: CodegenOptions) -> ir.ModuleOp:
         self.context = self.create_context()
-        if options.ir_multithreading:
+        if not options.ir_multithreading:
             self.context.disable_multithreading()
         try:
             global_builder.set_ir_builder(self.context)

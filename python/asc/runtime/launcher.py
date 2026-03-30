@@ -116,11 +116,13 @@ class Launcher:
 
         rt.synchronize()
         for index, arg in enumerate(memory_args):
-            if enable_debug and index == len(memory_args) - 1:
-                rt.call_print_interface(inputs[-1], utils.TOTAL_DUMP_SIZE, stream, func_name)
-            else:
-                arg.copy_from_device()
-            arg.release_memory()
+            try:
+                if enable_debug and index == len(memory_args) - 1:
+                    rt.call_print_interface(inputs[-1], utils.TOTAL_DUMP_SIZE, stream, func_name)
+                else:
+                    arg.copy_from_device()
+            finally:
+                arg.release_memory()
 
     def run(self, kernel: CompiledKernel, function_name: str, user_args: Tuple[Any]) -> None:
         dry_run = os.environ.get('DRY_RUN')
