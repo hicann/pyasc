@@ -1,53 +1,67 @@
----
-BasedOnStyle: LLVM
-Language: Cpp
+# Copyright (c) 2026 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of 
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, 
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ============================================================================
 
-# 大括号换行风格配置
-BreakBeforeBraces: Custom
-BraceWrapping:
-  AfterClass: false          # 类定义后不换行
-  AfterControlStatement: MultiLine  # 控制语句后多行时换行
-  AfterEnum: false           # 枚举定义后不换行
-  AfterFunction: true        # 函数定义后换行
-  AfterNamespace: false      # 命名空间后不换行
-  AfterObjCDeclaration: false
-  AfterStruct: false         # 结构体定义后不换行
-  AfterUnion: false          # 联合体定义后不换行
-  AfterExternBlock: false
-  BeforeCatch: false
-  BeforeElse: false          # else前不换行
-  IndentBraces: false
-  SplitEmptyFunction: false   # 空函数体可以放在一行
-  SplitEmptyRecord: true     # 空记录拆分成两行
-  SplitEmptyNamespace: true  # 空命名空间拆分成两行
+# Usage:
+#   Using clang-format to reformat a file:
+#     clang-format -i -style=Google <file>
 
-# 其他相关配置
-AllowShortBlocksOnASingleLine: Empty  # 只有空块可以放在一行
-AllowShortFunctionsOnASingleLine: Inline  # 内联函数可以放在一行
-AllowShortIfStatementsOnASingleLine: Never    # if语句不允许单行
-AllowShortLoopsOnASingleLine: false           # 循环不允许单行
-AlwaysBreakTemplateDeclarations: Yes
-
-# Lambda表达式配置
-PointerAlignment: Right           # 指针和引用靠右
-SpaceBeforeParens: ControlStatements  # 控制语句括号前加空格
-SpaceInEmptyParentheses: false    # 空括号内不加空格
-SpacesInCStyleCastParentheses: false  # C风格转换括号内不加空格
-SpacesInContainerLiterals: true   # 容器字面量内加空格
-SpacesInParentheses: false        # 普通括号内不加空格
-SpacesInSquareBrackets: false     # 方括号内不加空格
-
-# 初始化列表配置
-Cpp11BracedListStyle: true        # 使用C++11大括号初始化风格
-SpaceBeforeCpp11BracedList: true   # 大括号列表前加空格
-SpaceInEmptyBlock: false           # 空块内不加空格
-
-# 缩进配置
-IndentWidth: 4                    # 缩进宽度
-IndentCaseLabels: true      # case/default 相对于 switch 缩进
-TabWidth: 4
-UseTab: Never                     # 不使用tab
-
-# 其他格式配置
-ColumnLimit: 120                   # 行宽限制
+BasedOnStyle: Google
+ColumnLimit: 120
+AccessModifierOffset: -4
 SortIncludes: false
+BreakBeforeBraces:  Custom
+
+# 大括号换行配置
+BraceWrapping:
+    AfterCaseLabel: false
+    AfterClass: false
+    AfterControlStatement: false
+    # AfterEnum: false (紧凑模式，左大括号和enum同行, enum Color {...), AfterEnum: true (左大括号和enum换行).
+    AfterEnum: false
+    AfterFunction: true
+    AfterNamespace: false
+    AfterStruct: false
+    AfterUnion: false
+    AfterExternBlock: false
+    BeforeCatch: false
+    BeforeElse: false
+    IndentBraces: false
+    SplitEmptyFunction: false
+    SplitEmptyRecord: true
+    SplitEmptyNamespace: true
+
+# Align
+AlignAfterOpenBracket: AlwaysBreak
+AlignEscapedNewlines: Left
+AlignOperands: true
+AlignTrailingComments: true
+AllowAllArgumentsOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AlwaysBreakBeforeMultilineStrings: false
+AlwaysBreakTemplateDeclarations: true
+
+BinPackArguments: true
+BreakBeforeTernaryOperators: false
+SpacesBeforeTrailingComments: 1
+
+# poniter aligment
+DerivePointerAlignment: false
+PointerAlignment: Left
+
+# single line layout
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+
+# tab space
+UseTab: Never
+IndentWidth:  4
+TabWidth: 4
