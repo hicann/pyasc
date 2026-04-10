@@ -73,6 +73,12 @@ class Matmul(IRValue):
             self.handle = handle
             return
         builder = global_builder.get_ir_builder()
+        for name, value in [('a', a), ('b', b), ('c', c)]:
+            if not isinstance(value, MatmulType):
+                raise ValueError(f"{name} must be MatmulType and cannot be None.")
+        for name, value, param_type in [('bias', bias, MatmulType), ('matmul_config', matmul_config, MatmulConfig)]:
+            if value is not None and not isinstance(value, param_type):
+                raise ValueError(f"{name} must be {param_type.__name__} or None.")
         bias_pos = c.position
         bias_format = c.format
         bias_type = c.dtype
