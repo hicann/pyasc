@@ -274,7 +274,7 @@ pyasc支持通过pip快速安装和基于源码编译安装两种方式。
       注意事项：
       - torch_npu当前不支持python3.12及以上版本。关于torch_npu的更多详细信息可参考[torch_npu](https://gitcode.com/Ascend/pytorch)。
 
-#### python依赖安装
+#### python依赖安装<a name=runtimepip></a>
    ```shell
    python3 -m pip install -r requirements-runtime.txt
    ```
@@ -363,3 +363,10 @@ cd test
 sudo apt install lcov
 bash build_llt.sh --cov --check-ascir --llvm_install_path ${llvm_install_path} --lit_install_path ${lit_install_path}
 ```
+
+## FAQ
+### pip安装python依赖报错
+#### 问题描述
+在使用pip安装部分python依赖时可能出现提示`ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.`一般出现在[运行环境安装python依赖](#runtimepip)步骤，该提示为pip依赖解析器发出的警告，不影响后续样例以及UT执行。
+#### 解决措施
+更新CANN包至最新版本。
