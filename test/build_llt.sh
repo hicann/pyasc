@@ -119,8 +119,8 @@ generate_coverage() {
   if [[ ! -d "${_path_to_gen}" ]]; then
     mkdir -p "${_path_to_gen}"
   fi
-  lcov -c -d "${_source_dir}" -o "${_coverage_file}"
-  lcov -r "${_coverage_file}" "/home/jenkins/Ascend/ascend-toolkit/latest/*" -o "${_coverage_file}"
+  lcov -c -d "${_source_dir}" -o "${_coverage_file}" --rc geninfo_unexecuted_blocks=1 --ignore-errors mismatch,empty,inconsistent,negative,negative,source,unused
+  lcov -r "${_coverage_file}" "/home/jenkins/Ascend/ascend-toolkit/latest/*" -o "${_coverage_file}" --ignore-errors unused
   log "Info: generated coverage file ${_coverage_file}"
 }
 
@@ -140,7 +140,7 @@ filter_coverage() {
     exit 1
   fi
   lcov --remove "${_coverage_file}" '/usr/include/*' '/usr/local/include/*' "*/llvm/include/llvm/*" "*/mlir/include/mlir/*" "${BUILD_DIR}/*" \
-                                     -o "${_filtered_file}"
+                                     -o "${_filtered_file}" --ignore-errors unused
 }
 
 # generate html report
