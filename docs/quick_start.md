@@ -380,9 +380,22 @@ pip install lit
 cd test
 bash build_llt.sh --check-ascir --llvm_install_path ${llvm_install_path} --lit_install_path ${lit_install_path}
 ```
+
+**编译器选择说明**：
+- **默认编译器**：默认使用GCC编译，适用于无Clang环境
+- **Clang编译**：使用`--clang`参数可启用Clang编译，编译效率更高。需确保环境已安装clang和lld（推荐版本clang>=15，lld>=15）
+```bash
+bash build_llt.sh --clang --check-ascir --llvm_install_path ${llvm_install_path} --lit_install_path ${lit_install_path}
+```
+
 在项目根目录下，执行如下命令，可在执行UT测试后使用LCOV工具生成代码覆盖率报告。具体为，test目录下自动生成HTML报告，打开该文件即可查看详细覆盖率信息，ASC-IR定义模块报告在cov_ascir文件夹下。
 ```bash
 cd test
 sudo apt install lcov
 bash build_llt.sh --cov --check-ascir --llvm_install_path ${llvm_install_path} --lit_install_path ${lit_install_path}
+```
+
+**Clang覆盖率说明**：若使用`--clang`参数编译并生成覆盖率，需额外安装llvm-profdata和llvm-cov工具（推荐版本llvm-profdata-15，llvm-cov-15）
+```bash
+bash build_llt.sh --clang --cov --check-ascir --llvm_install_path ${llvm_install_path} --lit_install_path ${lit_install_path}
 ```
