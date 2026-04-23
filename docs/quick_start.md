@@ -3,16 +3,32 @@
 
 根据**本地是否有NPU设备**和**使用目标**选择对应的环境准备方式：
 
-| 环境准备 | 社区体验 / 算子开发（CANN商用/社区版） | 生态开发者贡献（CANN master） |
-| :---: | :---: | :---: |
-| **无NPU设备** | [云开发环境](#1️⃣-云开发环境) | [手动下载安装CANN master](#📥-下载安装cann包) + [云开发环境](#1️⃣-云开发环境) |
-| **有NPU设备** | [CANN官方Docker镜像](#2️⃣-cann官方docker镜像) | [手动下载安装CANN master](#📥-下载安装cann包) + [CANN官方Docker镜像](#2️⃣-cann官方docker镜像) |
+<table border="1" cellpadding="8" cellspacing="0">
+  <thead>
+    <tr>
+      <th style="text-align: center; vertical-align: middle;">环境准备</th>
+      <th style="text-align: center; vertical-align: middle;">社区体验 / 算子开发(CANN商用/社区版)</th>
+      <th style="text-align: center; vertical-align: middle;">生态开发者贡献(CANN master)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center; vertical-align: middle;"><strong>无NPU设备</strong></td>
+      <td style="text-align: center; vertical-align: middle;" colspan="2"><a href="#3️⃣-下载安装cann包">手动下载安装CANN master</a> + <a href="#1️⃣-云开发环境">云开发环境</a></td>
+    </tr>
+    <tr>
+      <td style="text-align: center; vertical-align: middle;"><strong>有NPU设备</strong></td>
+      <td style="text-align: center; vertical-align: middle;"><a href="#2️⃣-cann官方docker镜像">CANN官方Docker镜像</a></td>
+      <td style="text-align: center; vertical-align: middle;"><a href="#3️⃣-下载安装cann包">手动下载安装CANN master</a></td>
+    </tr>
+  </tbody>
+</table>
 
 > [!TIP] 选择建议
 >
 > - 为了保障开发体验环境的质量，推荐用户基于**容器化技术**完成**环境准备**。
 > - 如不希望使用容器，也可在带NPU设备的主机上完成**环境准备**，请参考[CANN软件安装指南 - 在物理机上安装](https://www.hiascend.com/document/redirect/CannCommunityInstWizard)。
-> - 针对仅体验"编译安装本开源仓 + 仿真环境运行算子"的用户，不要求主机带NPU设备，可跳过安装NPU驱动和固件，直接安装CANN包，请参考[下载安装CANN包](#📥-下载安装cann包)。
+> - 针对仅体验"编译安装本开源仓 + 仿真环境运行算子"的用户，不要求主机带NPU设备，可跳过安装NPU驱动和固件，直接安装CANN包，请参考[下载安装CANN包](#3️⃣-下载安装cann包)。
 
 
 ### 1️⃣ 云开发环境
@@ -33,7 +49,7 @@
 > [!NOTE] 使用说明
 >
 > - 环境默认安装了最新的商用版NPU驱动和固件、CANN包，源码下载时注意与软件配套。
-> - 本仓建议用户在WebIDE平台上使用CANN master软件包，请参考[下载安装CANN包](#📥-下载安装cann包)。如用户已更新过CANN软件包则无需重新安装。
+> - 本仓建议用户在WebIDE平台上使用CANN master软件包，请参考[下载安装CANN包](#3️⃣-下载安装cann包)。如用户已更新过CANN软件包则无需重新安装。
 > - 更多关于**WebIDE开发平台**的介绍，请参考[云开发平台介绍](https://gitcode.com/org/cann/discussions/54)。
 > - [Huawei Developer Space插件](https://marketplace.visualstudio.com/items?itemName=HuaweiCloud.developerspace)为VSCode IDE接入**云开发环境**提供技术支持。
 
@@ -100,9 +116,9 @@
     | `<ascend/cann:tag>` | 指定要运行的Docker镜像 | 请确保此镜像名和标签（tag）与您通过`docker pull`拉取的镜像完全一致 |
     | `bash` | 容器启动后立即执行的命令 | - |
 
-## 📥 下载安装CANN包<a name=canninstall></a>
+### 3️⃣ 下载安装CANN包<a name=canninstall></a>
 
-若您为社区体验人群请跳过该步骤，建议使用内置CANN包的云开发环境和CANN官方Docker镜像。若您是生态开发贡献者请手动安装软件包，请按照如下步骤选择正确的版本进行安装。
+若您需要手动安装软件包，请按照如下步骤选择正确的版本进行安装。
 
 使用[基于源码安装](#⚡-pyasc基于源码安装)时，建议安装社区版<a href="https://www.hiascend.com/developer/download/community/result?module=cann&cann=8.5.0.alpha001">8.5.0.alpha001</a>及以上版本。
 
@@ -197,6 +213,7 @@ CANN包分为CANN toolkit包和CANN ops包。
 
 > [!NOTE] 使用前须知
 > 云开发环境和CANN官方Docker镜像已自动配置环境变量，可跳过此步骤。
+> 若在环境中手动更新CANN包，请按照如下步骤重新配置环境变量。
 
 按需选择合适的命令使环境变量生效：
 
