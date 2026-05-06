@@ -167,14 +167,14 @@ CANN包分为CANN toolkit包和CANN ops包。
 
 #### 安装CANN包
 
-1. 安装CANN toolkit包 (必选)
+1. 安装CANN toolkit包
 
     ```bash
     chmod +x Ascend-cann-toolkit_${cann_version}_linux-$(uname -m).run
     ./Ascend-cann-toolkit_${cann_version}_linux-$(uname -m).run --install --install-path=${install_path}
     ```
 
-2. 安装CANN ops包 (可选)
+2. 安装CANN ops包
 
     ```bash
     # 示例：在x86架构下的8.5.0版本ops包
@@ -184,10 +184,7 @@ CANN包分为CANN toolkit包和CANN ops包。
     ./Ascend-cann-${soc_name}-ops_${cann_version}_linux-$(uname -m).run --install --install-path=${install_path}
     ```
 
-    > [!IMPORTANT] 安装说明
-    > [tutorials](../python/tutorials/)中部分算子样例的编译运行依赖本包，若想完整体验样例编译运行流程，建议安装此包。
-
-## ✅ 环境验证
+### ✅ 开发环境验证
 
 > [!NOTE] 使用前须知
 > 云开发环境和CANN官方Docker镜像已预装CANN包，可直接执行以下命令验证；手动安装用户请在安装CANN包后执行。
@@ -209,41 +206,9 @@ CANN包分为CANN toolkit包和CANN ops包。
     cat /usr/local/Ascend/cann/$(uname -m)-linux/ascend_ops_install.info
     ```
 
-## ⚙️ 环境变量配置
+### ⚙️ pyasc环境准备
 
-> [!NOTE] 使用前须知
-> 云开发环境和CANN官方Docker镜像已自动配置环境变量，可跳过此步骤。
-> 若在环境中手动更新CANN包，请按照如下步骤重新配置环境变量。
-
-按需选择合适的命令使环境变量生效：
-
-```bash
-# 默认路径安装，以root用户为例（非root用户，将/usr/local替换为${HOME}）
-source /usr/local/Ascend/cann/set_env.sh
-# 指定路径安装
-# source ${install_path}/cann/set_env.sh
-```
-
-注1：当pyasc后端采用仿真器模式（如Ascend910B1 simulator）时，需设置以下环境变量：
-```bash
-export LD_LIBRARY_PATH=$ASCEND_HOME_PATH/tools/simulator/Ascend910B1/lib:$LD_LIBRARY_PATH
-```
-
-注2：若pyasc后端采用仿真器模式运行接入torch的算子，需要提前加载仿真动态库libruntime_camodel.so。（原因：torch_npu默认只支持NPU上板，并且在导入torch_npu时自动加载libruntime.so，仿真器模式运行需要提前加载libruntime_camodel.so）。
-```bash
-# 若pyasc后端采用仿真器模式，需设置LD_PRELOAD环境变量
-export LD_PRELOAD=libruntime_camodel.so
-# 若pyasc后端采用NPU处理器运行，需取消LD_PRELOAD环境变量
-unset LD_PRELOAD
-```
-
-**注意：若环境中已安装多个版本的CANN软件包，设置上述环境变量时，请确保${cann_install_path}目录指向的是配套版本的软件包。**
-
-## 🔨 pyasc安装<a name="buildenv"></a>
-
-pyasc支持通过pip快速安装和基于源码编译安装两种方式。
-
-### 📥 下载源码
+#### 📥 下载源码
 
 开发者可通过如下命令下载本仓源码：
 
@@ -253,14 +218,14 @@ git clone https://gitcode.com/cann/pyasc.git
 cd pyasc
 ```
 
-### ⚡ python依赖安装
+#### 📦 python依赖安装
 执行以下命令完成编译运行需要的python依赖安装：
 ```bash
 python3 -m pip install -r requirements-build.txt # build-time dependencies
 python3 -m pip install -r requirements-runtime.txt # run-time dependencies
 ```
 
-### 📦 依赖检查
+#### 📦 依赖检查
 
 > [!NOTE] 使用前须知
 > 如您使用**容器化技术**，容器中已为您安装好依赖，可跳过此步骤。
@@ -271,6 +236,10 @@ python3 -m pip install -r requirements-runtime.txt # run-time dependencies
 - GCC >= 9.4.0
 - GLIBC >= 2.31
 - cmake >= 3.20
+
+## 🔨 pyasc安装<a name="buildenv"></a>
+
+pyasc支持通过pip快速安装和基于源码编译安装两种方式。
 
 ### ⚡ pyasc快速安装
 您可以通过pip安装pyasc的最新稳定版本：
@@ -300,6 +269,15 @@ pip install pyasc
       ```bash
       ${LLVM_INSTALL_PREFIX}/bin/llvm-config --version
       ```
+   3. 检查依赖：执行以下命令，确认所有系统库依赖均已安装。若输出缺少某个库，请在构建pyasc前安装：
+
+      ```bash
+      # 检查系统库是否存在，librt/dl/pthread/m通常已随GLIBC安装，重点检查libz和libzstd是否缺失
+      ldconfig -p | grep -E "librt\.so|libdl\.so|libpthread\.so|libm\.so|libz\.so|libzstd\.so"
+
+      #若缺少libz或libzstd，执行安装
+      # sudo apt-get install zlib1g libzstd-dev
+      ```
 
 - 构建pyasc
    1. 进入上文下载的pyasc源码目录。
@@ -317,10 +295,48 @@ pip install pyasc
       # 开发者模式，仅创建符号链接，本地修改实时生效，无需重新安装，适用于开发阶段
       python3 -m pip install -e .
       ```
+### ✅ 安装验证
+
+验证安装是否成功：
+
+  ```bash
+  # 若能正常显示pyasc及版本，则安装成功
+  pip3 list | grep -w "pyasc"
+  ```
+
+## ⚙️ 运行环境变量配置
+
+> [!NOTE] 使用前须知
+> 云开发环境和CANN官方Docker镜像已自动配置环境变量，可跳过此步骤。
+> 若在环境中手动更新CANN包，请按照如下步骤重新配置环境变量。
+
+按需选择合适的命令使环境变量生效：
+
+```bash
+# 默认路径安装，以root用户为例（非root用户，将/usr/local替换为${HOME}）
+source /usr/local/Ascend/cann/set_env.sh
+# 指定路径安装
+# source ${install_path}/cann/set_env.sh
+```
+
+注1：当pyasc后端采用仿真器模式（如Ascend910B1 simulator）时，需设置以下环境变量：
+```bash
+export LD_LIBRARY_PATH=$ASCEND_HOME_PATH/tools/simulator/Ascend910B1/lib:$LD_LIBRARY_PATH
+```
+
+注2：若pyasc后端采用仿真器模式运行接入torch的算子，需要提前加载仿真动态库libruntime_camodel.so。（原因：torch_npu默认只支持NPU上板，并且在导入torch_npu时自动加载libruntime.so，仿真器模式运行需要提前加载libruntime_camodel.so）。
+```bash
+# 若pyasc后端采用仿真器模式，需设置LD_PRELOAD环境变量
+export LD_PRELOAD=libruntime_camodel.so
+# 若pyasc后端采用NPU处理器运行，需取消LD_PRELOAD环境变量
+unset LD_PRELOAD
+```
+
+**注意：若环境中已安装多个版本的CANN软件包，设置上述环境变量时，请确保路径指向的是配套版本软件包的目录。**
 
 ## ▶️ 样例运行验证
 
-开发者使用Ascend C Python编程语言实现自定义算子后，可以进行算子功能验证。本代码仓提供了部分算子实现的样例，具体请参考[tutorials](../python/tutorials/)目录下的样例，样例均采用torch输入输出tensor，请确保已经完成[安装PyTorch框架和torch_npu插件](#torch_install)步骤和[环境变量配置](#⚙️-环境变量配置)步骤。
+开发者使用Ascend C Python编程语言实现自定义算子后，可以进行算子功能验证。本代码仓提供了部分算子实现的样例，具体请参考[tutorials](../python/tutorials/)目录下的样例，样例均采用torch输入输出tensor，请确保已经完成[安装PyTorch框架和torch_npu插件](#torch_install)步骤和[运行环境变量配置](#⚙️-运行环境变量配置)步骤。
 
 - 安装PyTorch框架和torch_npu插件<a name="torch_install"></a>
 
@@ -361,7 +377,7 @@ pip install pyasc
    cd pyasc
    python3 ./python/tutorials/01_add/add.py
    ```
-   注：完整的运行命令如下所示，通过参数[RUN_MODE]配置运行模式、参数[SOC_VERSION]配置运行环境，具体请参考[编译执行](../python/tutorials/01_add/README.md/#编译执行)。若缺省参数[RUN_MODE]默认是仿真器模式，缺省参数[SOC_VERSION]，仿真器模式下默认是`Ascend910B1`环境，NPU上板模式下默认自动检测。
+   注：完整的运行命令如下所示，通过参数[RUN_MODE]配置运行模式、参数[SOC_VERSION]配置运行环境，具体请参考[编译执行](../python/tutorials/01_add/README.md/#编译执行)。若缺省参数[RUN_MODE]默认是仿真器模式，缺省参数[SOC_VERSION]，仿真器模式下默认是`Ascend910B1`环境，NPU上板模式下默认自动检测。若选择仿真器模式，请确认相关环境变量已正确配置。
    ```bash
    python3 ./python/tutorials/01_add/add.py -r [RUN_MODE] -v [SOC_VERSION]
    ```
