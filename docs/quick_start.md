@@ -120,7 +120,7 @@
 
 若您需要手动安装软件包，请按照如下步骤选择正确的版本进行安装。
 
-使用[基于源码安装](#⚡-pyasc基于源码安装)时，建议安装社区版<a href="https://www.hiascend.com/developer/download/community/result?module=cann&cann=8.5.0.alpha001">8.5.0.alpha001</a>及以上版本。
+使用[基于源码安装](#⚡-pyasc基于源码安装)时，建议安装CANN master。
 
 使用[快速安装](#⚡-pyasc快速安装)时，不同pyasc发行版可支持的硬件平台及所需的[CANN](https://www.hiascend.com/developer/download/community/result?module=cann)版本如下表：
 
@@ -273,10 +273,11 @@ pip install pyasc
 
       ```bash
       # 检查系统库是否存在，librt/dl/pthread/m通常已随GLIBC安装，重点检查libz和libzstd是否缺失
-      ldconfig -p | grep -E "librt\.so|libdl\.so|libpthread\.so|libm\.so|libz\.so|libzstd\.so"
+      test -f /usr/lib/$(uname -m)-linux-gnu/libz.so && echo "libz.so: [OK]" || echo "libz.so: [MISSING]"
+      test -f /usr/lib/$(uname -m)-linux-gnu/libzstd.so && echo "libzstd.so: [OK]" || echo "libzstd.so: [MISSING]"
 
       #若缺少libz或libzstd，执行安装
-      # sudo apt-get install zlib1g libzstd-dev
+      # sudo apt-get install zlib1g-dev libzstd-dev
       ```
 
 - 构建pyasc
