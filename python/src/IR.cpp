@@ -9,6 +9,7 @@
  */
 
 #include "InitFuncDef.h"
+
 #include "ascir/Dialect/Asc/IR/Asc.h"
 #include "ascir/Dialect/Asc/Utils/Attributes.h"
 #include "ascir/Dialect/Asc/Utils/Utils.h"
@@ -52,7 +53,7 @@ using namespace mlir;
 
 namespace {
 
-constexpr unsigned INDEX_64 = 64;
+constexpr unsigned index64 = 64;
 
 OpPrintingFlags getOpPrintingFlags()
 {
@@ -84,14 +85,9 @@ std::optional<SmallVector<emitasc::KernelArgument>> getKernelArgAttrs(ModuleOp o
     return kernelArgs;
 }
 
-} // namespace
-
-namespace pybind11 {
-namespace asc {
-void pyasc_bind_enums(py::module& m)
+void bindEnums(py::module& m)
 {
     using ret = py::return_value_policy;
-    using namespace pybind11::literals;
 
     m.attr("dynshape") = py::int_(ShapedType::kDynamic);
 
@@ -110,8 +106,8 @@ void pyasc_bind_enums(py::module& m)
         .value("XRGB8888_U8", ascendc::AippInputFormat::XRGB8888_U8)
         .value("RGB888_U8", ascendc::AippInputFormat::RGB888_U8)
         .value("YUV400_U8", ascendc::AippInputFormat::YUV400_U8)
-        .def_static("symbolize", [](uint8_t input_format) -> ascendc::AippInputFormat {
-            return static_cast<ascendc::AippInputFormat>(input_format);
+        .def_static("symbolize", [](uint8_t inputFormat) -> ascendc::AippInputFormat {
+            return static_cast<ascendc::AippInputFormat>(inputFormat);
         });
 
     py::enum_<ascendc::CacheLine>(m, "CacheLine", py::module_local())
@@ -177,17 +173,17 @@ void pyasc_bind_enums(py::module& m)
         .value("GE", ascendc::CMPMODE::GE)
         .value("NE", ascendc::CMPMODE::NE)
         .def_static(
-            "symbolize", [](uint8_t cmp_mode) -> ascendc::CMPMODE { return static_cast<ascendc::CMPMODE>(cmp_mode); });
+            "symbolize", [](uint8_t cmpMode) -> ascendc::CMPMODE { return static_cast<ascendc::CMPMODE>(cmpMode); });
 
     py::enum_<ascendc::SELMODE>(m, "SELMODE", py::module_local())
         .value("VSEL_CMPMASK_SPR", ascendc::SELMODE::VSEL_CMPMASK_SPR)
         .value("VSEL_TENSOR_SCALAR_MODE", ascendc::SELMODE::VSEL_TENSOR_SCALAR_MODE)
         .value("VSEL_TENSOR_TENSOR_MODE", ascendc::SELMODE::VSEL_TENSOR_TENSOR_MODE)
         .def_static(
-            "symbolize", [](uint8_t sel_mode) -> ascendc::SELMODE { return static_cast<ascendc::SELMODE>(sel_mode); });
+            "symbolize", [](uint8_t selMode) -> ascendc::SELMODE { return static_cast<ascendc::SELMODE>(selMode); });
 }
 
-void pyasc_bind_context_and_dialect(py::module& m)
+void bindContextAndDialect(py::module& m)
 {
     py::class_<MLIRContext>(m, "Context", py::module_local())
         .def(py::init<>())
@@ -210,23 +206,22 @@ void pyasc_bind_context_and_dialect(py::module& m)
     });
 }
 
-void pyasc_bind_type(py::module& m)
+void bindType(py::module& m)
 {
-    using namespace pybind11::literals;
     py::class_<Type>(m, "Type", py::module_local())
         .def("is_integer", [](Type& self) -> bool { return self.isInteger(); })
         .def("is_index", &Type::isIndex)
         .def(
             "__eq__",
             [](Type& self, py::object& other) {
-                Type* other_ty = py::cast<Type*>(other);
-                return (other_ty != nullptr) && (*other_ty == self);
+                Type* otherTy = py::cast<Type*>(other);
+                return (otherTy != nullptr) && (*otherTy == self);
             })
         .def(
             "__ne__",
             [](Type& self, py::object& other) {
-                Type* other_ty = py::cast<Type*>(other);
-                return (other_ty == nullptr) || (*other_ty != self);
+                Type* otherTy = py::cast<Type*>(other);
+                return (otherTy == nullptr) || (*otherTy != self);
             })
         .def(
             "get_py_name",
@@ -254,7 +249,7 @@ void pyasc_bind_type(py::module& m)
         });
 }
 
-void pyasc_bind_memref(py::module& m)
+void bindMemref(py::module& m)
 {
     using namespace pybind11::literals;
     m.def("get_element_type", [](const Type& shapedType) -> Type {
@@ -281,7 +276,7 @@ void pyasc_bind_memref(py::module& m)
            std::optional<int64_t> addressSpace) -> Type {
             Attribute memorySpace;
             if (auto as = addressSpace.value_or(0)) {
-                memorySpace = IntegerAttr::get(IntegerType::get(elementType.getContext(), INDEX_64), as);
+                memorySpace = IntegerAttr::get(IntegerType::get(elementType.getContext(), index64), as);
             }
             SmallVector<int64_t> sh;
             if (std::holds_alternative<int64_t>(shape)) {
@@ -298,13 +293,13 @@ void pyasc_bind_memref(py::module& m)
         [](Type& elementType, std::optional<int64_t> addressSpace) -> Type {
             Attribute memorySpace;
             if (auto as = addressSpace.value_or(0))
-                memorySpace = IntegerAttr::get(IntegerType::get(elementType.getContext(), INDEX_64), as);
+                memorySpace = IntegerAttr::get(IntegerType::get(elementType.getContext(), index64), as);
             return UnrankedMemRefType::get(elementType, memorySpace);
         },
         "element_type"_a, "address_space"_a = py::none());
 }
 
-void pyasc_bind_tensor_type(py::module& m)
+void bindTensorType(py::module& m)
 {
     using namespace pybind11::literals;
     m.def("get_global_tensor_type", [](Type& elementType, std::vector<int64_t>& shape) -> Type {
@@ -327,7 +322,7 @@ void pyasc_bind_tensor_type(py::module& m)
     });
 }
 
-void pyasc_bind_location(py::module& m)
+void bindLocation(py::module& m)
 {
     py::class_<Location>(m, "Location", py::module_local()).def("__str__", [](Location& self) {
         std::string str;
@@ -337,7 +332,7 @@ void pyasc_bind_location(py::module& m)
     });
 }
 
-void pyasc_bind_value(py::module& m)
+void bindValue(py::module& m)
 {
     using ret = py::return_value_policy;
     py::class_<Value>(m, "Value", py::module_local())
@@ -374,7 +369,7 @@ void pyasc_bind_value(py::module& m)
         .def("id", [](Value& self) { return reinterpret_cast<uint64_t>(self.getImpl()); });
 }
 
-void pyasc_bind_region(py::module& m)
+void bindRegion(py::module& m)
 {
     using ret = py::return_value_policy;
     py::class_<OpResult, Value>(m, "OpResult", py::module_local());
@@ -394,7 +389,7 @@ void pyasc_bind_region(py::module& m)
         .def("id", [](Region& self) { return (uint64_t)&self; });
 }
 
-void pyasc_bind_blocks(py::module& m)
+void bindBlocks(py::module& m)
 {
     using ret = py::return_value_policy;
     py::class_<Block>(m, "Block", py::module_local())
@@ -425,8 +420,10 @@ void pyasc_bind_blocks(py::module& m)
         .def("erase", &Block::erase);
 }
 
-void pyasc_bind_inline_block(py::module& m)
+void bindInlineBlock(py::module& m)
 {
+    using namespace pybind11::literals;
+
     m.def(
         "inline_block_at_end",
         [](Block* src, Block* dst, const std::optional<std::vector<Value>>& args) {
@@ -450,7 +447,7 @@ void pyasc_bind_inline_block(py::module& m)
         "src"_a, "dst"_a, "args"_a = py::none());
 }
 
-void pyasc_bind_attritube(py::module& m)
+void bindAttritube(py::module& m)
 {
     using ret = py::return_value_policy;
     py::class_<Attribute>(m, "Attribute", py::module_local())
@@ -462,7 +459,7 @@ void pyasc_bind_attritube(py::module& m)
     m.def("get_type_attr", [](const Type& type) -> Attribute { return TypeAttr::get(type); });
 }
 
-void pyasc_bind_operation(py::module& m)
+void bindOperation(py::module& m)
 {
     using ret = py::return_value_policy;
     py::class_<Operation, std::unique_ptr<Operation, py::nodelete>>(m, "Operation", py::module_local())
@@ -514,7 +511,7 @@ void pyasc_bind_operation(py::module& m)
         });
 }
 
-void pyasc_bind_opstate(py::module& m)
+void bindOpstate(py::module& m)
 {
     using ret = py::return_value_policy;
     py::class_<OpState>(m, "OpState", py::module_local())
@@ -551,9 +548,11 @@ void pyasc_bind_opstate(py::module& m)
         .def_property_readonly("op", &OpState::getOperation, ret::reference);
 }
 
-void pyasc_bind_moduleop(py::module& m)
+void bindModuleop(py::module& m)
 {
     using ret = py::return_value_policy;
+    using namespace pybind11::literals;
+
     py::class_<ModuleOp, OpState>(m, "ModuleOp", py::module_local())
         .def("dump", &ModuleOp::dump)
         .def(
@@ -576,7 +575,7 @@ void pyasc_bind_moduleop(py::module& m)
         .def("erase", [](ModuleOp& self) { self->erase(); });
 }
 
-void pyasc_bind_funcop(py::module& m)
+void bindFuncop(py::module& m)
 {
     using ret = py::return_value_policy;
     py::class_<func::FuncOp, OpState>(m, "FuncOp", py::module_local())
@@ -620,7 +619,7 @@ void pyasc_bind_funcop(py::module& m)
         });
 }
 
-void pyasc_bind_scfop(py::module& m)
+void bindScfop(py::module& m)
 {
     using ret = py::return_value_policy;
     py::class_<scf::ForOp, OpState>(m, "ForOp", py::module_local())
@@ -638,7 +637,7 @@ void pyasc_bind_scfop(py::module& m)
     py::class_<scf::ConditionOp, OpState>(m, "ConditionOp", py::module_local());
 }
 
-void pyasc_bind_kernel_argument(py::module& m)
+void bindKernelArgument(py::module& m)
 {
     py::enum_<emitasc::KernelArgument>(m, "KernelArgument", py::module_local())
         .value("Explicit", emitasc::KernelArgument::Explicit)
@@ -657,28 +656,32 @@ void pyasc_bind_kernel_argument(py::module& m)
     });
 }
 
-void pyasc_init_ir(py::module&& m)
+} // namespace
+
+namespace pybind11 {
+namespace asc {
+void initIRModule(py::module&& m)
 {
-    pyasc_bind_enums(m);
-    pyasc_bind_context_and_dialect(m);
-    pyasc_bind_type(m);
-    pyasc_bind_memref(m);
-    pyasc_bind_tensor_type(m);
-    pyasc_bind_location(m);
-    pyasc_bind_value(m);
-    pyasc_bind_region(m);
-    pyasc_bind_blocks(m);
-    pyasc_bind_inline_block(m);
-    pyasc_bind_attritube(m);
-    pyasc_bind_operation(m);
-    pyasc_bind_opstate(m);
-    pyasc_bind_moduleop(m);
-    pyasc_bind_funcop(m);
-    pyasc_bind_scfop(m);
-    pyasc_bind_kernel_argument(m);
+    bindEnums(m);
+    bindContextAndDialect(m);
+    bindType(m);
+    bindMemref(m);
+    bindTensorType(m);
+    bindLocation(m);
+    bindValue(m);
+    bindRegion(m);
+    bindBlocks(m);
+    bindInlineBlock(m);
+    bindAttritube(m);
+    bindOperation(m);
+    bindOpstate(m);
+    bindModuleop(m);
+    bindFuncop(m);
+    bindScfop(m);
+    bindKernelArgument(m);
     py::class_<OpBuilder::InsertPoint>(m, "InsertPoint", py::module_local());
 
-    pyasc_init_ir_builder(m);
+    initBuilderInIRModule(m);
 }
 } // namespace asc
 } // namespace pybind11

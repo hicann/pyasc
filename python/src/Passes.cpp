@@ -8,8 +8,9 @@
  * See LICENSE in the root of the software repository for the full text of the License.
  */
 
-#include "ascir/Dialect/Asc/Transforms/Passes.h"
 #include "InitFuncDef.h"
+
+#include "ascir/Dialect/Asc/Transforms/Passes.h"
 
 #include "mlir/Conversion/ReconcileUnrealizedCasts/ReconcileUnrealizedCasts.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
@@ -113,7 +114,7 @@ void defineAscendCPasses(py::module& mod)
 
 namespace pybind11 {
 namespace asc {
-void pyasc_init_passes(py::module&& m)
+void initPassesModule(py::module&& m)
 {
     definePassManager(m);
     defineCommonPasses(m);

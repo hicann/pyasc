@@ -8,9 +8,10 @@
  * See LICENSE in the root of the software repository for the full text of the License.
  */
 
+#include "InitFuncDef.h"
+
 #include <pybind11/cast.h>
 #include <pybind11/functional.h>
-#include "InitFuncDef.h"
 
 namespace py = pybind11;
 
@@ -18,8 +19,8 @@ namespace {
 PYBIND11_MODULE(libpyasc, m)
 {
     m.doc() = "Python bindings to the C++ AscIR API";
-    py::asc::pyasc_init_ir(m.def_submodule("ir"));
-    py::asc::pyasc_init_passes(m.def_submodule("passes"));
-    py::asc::pyasc_init_translation(m.def_submodule("translation"));
+    py::asc::initIRModule(m.def_submodule("ir"));
+    py::asc::initPassesModule(m.def_submodule("passes"));
+    py::asc::initTranslationModule(m.def_submodule("translation"));
 }
 } // namespace

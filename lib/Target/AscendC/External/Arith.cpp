@@ -13,8 +13,8 @@
 using namespace mlir;
 
 namespace {
-constexpr uint32_t BIT_WIDTH_32 = 32;
-constexpr uint32_t BIT_WIDTH_16 = 16;
+constexpr uint32_t bitWidth32 = 32;
+constexpr uint32_t bitWidth16 = 16;
 } // namespace
 
 LogicalResult mlir::printOperation(CodeEmitter& emitter, arith::ConstantOp constantOp)
@@ -39,9 +39,9 @@ LogicalResult mlir::printOperation(CodeEmitter& emitter, arith::MulUIExtendedOp 
     if (failed(emitter.emitVariableDeclaration(op->getResult(1), false))) {
         return failure();
     }
-    if (typeSize == BIT_WIDTH_32) {
+    if (typeSize == bitWidth32) {
         os << " = (static_cast<uint64_t>(" << lhs << ") * static_cast<uint64_t>(" << rhs << ")) >> 32";
-    } else if (typeSize == BIT_WIDTH_16) {
+    } else if (typeSize == bitWidth16) {
         os << " = (static_cast<uint32_t>(" << lhs << ") * static_cast<uint32_t>(" << rhs << ")) >> 16";
     } else {
         llvm_unreachable("not implemented");

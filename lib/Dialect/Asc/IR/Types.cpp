@@ -46,7 +46,7 @@ public:
     {
         Type elementType;
         if (odsParser.parseLess())
-            return Type();
+            return {};
         SmallVector<int64_t> shape;
         if (odsParser.parseOptionalStar()) {
             // No '*' consumed => tensor is ranked (i.e. has shape)
@@ -54,13 +54,13 @@ public:
                 odsParser.emitError(
                     odsParser.getNameLoc(), "either dimension list (for ranked tensor) or '*' symbol (for "
                                             "unranked tensor) must be declared");
-                return Type();
+                return {};
             }
         } else if (odsParser.parseXInDimensionList()) {
-            return Type();
+            return {};
         }
         if (odsParser.parseType(elementType) || odsParser.parseGreater()) {
-            return Type();
+            return {};
         }
         return ConcreteT::get(shape, elementType);
     }

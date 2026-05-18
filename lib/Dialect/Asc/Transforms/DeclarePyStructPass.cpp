@@ -53,7 +53,7 @@ PyStructVector deduplicate(ArrayRef<emitasc::PyStructType> pyStructs)
     return result;
 }
 
-void CollectPyStructTypes(PyStructVector& structs, Value& arg)
+void collectPyStructTypes(PyStructVector& structs, Value& arg)
 {
     arg.getType().walk([&](Type type) {
         if (auto pyStructType = dyn_cast<emitasc::PyStructType>(type)) {
@@ -72,13 +72,13 @@ public:
             for (auto& region : op->getRegions()) {
                 for (auto& block : region) {
                     for (auto& arg : block.getArguments()) {
-                        CollectPyStructTypes(structs, arg);
+                        collectPyStructTypes(structs, arg);
                     }
                 }
             }
 
             for (auto result : op->getResults()) {
-                CollectPyStructTypes(structs, result);
+                collectPyStructTypes(structs, result);
             }
         });
 

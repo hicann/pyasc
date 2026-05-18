@@ -15,9 +15,9 @@
 
 #include "acl/acl.h"
 #ifdef SEPARATE_PKG_ARCH
+#include "profiling/aprof_pub.h"
 #include "profiling/prof_api.h"
 #include "profiling/prof_common.h"
-#include "profiling/aprof_pub.h"
 #include "runtime/rt.h"
 #else
 #include "experiment/msprof/toolchain/prof_api.h"

@@ -41,13 +41,13 @@ ascendc::TQueBindAllocTensorOp findDef(TypedValue<ascendc::LocalTensorType> tens
 
 struct VerifySyncPass : public ascendc::impl::VerifySyncBase<VerifySyncPass> {
     void dealTQueBindFreeTensorOp(
-        ascendc::TQueBindFreeTensorOp& TQueBindFreeTensorOp, ValueMap<SmallVector<Operation*>>& queBinds,
+        ascendc::TQueBindFreeTensorOp& freeOp, ValueMap<SmallVector<Operation*>>& queBinds,
         std::unordered_map<
             ascendc::TQueBindDequeTensorOp, ascendc::TQueBindEnqueTensorOp,
             PointerLikeTypeHash<ascendc::TQueBindDequeTensorOp>>& deqToEnq)
     {
-        auto& operations = queBinds[TQueBindFreeTensorOp.getQueue()];
-        auto allocTensorOp = findDef(TQueBindFreeTensorOp.getTensor(), deqToEnq);
+        auto& operations = queBinds[freeOp.getQueue()];
+        auto allocTensorOp = findDef(freeOp.getTensor(), deqToEnq);
         if (allocTensorOp) {
             auto* it = llvm::find_if(operations, [&](Operation* op) {
                 auto exAllocOp = dyn_cast<ascendc::TQueBindAllocTensorOp>(op);
@@ -56,17 +56,17 @@ struct VerifySyncPass : public ascendc::impl::VerifySyncBase<VerifySyncPass> {
             if (it != operations.end()) {
                 operations.erase(it);
             } else {
-                TQueBindFreeTensorOp.emitWarning()
-                    .append(TQueBindFreeTensorOp.getAPIName(), ": tensor memory was freed before its last use")
-                    .attachNote(TQueBindFreeTensorOp.getTensor().getLoc())
+                freeOp.emitWarning()
+                    .append(freeOp.getAPIName(), ": tensor memory was freed before its last use")
+                    .attachNote(freeOp.getTensor().getLoc())
                     .append("tensor declared here");
             }
         } else {
-            TQueBindFreeTensorOp.emitWarning()
+            freeOp.emitWarning()
                 .append(
-                    TQueBindFreeTensorOp.getAPIName(), ": there is no corresponding call to ",
+                    freeOp.getAPIName(), ": there is no corresponding call to ",
                     ascendc::TQueBindAllocTensorOp::getAPIName())
-                .attachNote(TQueBindFreeTensorOp.getTensor().getLoc())
+                .attachNote(freeOp.getTensor().getLoc())
                 .append("tensor declared here");
         }
     }
@@ -123,8 +123,8 @@ struct VerifySyncPass : public ascendc::impl::VerifySyncBase<VerifySyncPass> {
         funcOp.walk([&](Operation* op) {
             if (auto alloc = dyn_cast<ascendc::TQueBindAllocTensorOp>(op)) {
                 queBinds[alloc.getQueue()].push_back(op);
-            } else if (auto TQueBindFreeTensorOp = dyn_cast<ascendc::TQueBindFreeTensorOp>(op)) {
-                dealTQueBindFreeTensorOp(TQueBindFreeTensorOp, queBinds, deqToEnq);
+            } else if (auto freeOp = dyn_cast<ascendc::TQueBindFreeTensorOp>(op)) {
+                dealTQueBindFreeTensorOp(freeOp, queBinds, deqToEnq);
             } else if (auto enque = dyn_cast<ascendc::TQueBindEnqueTensorOp>(op)) {
                 queBinds[enque.getQueue()].push_back(op);
             } else if (auto deque = dyn_cast<ascendc::TQueBindDequeTensorOp>(op)) {

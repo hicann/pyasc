@@ -19,9 +19,6 @@
 using namespace llvm;
 using mlir::raw_indented_ostream;
 
-// From GenPyBindDefs.cpp
-extern cl::opt<std::string> builderClass;
-
 namespace {
 
 using TypeNamePair = std::pair<std::string, std::string>;
@@ -43,7 +40,7 @@ void GenPybindDefsTypes::run(raw_ostream& os)
             continue;
         }
         auto defName = def->getValueAsString("typeName");
-        ios << ".def(\"get_asc_" << defName << "Type\", [](" << builderClass << " &self) -> ::mlir::Type {\n";
+        ios << ".def(\"get_asc_" << defName << "Type\", [](PyOpBuilder &self) -> ::mlir::Type {\n";
         ios.indent() << "return self->getType<::mlir::ascendc::" << defName << "Type>();\n";
         ios.unindent() << "})\n";
     }

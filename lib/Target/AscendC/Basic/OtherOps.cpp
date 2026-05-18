@@ -77,18 +77,18 @@ LogicalResult printAippStructConstruction(CodeEmitter& emitter, ascendc::Constru
     mlir::Type resultType = op->getResult(0).getType();
 
     return llvm::TypeSwitch<mlir::Type, LogicalResult>(resultType)
-        .Case<ascendc::AippParamsType>([&](auto type) -> LogicalResult {
-            constexpr size_t PADDING_PARAMS_OP_INDEX = 0;
-            constexpr size_t TEMPLATE_TYPE_MEMBER_INDEX = 1;
-            if (op->getNumOperands() <= PADDING_PARAMS_OP_INDEX) {
+        .Case([&](ascendc::AippParamsType) -> LogicalResult {
+            constexpr size_t paddingParamsOpIndex = 0;
+            constexpr size_t templateTypeMemberIndex = 1;
+            if (op->getNumOperands() <= paddingParamsOpIndex) {
                 return op.emitError("Internal Error: AippParams is missing operands.");
             }
             auto paddingConstructOp =
-                dyn_cast_or_null<ascendc::ConstructOp>(op->getOperand(PADDING_PARAMS_OP_INDEX).getDefiningOp());
-            if (!paddingConstructOp || paddingConstructOp->getNumOperands() <= TEMPLATE_TYPE_MEMBER_INDEX) {
+                dyn_cast_or_null<ascendc::ConstructOp>(op->getOperand(paddingParamsOpIndex).getDefiningOp());
+            if (!paddingConstructOp || paddingConstructOp->getNumOperands() <= templateTypeMemberIndex) {
                 return op.emitError("Internal Error: Cannot deduce template type from paddingParams.");
             }
-            mlir::Type templateType = paddingConstructOp->getOperand(TEMPLATE_TYPE_MEMBER_INDEX).getType();
+            mlir::Type templateType = paddingConstructOp->getOperand(templateTypeMemberIndex).getType();
 
             os << "AscendC::AippParams<";
             if (failed(emitter.emitType(op.getLoc(), templateType))) {
@@ -107,8 +107,8 @@ LogicalResult printAippStructConstruction(CodeEmitter& emitter, ascendc::Constru
         .Case<
             ascendc::AippPaddingParamsType, ascendc::AippSwapParamsType, ascendc::AippSingleLineParamsType,
             ascendc::AippDataTypeConvParamsType, ascendc::AippChannelPaddingParamsType,
-            ascendc::AippColorSpaceConvParamsType>([&](auto type) -> LogicalResult { return success(); })
-        .Default([](auto type) -> LogicalResult { return failure(); });
+            ascendc::AippColorSpaceConvParamsType>([&](auto) -> LogicalResult { return success(); })
+        .Default([](auto) -> LogicalResult { return failure(); });
 }
 
 } // namespace

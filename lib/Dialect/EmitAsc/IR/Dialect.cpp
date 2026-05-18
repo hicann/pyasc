@@ -36,5 +36,5 @@ void EmitAscDialect::initialize()
 void emitasc::registerExternalModels(DialectRegistry& registry)
 {
     registry.addExtension(
-        +[](MLIRContext* ctx, EmitAscDialect* dialect) { dialect->addInterface<ascir::PermissiveInlinerInterface>(); });
+        +[](MLIRContext*, EmitAscDialect* dialect) { dialect->addInterface<ascir::PermissiveInlinerInterface>(); });
 }

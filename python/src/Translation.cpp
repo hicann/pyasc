@@ -8,8 +8,9 @@
  * See LICENSE in the root of the software repository for the full text of the License.
  */
 
-#include "ascir/Target/Asc/Translation.h"
 #include "InitFuncDef.h"
+
+#include "ascir/Target/Asc/Translation.h"
 
 #include "mlir/IR/BuiltinOps.h"
 #include "llvm/Support/raw_ostream.h"
@@ -26,7 +27,7 @@ using namespace mlir;
 
 namespace pybind11 {
 namespace asc {
-void pyasc_init_translation(py::module&& m)
+void initTranslationModule(py::module&& m)
 {
     m.def("ir_to_ascendc", [](ModuleOp& mod) -> std::string {
         std::string result;

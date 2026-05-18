@@ -67,7 +67,7 @@ LogicalResult printOperation(CodeEmitter& emitter, ModuleOp moduleOp)
     return success();
 }
 
-LogicalResult printOperation(CodeEmitter& emitter, ascendc::NoOp op) { return success(); }
+LogicalResult printOperation(CodeEmitter&, ascendc::NoOp) { return success(); }
 
 using PrintableOpTypes = std::tuple<
     // Builtin ops

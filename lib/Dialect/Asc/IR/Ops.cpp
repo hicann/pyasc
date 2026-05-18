@@ -84,7 +84,7 @@ bool LocalTensorReinterpretCastOp::areCastCompatible(TypeRange inputs, TypeRange
            isa<LocalTensorType>(outputs[0]);
 }
 
-OpFoldResult LocalTensorReinterpretCastOp::fold(FoldAdaptor adaptor)
+OpFoldResult LocalTensorReinterpretCastOp::fold([[maybe_unused]] FoldAdaptor adaptor)
 {
     Value in = getIn();
     return in.getType() == getType() ? in : nullptr;

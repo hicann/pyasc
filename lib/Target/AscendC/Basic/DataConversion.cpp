@@ -16,7 +16,7 @@ using namespace mlir::ascendc;
 
 namespace {
 
-constexpr std::uint64_t UNSIGNED_INT64_BIT_WIDTH = 64;
+constexpr std::uint64_t ui64BitWidth = 64;
 
 mlir::Type inferElementTypeFromTensorList(ValueRange tensorList)
 {
@@ -36,7 +36,7 @@ mlir::Type inferElementTypeFromAddrList(ValueRange addrList)
         return nullptr;
     }
     mlir::Value firstAddr = addrList.front();
-    if (!firstAddr.getType().isUnsignedInteger(UNSIGNED_INT64_BIT_WIDTH)) {
+    if (!firstAddr.getType().isUnsignedInteger(ui64BitWidth)) {
         return nullptr;
     }
 

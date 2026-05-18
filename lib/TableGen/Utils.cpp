@@ -26,7 +26,7 @@ StringRef fetchOpClass(StringRef defName)
 
 void fetchResults(const DagInit* resultsDag, std::vector<VirtualArg>& dest)
 {
-    auto* outsOp = dyn_cast<DefInit>(resultsDag->getOperator());
+    const auto* outsOp = dyn_cast<DefInit>(resultsDag->getOperator());
     assert(outsOp && outsOp->getDef()->getName() == "outs");
     for (unsigned i = 0, e = resultsDag->getNumArgs(); i < e; ++i) {
         VirtualArg result;
@@ -37,9 +37,9 @@ void fetchResults(const DagInit* resultsDag, std::vector<VirtualArg>& dest)
             result.name = name;
         }
         result.substitution = result.name;
-        auto* init = dyn_cast<DefInit>(resultsDag->getArg(i));
+        const auto* init = dyn_cast<DefInit>(resultsDag->getArg(i));
         assert(init && "argument must have defined types");
-        auto* resultDef = init->getDef();
+        const auto* resultDef = init->getDef();
         if (resultDef->isSubClassOf("Variadic")) {
             result.cppType = "::std::vector< ::mlir::Type >";
         } else {
@@ -51,7 +51,7 @@ void fetchResults(const DagInit* resultsDag, std::vector<VirtualArg>& dest)
 
 void fetchArguments(const DagInit* argsDag, std::vector<VirtualArg>& dest)
 {
-    auto* insOp = dyn_cast<DefInit>(argsDag->getOperator());
+    const auto* insOp = dyn_cast<DefInit>(argsDag->getOperator());
     assert(insOp && insOp->getDef()->getName() == "ins");
     for (unsigned i = 0, e = argsDag->getNumArgs(); i < e; ++i) {
         VirtualArg arg;
@@ -62,9 +62,9 @@ void fetchArguments(const DagInit* argsDag, std::vector<VirtualArg>& dest)
             arg.name = name;
         }
         arg.substitution = arg.name;
-        auto* init = dyn_cast<DefInit>(argsDag->getArg(i));
+        const auto* init = dyn_cast<DefInit>(argsDag->getArg(i));
         assert(init && "argument must have defined types");
-        auto* argDef = init->getDef();
+        const auto* argDef = init->getDef();
         if (argDef->isSubClassOf("TypeConstraint")) {
             if (argDef->isSubClassOf("Variadic")) {
                 arg.cppType = "::std::vector< ::mlir::Value >";

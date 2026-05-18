@@ -13,10 +13,9 @@
 
 #include "llvm/ADT/StringRef.h"
 #include "llvm/TableGen/Record.h"
-#include "llvm/ADT/StringRef.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace mlir {
 namespace asc {

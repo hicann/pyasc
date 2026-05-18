@@ -13,15 +13,15 @@
 using namespace mlir;
 
 namespace {
-constexpr uint32_t TYPE_WIDTH_16 = 16;
-}
+constexpr uint32_t typeWidth16 = 16;
+} // namespace
 
 LogicalResult mlir::printConstantOp(CodeEmitter& emitter, Operation* operation, Attribute value)
 {
     OpResult result = operation->getResult(0);
     auto& os = emitter.ostream();
     auto fType = dyn_cast_or_null<FloatType>(operation->getResult(0).getType());
-    if (!fType || fType.getWidth() != TYPE_WIDTH_16) {
+    if (!fType || fType.getWidth() != typeWidth16) {
         os << "constexpr ";
     }
     // Emit a variable declaration for an emitc.constant op without value.

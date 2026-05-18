@@ -25,9 +25,6 @@
 using namespace llvm;
 using mlir::raw_indented_ostream;
 
-cl::opt<std::string> builderClass(
-    "builder-class", cl::init("PyOpBuilder"), cl::desc("Operation builder class name for 'gen-pybind-defs' action"));
-
 namespace {
 
 using TypeNamePair = std::pair<std::string, std::string>;
@@ -58,7 +55,7 @@ void printMethod(raw_indented_ostream& os, const Record* def)
     } else {
         os << dialectName;
     }
-    os << '_' << name << "\", [](" << builderClass.getValue() << " &self";
+    os << '_' << name << "\", [](PyOpBuilder &self";
     for (const auto& arg : args) {
         os << ", const " << arg.cppType << " &" << arg.name;
     }

@@ -26,24 +26,24 @@ using namespace mlir;
 using llvm::formatv;
 
 namespace {
-constexpr uint32_t DTYPE_BIT_WIDTH_1 = 1;
-constexpr uint32_t DTYPE_BIT_WIDTH_8 = 8;
-constexpr uint32_t DTYPE_BIT_WIDTH_16 = 16;
-constexpr uint32_t DTYPE_BIT_WIDTH_32 = 32;
-constexpr uint32_t DTYPE_BIT_WIDTH_64 = 64;
-constexpr uint32_t SMALL_STRING_LENGTH = 128;
-constexpr uint32_t BATCHMODE_NONE_VALUE = 0;
-constexpr uint32_t BATCHMODE_BATCH_LESS_THAN_L1_VALUE = 1;
-constexpr uint32_t BATCHMODE_BATCH_LARGE_THAN_L1_VALUE = 2;
-constexpr uint32_t BATCHMODE_SINGLE_LARGE_THAN_L1_VALUE = 3;
-constexpr uint32_t ITERATEORDER_ORDER_M_VALUE = 0;
-constexpr uint32_t ITERATEORDER_ORDER_N_VALUE = 1;
-constexpr uint32_t ITERATEORDER_UNDEF_VALUE = 2;
-constexpr uint32_t SCHEDULETYPE_INNER_PRODUCT_VALUE = 0;
-constexpr uint32_t SCHEDULETYPE_OUTER_PRODUCT_VALUE = 1;
-constexpr uint32_t BATCHOUTMODE_SINGLE_BATCH_VALUE = 0;
-constexpr uint32_t BATCHOUTMODE_MULTI_BATCH_ONE = 1;
-constexpr uint32_t BATCHOUTMODE_DYNAMIC_VALUE = 2;
+constexpr uint32_t dtypeBitWidth1 = 1;
+constexpr uint32_t dtypeBitWidth8 = 8;
+constexpr uint32_t dtypeBitWidth16 = 16;
+constexpr uint32_t dtypeBitWidth32 = 32;
+constexpr uint32_t dtypeBitWidth64 = 64;
+constexpr uint32_t smallStringLength = 128;
+constexpr uint32_t batchmodeNoneValue = 0;
+constexpr uint32_t batchmodeBatchLessThanL1Value = 1;
+constexpr uint32_t batchmodeBatchLargeThanL1Value = 2;
+constexpr uint32_t batchmodeSingleLargeThanL1Value = 3;
+constexpr uint32_t iterateorderOrderMValue = 0;
+constexpr uint32_t iterateorderOrderNValue = 1;
+constexpr uint32_t iterateorderUndefValue = 2;
+constexpr uint32_t scheduletypeInnerProductValue = 0;
+constexpr uint32_t scheduletypeOuterProductValue = 1;
+constexpr uint32_t batchoutmodeSingleBatchValue = 0;
+constexpr uint32_t batchoutmodeMultiBatchOne = 1;
+constexpr uint32_t batchoutmodeDynamicValue = 2;
 } // namespace
 
 void CodeEmitter::emitTPosition(raw_ostream& os, ascendc::TPosition pos)
@@ -152,12 +152,6 @@ void CodeEmitter::createTypeEmitMapper()
     emitTypeMapper[TypeID::get<ascendc::GlobalTensorType>()] = [this](Location loc, Type type, bool flag) {
         return this->emitAscGlobalTensorType(loc, type, flag);
     };
-    emitTypeMapper[TypeID::get<ascendc::BaseGlobalTensorType>()] = [this](Location loc, Type type, bool flag) {
-        return this->emitAscBaseGlobalTensorType(loc, type, flag);
-    };
-    emitTypeMapper[TypeID::get<ascendc::BaseLocalTensorType>()] = [this](Location loc, Type type, bool flag) {
-        return this->emitAscBaseLocalTensorType(loc, type, flag);
-    };
     emitTypeMapper[TypeID::get<ascendc::MatmulType>()] = [this](Location loc, Type type, bool flag) {
         return this->emitAscMatmulType(loc, type, flag);
     };
@@ -186,12 +180,6 @@ void CodeEmitter::createAttributeEmitMapper()
     emitAttributeMapper[TypeID::get<IntegerAttr>()] = [this](Location loc, Attribute attr) {
         return this->emitIntegerAttr(loc, attr);
     };
-    emitAttributeMapper[TypeID::get<DenseFPElementsAttr>()] = [this](Location loc, Attribute attr) {
-        return this->emitDenseFPElementsAttr(loc, attr);
-    };
-    emitAttributeMapper[TypeID::get<DenseIntElementsAttr>()] = [this](Location loc, Attribute attr) {
-        return this->emitDenseIntElementsAttr(loc, attr);
-    };
     emitAttributeMapper[TypeID::get<emitc::OpaqueAttr>()] = [this](Location loc, Attribute attr) {
         return this->emitEmitcOpaqueAttr(loc, attr);
     };
@@ -201,18 +189,16 @@ void CodeEmitter::createAttributeEmitMapper()
     emitAttributeMapper[TypeID::get<TypeAttr>()] = [this](Location loc, Attribute attr) {
         return this->emitTypeAttr(loc, attr);
     };
-    emitAttributeMapper[TypeID::get<StringAttr>()] = [this](Location loc, Attribute attr) {
-        return this->emitStringAttr(loc, attr);
-    };
 }
 
-LogicalResult CodeEmitter::emitFloatAttr(Location loc, Attribute attr)
+LogicalResult CodeEmitter::emitFloatAttr(Location /*loc*/, Attribute attr)
 {
     auto fAttr = dyn_cast<FloatAttr>(attr);
     printFloat(fAttr.getValue());
     return success();
 }
-LogicalResult CodeEmitter::emitIntegerAttr(Location loc, Attribute attr)
+
+LogicalResult CodeEmitter::emitIntegerAttr(Location /*loc*/, Attribute attr)
 {
     auto iAttr = dyn_cast<IntegerAttr>(attr);
     if (auto iType = dyn_cast<IntegerType>(iAttr.getType())) {
@@ -225,38 +211,14 @@ LogicalResult CodeEmitter::emitIntegerAttr(Location loc, Attribute attr)
     }
     return success();
 }
-LogicalResult CodeEmitter::emitDenseFPElementsAttr(Location loc, Attribute attr)
-{
-    auto dense = dyn_cast<DenseFPElementsAttr>(attr);
-    os << '{';
-    interleaveComma(dense, os, [&](const APFloat& val) { printFloat(val); });
-    os << '}';
-    return success();
-}
-LogicalResult CodeEmitter::emitDenseIntElementsAttr(Location loc, Attribute attr)
-{
-    auto dense = dyn_cast<DenseIntElementsAttr>(attr);
-    if (auto iType = dyn_cast<IntegerType>(cast<TensorType>(dense.getType()).getElementType())) {
-        os << '{';
-        interleaveComma(
-            dense, os, [&](const APInt& val) { printInt(val, shouldMapToUnsigned(iType.getSignedness())); });
-        os << '}';
-        return success();
-    }
-    if (auto iType = dyn_cast<IndexType>(cast<TensorType>(dense.getType()).getElementType())) {
-        os << '{';
-        interleaveComma(dense, os, [&](const APInt& val) { printInt(val, false); });
-        os << '}';
-        return success();
-    }
-    return success();
-}
-LogicalResult CodeEmitter::emitEmitcOpaqueAttr(Location loc, Attribute attr)
+
+LogicalResult CodeEmitter::emitEmitcOpaqueAttr(Location /*loc*/, Attribute attr)
 {
     auto oAttr = dyn_cast<emitc::OpaqueAttr>(attr);
     os << oAttr.getValue();
     return success();
 }
+
 LogicalResult CodeEmitter::emitSymbolRefAttr(Location loc, Attribute attr)
 {
     auto sAttr = dyn_cast<SymbolRefAttr>(attr);
@@ -270,12 +232,6 @@ LogicalResult CodeEmitter::emitTypeAttr(Location loc, Attribute attr)
 {
     auto type = dyn_cast<TypeAttr>(attr);
     return emitType(loc, type.getValue());
-}
-LogicalResult CodeEmitter::emitStringAttr(Location loc, Attribute attr)
-{
-    auto str = dyn_cast<StringAttr>(attr);
-    os << '"' << str.getValue() << '"';
-    return success();
 }
 
 /// Return the existing or a new name for a Value.
@@ -323,7 +279,7 @@ void CodeEmitter::printInt(const APInt& value, bool isUnsigned)
             os << "false";
     } else {
         constexpr uint32_t toStringLen = 10;
-        SmallString<SMALL_STRING_LENGTH> strValue;
+        SmallString<smallStringLength> strValue;
         value.toString(strValue, toStringLen, !isUnsigned, false);
         os << strValue;
     }
@@ -332,7 +288,7 @@ void CodeEmitter::printInt(const APInt& value, bool isUnsigned)
 void CodeEmitter::printFloat(const APFloat& value)
 {
     if (value.isFinite()) {
-        SmallString<SMALL_STRING_LENGTH> strValue;
+        SmallString<smallStringLength> strValue;
         // Use default values of toString except don't truncate zeros.
         value.toString(strValue, 0, 0, false);
         switch (llvm::APFloatBase::SemanticsToEnum(value.getSemantics())) {
@@ -360,9 +316,8 @@ LogicalResult CodeEmitter::emitAttribute(Location loc, Attribute attr)
     auto it = emitAttributeMapper.find(attr.getTypeID());
     if (it != emitAttributeMapper.end()) {
         return it->second(loc, attr);
-    } else {
-        return emitError(loc, "cannot emit attribute: ") << attr;
     }
+    return emitError(loc, "cannot emit attribute: ") << attr;
 }
 
 LogicalResult CodeEmitter::emitOperands(Operation& op)
@@ -387,12 +342,6 @@ LogicalResult CodeEmitter::emitVariableDeclaration(OpResult opResult, bool trail
     if (trailingSemicolon)
         os << ";\n";
     return success();
-}
-
-static bool isValidToken(const std::string::value_type& token)
-{
-    return (token >= 'A' && token <= 'Z') || (token >= 'a' && token <= 'z') || (token >= '0' && token <= '9') ||
-           token == '_';
 }
 
 LogicalResult CodeEmitter::emitAssignPrefix(Operation& op)
@@ -453,12 +402,12 @@ void CodeEmitter::emitAddressSpace(ascendc::AddressSpace addressSpace)
     }
 }
 
-LogicalResult CodeEmitter::emitIndexType(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitIndexType(Location /*loc*/, Type /*type*/, bool /*emitAsUnsigned*/)
 {
     return (os << "uint32_t"), success();
 }
 
-LogicalResult CodeEmitter::emitTensorType(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitTensorType(Location loc, Type type, bool /*emitAsUnsigned*/)
 {
     auto tensorType = dyn_cast<TensorType>(type);
     if (!tensorType.hasRank())
@@ -477,7 +426,7 @@ LogicalResult CodeEmitter::emitTensorType(Location loc, Type type, bool emitAsUn
     return success();
 }
 
-LogicalResult CodeEmitter::emitEmitcPointerType(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitEmitcPointerType(Location loc, Type type, bool /*emitAsUnsigned*/)
 {
     auto pType = dyn_cast<emitc::PointerType>(type);
     if (failed(emitType(loc, pType.getPointee())))
@@ -486,14 +435,14 @@ LogicalResult CodeEmitter::emitEmitcPointerType(Location loc, Type type, bool em
     return success();
 }
 
-LogicalResult CodeEmitter::emitEmitcOpaqueType(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitEmitcOpaqueType(Location /*loc*/, Type type, bool /*emitAsUnsigned*/)
 {
     auto oType = dyn_cast<emitc::OpaqueType>(type);
     os << oType.getValue();
     return success();
 }
 
-LogicalResult CodeEmitter::emitAscTBufType(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitAscTBufType(Location /*loc*/, Type type, bool /*emitAsUnsigned*/)
 {
     auto bType = dyn_cast<ascendc::TBufType>(type);
     os << ascNamespace << "::TBuf<";
@@ -502,7 +451,7 @@ LogicalResult CodeEmitter::emitAscTBufType(Location loc, Type type, bool emitAsU
     return success();
 }
 
-LogicalResult CodeEmitter::emitAscTBufPoolType(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitAscTBufPoolType(Location /*loc*/, Type type, bool /*emitAsUnsigned*/)
 {
     auto bType = dyn_cast<ascendc::TBufPoolType>(type);
     os << ascNamespace << "::TBufPool<";
@@ -511,7 +460,7 @@ LogicalResult CodeEmitter::emitAscTBufPoolType(Location loc, Type type, bool emi
     return success();
 }
 
-LogicalResult CodeEmitter::emitAscQueueType(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitAscQueueType(Location /*loc*/, Type type, bool /*emitAsUnsigned*/)
 {
     auto qType = dyn_cast<ascendc::QueueType>(type);
     os << ascNamespace << "::TQue<";
@@ -520,7 +469,7 @@ LogicalResult CodeEmitter::emitAscQueueType(Location loc, Type type, bool emitAs
     return success();
 }
 
-LogicalResult CodeEmitter::emitAscQueBindType(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitAscQueBindType(Location /*loc*/, Type type, bool /*emitAsUnsigned*/)
 {
     auto qType = dyn_cast<ascendc::QueBindType>(type);
     os << ascNamespace << "::TQueBind<";
@@ -531,7 +480,7 @@ LogicalResult CodeEmitter::emitAscQueBindType(Location loc, Type type, bool emit
     return success();
 }
 
-LogicalResult CodeEmitter::emitAscFixpipeParamsType(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitAscFixpipeParamsType(Location loc, Type type, bool /*emitAsUnsigned*/)
 {
     auto fpType = dyn_cast<ascendc::FixpipeParamsType>(type);
     auto instanceType = fpType.getType();
@@ -542,7 +491,7 @@ LogicalResult CodeEmitter::emitAscFixpipeParamsType(Location loc, Type type, boo
     return success();
 }
 
-LogicalResult CodeEmitter::emitAscGlobalTensorType(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitAscGlobalTensorType(Location loc, Type type, bool /*emitAsUnsigned*/)
 {
     auto pType = dyn_cast<ascendc::GlobalTensorType>(type);
     auto elemTy = pType.getElementType();
@@ -553,29 +502,7 @@ LogicalResult CodeEmitter::emitAscGlobalTensorType(Location loc, Type type, bool
     return success();
 }
 
-LogicalResult CodeEmitter::emitAscBaseGlobalTensorType(Location loc, Type type, bool emitAsUnsigned)
-{
-    auto pType = dyn_cast<ascendc::BaseGlobalTensorType>(type);
-    auto elemTy = pType.getElementType();
-    os << ascNamespace << "::BaseGlobalTensor<";
-    if (failed(emitType(loc, elemTy)))
-        return failure();
-    os << ">";
-    return success();
-}
-
-LogicalResult CodeEmitter::emitAscBaseLocalTensorType(Location loc, Type type, bool emitAsUnsigned)
-{
-    auto pType = dyn_cast<ascendc::BaseLocalTensorType>(type);
-    auto elemTy = pType.getElementType();
-    os << ascNamespace << "::BaseLocalTensor<";
-    if (failed(emitType(loc, elemTy)))
-        return failure();
-    os << ">";
-    return success();
-}
-
-LogicalResult CodeEmitter::emitAscLocalMemAllocatorType(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitAscLocalMemAllocatorType(Location /*loc*/, Type type, bool /*emitAsUnsigned*/)
 {
     auto pType = dyn_cast<ascendc::LocalMemAllocatorType>(type);
     os << ascNamespace << "::LocalMemAllocator<";
@@ -604,7 +531,7 @@ LogicalResult CodeEmitter::emitAscLocalMemAllocatorType(Location loc, Type type,
     return success();
 }
 
-LogicalResult CodeEmitter::emitAscLocalTensorType(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitAscLocalTensorType(Location loc, Type type, bool /*emitAsUnsigned*/)
 {
     auto pType = dyn_cast<ascendc::LocalTensorType>(type);
     auto elemTy = pType.getElementType();
@@ -666,13 +593,13 @@ void CodeEmitter::emitMatmulConfig(raw_ostream& os, ascendc::MatmulConfigAttr co
     os << ",";
     os << config.getEnableInit().getValue();
     os << ",";
-    if (config.getBatchMode().getValue() == BATCHMODE_NONE_VALUE)
+    if (config.getBatchMode().getValue() == batchmodeNoneValue)
         os << "BatchMode::NONE,";
-    else if (config.getBatchMode().getValue() == BATCHMODE_BATCH_LESS_THAN_L1_VALUE)
+    else if (config.getBatchMode().getValue() == batchmodeBatchLessThanL1Value)
         os << "BatchMode::BATCH_LESS_THAN_L1,";
-    else if (config.getBatchMode().getValue() == BATCHMODE_BATCH_LARGE_THAN_L1_VALUE)
+    else if (config.getBatchMode().getValue() == batchmodeBatchLargeThanL1Value)
         os << "BatchMode::BATCH_LARGE_THAN_L1,";
-    else if (config.getBatchMode().getValue() == BATCHMODE_SINGLE_LARGE_THAN_L1_VALUE)
+    else if (config.getBatchMode().getValue() == batchmodeSingleLargeThanL1Value)
         os << "BatchMode::SINGLE_LARGE_THAN_L1,";
     else
         os << ",";
@@ -700,17 +627,17 @@ void CodeEmitter::emitMatmulConfig(raw_ostream& os, ascendc::MatmulConfigAttr co
     os << ",";
     os << config.getIntraBlockPartSum().getValue();
     os << ",";
-    if (config.getIterateOrder().getValue() == ITERATEORDER_ORDER_M_VALUE)
+    if (config.getIterateOrder().getValue() == iterateorderOrderMValue)
         os << "IterateOrder::ORDER_M,";
-    else if (config.getIterateOrder().getValue() == ITERATEORDER_ORDER_N_VALUE)
+    else if (config.getIterateOrder().getValue() == iterateorderOrderNValue)
         os << "IterateOrder::ORDER_N,";
-    else if (config.getIterateOrder().getValue() == ITERATEORDER_UNDEF_VALUE)
+    else if (config.getIterateOrder().getValue() == iterateorderUndefValue)
         os << "IterateOrder::UNDEF,";
     else
         os << ",";
-    if (config.getScheduleType().getValue() == SCHEDULETYPE_INNER_PRODUCT_VALUE)
+    if (config.getScheduleType().getValue() == scheduletypeInnerProductValue)
         os << "ScheduleType::INNER_PRODUCT,";
-    else if (config.getScheduleType().getValue() == SCHEDULETYPE_OUTER_PRODUCT_VALUE)
+    else if (config.getScheduleType().getValue() == scheduletypeOuterProductValue)
         os << "ScheduleType::OUTER_PRODUCT,";
     else
         os << ",";
@@ -734,16 +661,16 @@ void CodeEmitter::emitMatmulConfig(raw_ostream& os, ascendc::MatmulConfigAttr co
     os << ",";
     os << config.getSharedCo1BufferSize().getValue();
     os << ",";
-    if (config.getBatchOutMode().getValue() == BATCHOUTMODE_SINGLE_BATCH_VALUE)
+    if (config.getBatchOutMode().getValue() == batchoutmodeSingleBatchValue)
         os << "BatchOutMode::SINGLE_BATCH";
-    else if (config.getBatchOutMode().getValue() == BATCHOUTMODE_MULTI_BATCH_ONE)
+    else if (config.getBatchOutMode().getValue() == batchoutmodeMultiBatchOne)
         os << "BatchOutMode::MULTI_BATCH";
-    else if (config.getBatchOutMode().getValue() == BATCHOUTMODE_DYNAMIC_VALUE)
+    else if (config.getBatchOutMode().getValue() == batchoutmodeDynamicValue)
         os << "BatchOutMode::DYNAMIC";
     os << "};";
 }
 
-LogicalResult CodeEmitter::emitAscMatmulTypeTemplate(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitAscMatmulTypeTemplate(Location loc, Type type, bool /*emitAsUnsigned*/)
 {
     auto pType = dyn_cast<ascendc::MatmulType>(type);
     emitMatmulConfig(os, pType.getMatmulConfig());
@@ -800,7 +727,7 @@ LogicalResult CodeEmitter::emitAscMatmulTypeTemplate(Location loc, Type type, bo
     return success();
 }
 
-LogicalResult CodeEmitter::emitAscMatmulSimplifiedTemplate(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitAscMatmulSimplifiedTemplate(Location loc, Type type, bool /*emitAsUnsigned*/)
 {
     auto pType = dyn_cast<ascendc::MatmulType>(type);
     os << "<matmul::MatmulType<";
@@ -861,12 +788,12 @@ LogicalResult CodeEmitter::emitAscMatmulType(Location loc, Type type, bool emitA
 LogicalResult CodeEmitter::emitIntegerType(IntegerType& iType, Location loc, Type type, bool emitAsUnsigned)
 {
     switch (iType.getWidth()) {
-    case DTYPE_BIT_WIDTH_1:
+    case dtypeBitWidth1:
         return (os << "bool"), success();
-    case DTYPE_BIT_WIDTH_8:
-    case DTYPE_BIT_WIDTH_16:
-    case DTYPE_BIT_WIDTH_32:
-    case DTYPE_BIT_WIDTH_64:
+    case dtypeBitWidth8:
+    case dtypeBitWidth16:
+    case dtypeBitWidth32:
+    case dtypeBitWidth64:
         if (shouldMapToUnsigned(iType.getSignedness()) || emitAsUnsigned)
             return (os << "uint" << iType.getWidth() << "_t"), success();
         else
@@ -876,21 +803,21 @@ LogicalResult CodeEmitter::emitIntegerType(IntegerType& iType, Location loc, Typ
     }
 }
 
-LogicalResult CodeEmitter::emitFloatType(FloatType& fType, Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitFloatType(FloatType& fType, Location loc, Type type, bool /*emitAsUnsigned*/)
 {
     switch (fType.getWidth()) {
-    case DTYPE_BIT_WIDTH_16:
+    case dtypeBitWidth16:
         return (os << "half"), success();
-    case DTYPE_BIT_WIDTH_32:
+    case dtypeBitWidth32:
         return (os << "float"), success();
-    case DTYPE_BIT_WIDTH_64:
+    case dtypeBitWidth64:
         return (os << "double"), success();
     default:
         return emitError(loc, "cannot emit float type ") << type;
     }
 }
 
-LogicalResult CodeEmitter::emitBaseMemRefType(BaseMemRefType& pType, Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitBaseMemRefType(BaseMemRefType& pType, Location loc, Type /*type*/, bool emitAsUnsigned)
 {
     if (auto attr = pType.getMemorySpace()) {
         auto value = static_cast<uint8_t>(cast<IntegerAttr>(attr).getInt());
@@ -910,31 +837,30 @@ LogicalResult CodeEmitter::emitType(Location loc, Type type, bool emitAsUnsigned
     auto it = emitTypeMapper.find(type.getTypeID());
     if (it != emitTypeMapper.end()) {
         return it->second(loc, type, emitAsUnsigned);
-    } else {
-        if (auto iType = dyn_cast<IntegerType>(type)) {
-            return emitIntegerType(iType, loc, type, emitAsUnsigned);
-        }
-        if (auto fType = dyn_cast<FloatType>(type)) {
-            return emitFloatType(fType, loc, type, emitAsUnsigned);
-        }
-        if (auto pType = dyn_cast<BaseMemRefType>(type)) {
-            return emitBaseMemRefType(pType, loc, type, emitAsUnsigned);
-        }
+    }
+    if (auto iType = dyn_cast<IntegerType>(type)) {
+        return emitIntegerType(iType, loc, type, emitAsUnsigned);
+    }
+    if (auto fType = dyn_cast<FloatType>(type)) {
+        return emitFloatType(fType, loc, type, emitAsUnsigned);
+    }
+    if (auto pType = dyn_cast<BaseMemRefType>(type)) {
+        return emitBaseMemRefType(pType, loc, type, emitAsUnsigned);
+    }
 
 #define GEN_EMITTER
 #include "ascir/API/Types.h.inc"
-        return emitError(loc, "cannot emit type ") << type;
-    }
+    return emitError(loc, "cannot emit type ") << type;
 }
 
-LogicalResult CodeEmitter::emitAscPyStructType(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitAscPyStructType(Location /*loc*/, Type type, bool /*emitAsUnsigned*/)
 {
     auto pType = dyn_cast<emitasc::PyStructType>(type);
     os << pType.getNameAttr().getValue();
     return success();
 }
 
-LogicalResult CodeEmitter::emitAscDataCopyPadExtParamsType(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitAscDataCopyPadExtParamsType(Location loc, Type type, bool /*emitAsUnsigned*/)
 {
     auto ldType = dyn_cast<ascendc::DataCopyPadExtParamsType>(type);
     os << ascNamespace << "::DataCopyPadExtParams<";
@@ -944,7 +870,7 @@ LogicalResult CodeEmitter::emitAscDataCopyPadExtParamsType(Location loc, Type ty
     return success();
 }
 
-LogicalResult CodeEmitter::emitAscMrgSortSrcListType(Location loc, Type type, bool emitAsUnsigned)
+LogicalResult CodeEmitter::emitAscMrgSortSrcListType(Location loc, Type type, bool /*emitAsUnsigned*/)
 {
     auto ldType = dyn_cast<ascendc::MrgSortSrcListType>(type);
     os << ascNamespace << "::MrgSortSrcList<";
@@ -960,7 +886,7 @@ LogicalResult CodeEmitter::emitTypes(Location loc, ArrayRef<Type> types)
     case 0:
         os << "void";
         return success();
-    case DTYPE_BIT_WIDTH_1:
+    case dtypeBitWidth1:
         return emitType(loc, types.front());
     default:
         llvm_unreachable("unsupported emission of types array");

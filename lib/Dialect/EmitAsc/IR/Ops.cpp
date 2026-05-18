@@ -26,7 +26,7 @@ using namespace mlir::emitasc;
 
 Value PtrOffsetOp::getViewSource() { return getBase(); }
 
-OpFoldResult PtrOffsetOp::fold(FoldAdaptor adaptor)
+OpFoldResult PtrOffsetOp::fold([[maybe_unused]] FoldAdaptor adaptor)
 {
     if (auto offset = getStaticOffset())
         return offset->isZero() ? getBase() : nullptr;

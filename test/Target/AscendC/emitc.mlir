@@ -14,3 +14,12 @@ module {
     emitc.include "my_lib/my_header.h"
     emitc.include <"cstdint">
 }
+
+// CHECK-LABEL: void emit_constant() {
+// CHECK-NEXT:  constexpr int32_t v1 = ::AscendC::TOTAL_L1_SIZE;
+// CHECK-NEXT:  return;
+// CHECK-NEXT:}
+func.func @emit_constant() {
+    %0 = "emitc.constant"() {value = #emitc.opaque<"::AscendC::TOTAL_L1_SIZE">} : () -> i32
+    return
+}

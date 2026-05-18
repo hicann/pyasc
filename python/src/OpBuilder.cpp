@@ -9,6 +9,7 @@
  */
 
 #include "InitFuncDef.h"
+
 #include "ascir/Dialect/Asc/IR/Asc.h"
 #include "ascir/Dialect/Asc/Utils/Attributes.h"
 #include "ascir/Dialect/EmitAsc/IR/EmitAsc.h"
@@ -168,26 +169,17 @@ public:
         }
         return std::nullopt;
     }
-}; // PyOpBuilder
-} // namespace
+};
 
-namespace pybind11 {
-namespace asc {
-
-[[noreturn]] void throw_op_error(const std::string& opName, const std::string& reason)
-{
-    throw std::runtime_error(opName + ": " + reason);
-}
-
-ascendc::HardEvent get_hard_event(uint8_t event, const std::string& opName)
+ascendc::HardEvent getHardEvent(uint8_t event, const std::string& opName)
 {
     if (auto eventAttr = ascendc::symbolizeHardEvent(event)) {
         return *eventAttr;
     }
-    throw_op_error(opName, "unknown hard event");
+    throw std::runtime_error(opName + ": unknown hard event");
 }
 
-void bind_init(py::class_<PyOpBuilder>& clss)
+void bindInit(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -195,7 +187,7 @@ void bind_init(py::class_<PyOpBuilder>& clss)
     clss.def(py::init<MLIRContext*>());
 }
 
-void bind_locations(py::class_<PyOpBuilder>& clss)
+void bindLocations(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -213,7 +205,7 @@ void bind_locations(py::class_<PyOpBuilder>& clss)
             "filename"_a, "line"_a, "column"_a, "name"_a = py::none());
 }
 
-void bind_modify_insertion_point(py::class_<PyOpBuilder>& clss)
+void bindModifyInsertionPoint(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -235,7 +227,7 @@ void bind_modify_insertion_point(py::class_<PyOpBuilder>& clss)
         .def("get_current_function", &PyOpBuilder::getCurrentFunction);
 }
 
-void bind_get_basic_type(py::class_<PyOpBuilder>& clss)
+void bindGetBasicType(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -274,7 +266,7 @@ void bind_get_basic_type(py::class_<PyOpBuilder>& clss)
         .def("get_f64_type", [](PyOpBuilder& self) -> Type { return self->getF64Type(); });
 }
 
-void bind_get_special_type(py::class_<PyOpBuilder>& clss)
+void bindGetSpecialType(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -334,20 +326,19 @@ void bind_get_special_type(py::class_<PyOpBuilder>& clss)
             "get_matmul_type",
             [](PyOpBuilder& self, uint8_t posA, uint8_t fmtA, Type typeA, bool istransA, uint8_t layoutA, uint8_t posB,
                uint8_t fmtB, Type typeB, bool istransB, uint8_t layoutB, uint8_t posC, uint8_t fmtC, Type typeC,
-               bool istransC, uint8_t layoutC, uint8_t posBias, uint8_t fmtBias, Type typeBias, bool do_norm,
-               bool do_basic_block, bool do_multi_data_load, int32_t basic_m, int32_t basic_n, int32_t basic_k,
-               bool intrinsics_check, bool is_n_batch, bool en_vec_nd2nz, bool do_special_basic_block,
-               int32_t do_mte2_preload, int32_t single_core_m, int32_t single_core_n, int32_t single_core_k,
-               int32_t step_m, int32_t step_n, int32_t base_mn, int32_t single_core_mn, bool en_unit_flag,
-               bool is_per_tensor, bool has_anti_quant_offset, bool do_ib_share_norm, bool do_special_mdl,
-               bool enable_init, int32_t batch_mode, bool enable_end, bool enable_get_tensor_c,
-               bool enable_set_org_shape, bool enable_set_bias, bool enable_set_tail, bool enable_quant_vector,
-               bool enable_set_define_data, int32_t iterate_mode, bool enable_reuse, bool enable_ub_reuse,
-               bool enable_l1_cache_ub, bool intra_block_part_sum, int32_t iterate_order, int32_t schedule_type,
-               bool enable_double_cache, bool is_bias_batch, bool enable_static_pad_zeros, bool is_partial_output,
-               bool enable_mix_dual_master, bool is_a2b2_shared, bool is_enable_channel_split,
-               bool enable_kdim_reorder_load, bool is_co1_shared, int32_t shared_co1_buffer_size,
-               int32_t batch_out_mode) -> Type {
+               bool istransC, uint8_t layoutC, uint8_t posBias, uint8_t fmtBias, Type typeBias, bool doNorm,
+               bool doBasicBlock, bool doMultiDataLoad, int32_t basicM, int32_t basicN, int32_t basicK,
+               bool intrinsicsCheck, bool isNBatch, bool enVecNd2nz, bool doSpecialBasicBlock, int32_t doMte2Preload,
+               int32_t singleCoreM, int32_t singleCoreN, int32_t singleCoreK, int32_t stepM, int32_t stepN,
+               int32_t baseMn, int32_t singleCoreMn, bool enUnitFlag, bool isPerTensor, bool hasAntiQuantOffset,
+               bool doIbShareNorm, bool doSpecialMdl, bool enableInit, int32_t batchMode, bool enableEnd,
+               bool enableGetTensorC, bool enableSetOrgShape, bool enableSetBias, bool enableSetTail,
+               bool enableQuantVector, bool enableSetDefineData, int32_t iterateMode, bool enableReuse,
+               bool enableUbReuse, bool enableL1CacheUb, bool intraBlockPartSum, int32_t iterateOrder,
+               int32_t scheduleType, bool enableDoubleCache, bool isBiasBatch, bool enableStaticPadZeros,
+               bool isPartialOutput, bool enableMixDualMaster, bool isA2b2Shared, bool isEnableChannelSplit,
+               bool enableKdimReorderLoad, bool isCo1Shared, int32_t sharedCo1BufferSize,
+               int32_t batchOutMode) -> Type {
                 auto sposA = ascendc::symbolizeTPosition(posA);
                 auto sfmtA = ascendc::symbolizeCubeFormat(fmtA);
                 auto slayoutA = ascendc::symbolizeLayoutMode(layoutA);
@@ -362,34 +353,33 @@ void bind_get_special_type(py::class_<PyOpBuilder>& clss)
                 mlir::MLIRContext* ctx = self.getBuilder().getContext();
                 IntegerType i32 = IntegerType::get(ctx, 32);
                 IntegerType i8 = IntegerType::get(ctx, 8);
-                auto matmul_config_attr = ascendc::MatmulConfigAttr::get(
-                    self.getBuilder().getContext(), BoolAttr::get(ctx, do_norm), BoolAttr::get(ctx, do_basic_block),
-                    BoolAttr::get(ctx, do_multi_data_load), IntegerAttr::get(i32, basic_m),
-                    IntegerAttr::get(i32, basic_n), IntegerAttr::get(i32, basic_k),
-                    BoolAttr::get(ctx, intrinsics_check), BoolAttr::get(ctx, is_n_batch),
-                    BoolAttr::get(ctx, en_vec_nd2nz), BoolAttr::get(ctx, do_special_basic_block),
-                    IntegerAttr::get(i32, do_mte2_preload), IntegerAttr::get(i32, single_core_m),
-                    IntegerAttr::get(i32, single_core_n), IntegerAttr::get(i32, single_core_k),
-                    IntegerAttr::get(i32, step_m), IntegerAttr::get(i32, step_n), IntegerAttr::get(i32, base_mn),
-                    IntegerAttr::get(i32, single_core_mn), BoolAttr::get(ctx, en_unit_flag),
-                    BoolAttr::get(ctx, is_per_tensor), BoolAttr::get(ctx, has_anti_quant_offset),
-                    BoolAttr::get(ctx, do_ib_share_norm), BoolAttr::get(ctx, do_special_mdl),
-                    BoolAttr::get(ctx, enable_init), IntegerAttr::get(i32, batch_mode), BoolAttr::get(ctx, enable_end),
-                    BoolAttr::get(ctx, enable_get_tensor_c), BoolAttr::get(ctx, enable_set_org_shape),
-                    BoolAttr::get(ctx, enable_set_bias), BoolAttr::get(ctx, enable_set_tail),
-                    BoolAttr::get(ctx, enable_quant_vector), BoolAttr::get(ctx, enable_set_define_data),
-                    IntegerAttr::get(i32, iterate_mode), BoolAttr::get(ctx, enable_reuse),
-                    BoolAttr::get(ctx, enable_ub_reuse), BoolAttr::get(ctx, enable_l1_cache_ub),
-                    BoolAttr::get(ctx, intra_block_part_sum), IntegerAttr::get(i32, iterate_order),
-                    IntegerAttr::get(i32, schedule_type), BoolAttr::get(ctx, enable_double_cache),
-                    BoolAttr::get(ctx, is_bias_batch), BoolAttr::get(ctx, enable_static_pad_zeros),
-                    BoolAttr::get(ctx, is_partial_output), BoolAttr::get(ctx, enable_mix_dual_master),
-                    BoolAttr::get(ctx, is_a2b2_shared), BoolAttr::get(ctx, is_enable_channel_split),
-                    BoolAttr::get(ctx, enable_kdim_reorder_load), BoolAttr::get(ctx, is_co1_shared),
-                    IntegerAttr::get(i32, shared_co1_buffer_size), IntegerAttr::get(i32, batch_out_mode));
+                auto matmulConfigAttr = ascendc::MatmulConfigAttr::get(
+                    self.getBuilder().getContext(), BoolAttr::get(ctx, doNorm), BoolAttr::get(ctx, doBasicBlock),
+                    BoolAttr::get(ctx, doMultiDataLoad), IntegerAttr::get(i32, basicM), IntegerAttr::get(i32, basicN),
+                    IntegerAttr::get(i32, basicK), BoolAttr::get(ctx, intrinsicsCheck), BoolAttr::get(ctx, isNBatch),
+                    BoolAttr::get(ctx, enVecNd2nz), BoolAttr::get(ctx, doSpecialBasicBlock),
+                    IntegerAttr::get(i32, doMte2Preload), IntegerAttr::get(i32, singleCoreM),
+                    IntegerAttr::get(i32, singleCoreN), IntegerAttr::get(i32, singleCoreK),
+                    IntegerAttr::get(i32, stepM), IntegerAttr::get(i32, stepN), IntegerAttr::get(i32, baseMn),
+                    IntegerAttr::get(i32, singleCoreMn), BoolAttr::get(ctx, enUnitFlag),
+                    BoolAttr::get(ctx, isPerTensor), BoolAttr::get(ctx, hasAntiQuantOffset),
+                    BoolAttr::get(ctx, doIbShareNorm), BoolAttr::get(ctx, doSpecialMdl), BoolAttr::get(ctx, enableInit),
+                    IntegerAttr::get(i32, batchMode), BoolAttr::get(ctx, enableEnd),
+                    BoolAttr::get(ctx, enableGetTensorC), BoolAttr::get(ctx, enableSetOrgShape),
+                    BoolAttr::get(ctx, enableSetBias), BoolAttr::get(ctx, enableSetTail),
+                    BoolAttr::get(ctx, enableQuantVector), BoolAttr::get(ctx, enableSetDefineData),
+                    IntegerAttr::get(i32, iterateMode), BoolAttr::get(ctx, enableReuse),
+                    BoolAttr::get(ctx, enableUbReuse), BoolAttr::get(ctx, enableL1CacheUb),
+                    BoolAttr::get(ctx, intraBlockPartSum), IntegerAttr::get(i32, iterateOrder),
+                    IntegerAttr::get(i32, scheduleType), BoolAttr::get(ctx, enableDoubleCache),
+                    BoolAttr::get(ctx, isBiasBatch), BoolAttr::get(ctx, enableStaticPadZeros),
+                    BoolAttr::get(ctx, isPartialOutput), BoolAttr::get(ctx, enableMixDualMaster),
+                    BoolAttr::get(ctx, isA2b2Shared), BoolAttr::get(ctx, isEnableChannelSplit),
+                    BoolAttr::get(ctx, enableKdimReorderLoad), BoolAttr::get(ctx, isCo1Shared),
+                    IntegerAttr::get(i32, sharedCo1BufferSize), IntegerAttr::get(i32, batchOutMode));
                 return self->getType<ascendc::MatmulType>(
                     *sposA, *sfmtA, typeA, istransA, *slayoutA, *sposB, *sfmtB, typeB, istransB, *slayoutB, *sposC,
-                    *sfmtC, typeC, istransC, *slayoutC, *sposBias, *sfmtBias, typeBias, matmul_config_attr);
+                    *sfmtC, typeC, istransC, *slayoutC, *sposBias, *sfmtBias, typeBias, matmulConfigAttr);
             })
         .def("get_asc_MaskType", [](PyOpBuilder& self) -> Type { return self->getType<ascendc::MaskType>(); })
         .def(
@@ -422,7 +412,7 @@ void bind_get_special_type(py::class_<PyOpBuilder>& clss)
         ;
 }
 
-void bind_get_attributes(py::class_<PyOpBuilder>& clss)
+void bindGetAttributes(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -452,7 +442,7 @@ void bind_get_attributes(py::class_<PyOpBuilder>& clss)
             op.setAttr(ascendc::attr::emitAsUnsigned, self->getUnitAttr());
         });
 }
-void bind_create_operations(py::class_<PyOpBuilder>& clss)
+void bindCreateOperations(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -481,7 +471,7 @@ void bind_create_operations(py::class_<PyOpBuilder>& clss)
             });
 }
 
-void bind_create_operations_function(py::class_<PyOpBuilder>& clss)
+void bindCreateOperationsFunction(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -511,7 +501,7 @@ void bind_create_operations_function(py::class_<PyOpBuilder>& clss)
             "name"_a, "args"_a = py::none(), "ret_types"_a = py::none());
 }
 
-void bind_create_signed_constants(py::class_<PyOpBuilder>& clss)
+void bindCreateSignedConstants(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -540,7 +530,7 @@ void bind_create_signed_constants(py::class_<PyOpBuilder>& clss)
         });
 }
 
-void bind_create_unsigned_constants(py::class_<PyOpBuilder>& clss)
+void bindCreateUnsignedConstants(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -565,11 +555,11 @@ void bind_create_unsigned_constants(py::class_<PyOpBuilder>& clss)
             })
         .def("get_ui64", [](PyOpBuilder& self, uint64_t v) -> Value {
             auto type = self->getIntegerType(64U, false);
-            return self.create<emitc::ConstantOp>(type, self->getIntegerAttr(type, v));
+            return self.create<emitc::ConstantOp>(type, self->getIntegerAttr(type, static_cast<int64_t>(v)));
         });
 }
 
-void bind_create_float_constants(py::class_<PyOpBuilder>& clss)
+void bindCreateFloatConstants(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -589,7 +579,7 @@ void bind_create_float_constants(py::class_<PyOpBuilder>& clss)
         });
 }
 
-void bind_create_airth_basic_operations(py::class_<PyOpBuilder>& clss)
+void bindCreateAirthBasicOperations(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -620,7 +610,7 @@ void bind_create_airth_basic_operations(py::class_<PyOpBuilder>& clss)
         });
 }
 
-void bind_create_airth_special_operations(py::class_<PyOpBuilder>& clss)
+void bindCreateAirthSpecialOperations(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -644,7 +634,7 @@ void bind_create_airth_special_operations(py::class_<PyOpBuilder>& clss)
         });
 }
 
-void bind_create_airth_comparison_operations(py::class_<PyOpBuilder>& clss)
+void bindCreateAirthComparisonOperations(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -668,7 +658,7 @@ void bind_create_airth_comparison_operations(py::class_<PyOpBuilder>& clss)
         });
 }
 
-void bind_create_airth_extended_operations(py::class_<PyOpBuilder>& clss)
+void bindCreateAirthExtendedOperations(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -701,7 +691,7 @@ void bind_create_airth_extended_operations(py::class_<PyOpBuilder>& clss)
         });
 }
 
-void bind_create_scf_operations(py::class_<PyOpBuilder>& clss)
+void bindCreateScfOperations(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -737,7 +727,7 @@ void bind_create_scf_operations(py::class_<PyOpBuilder>& clss)
             "condition"_a, "args"_a = py::none());
 }
 
-void bind_create_memref_operations(py::class_<PyOpBuilder>& clss)
+void bindCreateMemrefOperations(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -770,7 +760,7 @@ void bind_create_memref_operations(py::class_<PyOpBuilder>& clss)
             "src"_a, "base"_a, "indices"_a);
 }
 
-void bind_create_vector_operations(py::class_<PyOpBuilder>& clss)
+void bindCreateVectorOperations(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -788,7 +778,7 @@ void bind_create_vector_operations(py::class_<PyOpBuilder>& clss)
             "value"_a, "base"_a, "indices"_a = py::none());
 }
 
-void bind_create_emitc_operations(py::class_<PyOpBuilder>& clss)
+void bindCreateEmitcOperations(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -811,7 +801,7 @@ void bind_create_emitc_operations(py::class_<PyOpBuilder>& clss)
         });
 }
 
-void bind_create_emitasc_operations(py::class_<PyOpBuilder>& clss)
+void bindCreateEmitascOperations(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -844,7 +834,7 @@ void bind_create_emitasc_operations(py::class_<PyOpBuilder>& clss)
             "value"_a, "args"_a = py::none());
 }
 
-void bind_create_asc_pipe_operations(py::class_<PyOpBuilder>& clss)
+void bindCreateAscPipeOperations(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -871,13 +861,13 @@ void bind_create_asc_pipe_operations(py::class_<PyOpBuilder>& clss)
         .def(
             "create_asc_SetFlagOp",
             [](PyOpBuilder& self, uint8_t event, Value eventId) {
-                auto eventAttr = get_hard_event(event, "SetFlagOp");
+                auto eventAttr = getHardEvent(event, "SetFlagOp");
                 self.create<ascendc::SetFlagOp>(eventAttr, eventId);
             })
         .def(
             "create_asc_WaitFlagOp",
             [](PyOpBuilder& self, uint8_t event, Value eventId) {
-                auto eventAttr = get_hard_event(event, "WaitFlagOp");
+                auto eventAttr = getHardEvent(event, "WaitFlagOp");
                 self.create<ascendc::WaitFlagOp>(eventAttr, eventId);
             })
         .def(
@@ -900,9 +890,9 @@ void bind_create_asc_pipe_operations(py::class_<PyOpBuilder>& clss)
             })
         .def(
             "create_asc_TPipeAllocEventIDOp",
-            [](PyOpBuilder& self, const Type& event_id, const Value& pipe, uint8_t event) -> Value {
-                auto eventAttr = get_hard_event(event, "TPipeAllocEventIDOp");
-                return self.create<ascendc::TPipeAllocEventIDOp>(event_id, pipe, eventAttr);
+            [](PyOpBuilder& self, const Type& eventId, const Value& pipe, uint8_t event) -> Value {
+                auto eventAttr = getHardEvent(event, "TPipeAllocEventIDOp");
+                return self.create<ascendc::TPipeAllocEventIDOp>(eventId, pipe, eventAttr);
             })
         .def("create_asc_DataSyncBarrierOp", [](PyOpBuilder& self, uint8_t memDsbType) {
             auto memDsbAttr = ascendc::symbolizeMemDsbT(memDsbType);
@@ -913,7 +903,7 @@ void bind_create_asc_pipe_operations(py::class_<PyOpBuilder>& clss)
         });
 }
 
-void bind_create_asc_event_operations(py::class_<PyOpBuilder>& clss)
+void bindCreateAscEventOperations(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -921,14 +911,14 @@ void bind_create_asc_event_operations(py::class_<PyOpBuilder>& clss)
     clss.def(
             "create_asc_TPipeReleaseEventIDOp",
             [](PyOpBuilder& self, const Value& pipe, const Value& id, uint8_t event) {
-                auto eventAttr = get_hard_event(event, "TPipeReleaseEventIDOp");
+                auto eventAttr = getHardEvent(event, "TPipeReleaseEventIDOp");
                 self.create<ascendc::TPipeReleaseEventIDOp>(pipe, id, eventAttr);
             })
         .def(
             "create_asc_TPipeFetchEventIDOp",
-            [](PyOpBuilder& self, const Type& event_id, const Value& pipe, uint8_t event) -> Value {
-                auto eventAttr = get_hard_event(event, "TPipeFetchEventIDOp");
-                return self.create<ascendc::TPipeFetchEventIDOp>(event_id, pipe, eventAttr);
+            [](PyOpBuilder& self, const Type& eventId, const Value& pipe, uint8_t event) -> Value {
+                auto eventAttr = getHardEvent(event, "TPipeFetchEventIDOp");
+                return self.create<ascendc::TPipeFetchEventIDOp>(eventId, pipe, eventAttr);
             })
         .def(
             "create_asc_PrintfOp",
@@ -960,7 +950,7 @@ void bind_create_asc_event_operations(py::class_<PyOpBuilder>& clss)
         ;
 }
 
-void bind_create_asc_common_operations(py::class_<PyOpBuilder>& clss)
+void bindCreateAscCommonOperations(py::class_<PyOpBuilder>& clss)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
@@ -1010,35 +1000,41 @@ void bind_create_asc_common_operations(py::class_<PyOpBuilder>& clss)
         "type"_a, "op"_a);
 }
 
-void pyasc_init_ir_builder(py::module& m)
+} // namespace
+
+namespace pybind11 {
+namespace asc {
+
+void initBuilderInIRModule(py::module& m)
 {
     using ret = py::return_value_policy;
     using namespace pybind11::literals;
 
     py::class_<PyOpBuilder> clss(m, "Builder", py::module_local(), py::dynamic_attr());
-    bind_init(clss);
-    bind_locations(clss);
-    bind_modify_insertion_point(clss);
-    bind_get_basic_type(clss);
-    bind_get_special_type(clss);
-    bind_get_attributes(clss);
-    bind_create_operations(clss);
-    bind_create_operations_function(clss);
-    bind_create_signed_constants(clss);
-    bind_create_unsigned_constants(clss);
-    bind_create_float_constants(clss);
-    bind_create_airth_basic_operations(clss);
-    bind_create_airth_special_operations(clss);
-    bind_create_airth_comparison_operations(clss);
-    bind_create_airth_extended_operations(clss);
-    bind_create_scf_operations(clss);
-    bind_create_memref_operations(clss);
-    bind_create_vector_operations(clss);
-    bind_create_emitc_operations(clss);
-    bind_create_emitasc_operations(clss);
-    bind_create_asc_pipe_operations(clss);
-    bind_create_asc_event_operations(clss);
-    bind_create_asc_common_operations(clss);
+    bindInit(clss);
+    bindLocations(clss);
+    bindModifyInsertionPoint(clss);
+    bindGetBasicType(clss);
+    bindGetSpecialType(clss);
+    bindGetAttributes(clss);
+    bindCreateOperations(clss);
+    bindCreateOperationsFunction(clss);
+    bindCreateSignedConstants(clss);
+    bindCreateUnsignedConstants(clss);
+    bindCreateFloatConstants(clss);
+    bindCreateAirthBasicOperations(clss);
+    bindCreateAirthSpecialOperations(clss);
+    bindCreateAirthComparisonOperations(clss);
+    bindCreateAirthExtendedOperations(clss);
+    bindCreateScfOperations(clss);
+    bindCreateMemrefOperations(clss);
+    bindCreateVectorOperations(clss);
+    bindCreateEmitcOperations(clss);
+    bindCreateEmitascOperations(clss);
+    bindCreateAscPipeOperations(clss);
+    bindCreateAscEventOperations(clss);
+    bindCreateAscCommonOperations(clss);
 }
+
 } // namespace asc
 } // namespace pybind11

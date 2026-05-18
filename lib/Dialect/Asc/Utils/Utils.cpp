@@ -44,10 +44,10 @@ bool opPrecedes(Operation* lhs, Operation* rhs, DominanceInfo& di)
 
 void registerInlinerInterfaces(DialectRegistry& registry)
 {
-    registry.addExtension(+[](MLIRContext* ctx, BuiltinDialect* dialect) {
+    registry.addExtension(+[](MLIRContext*, BuiltinDialect* dialect) {
         dialect->addInterface<AllowInline<UnrealizedConversionCastOp>>();
     });
-    registry.addExtension(+[](MLIRContext* ctx, emitc::EmitCDialect* dialect) {
+    registry.addExtension(+[](MLIRContext*, emitc::EmitCDialect* dialect) {
         dialect->addInterface<AllowInline<emitc::CastOp, emitc::ConstantOp>>();
     });
 }

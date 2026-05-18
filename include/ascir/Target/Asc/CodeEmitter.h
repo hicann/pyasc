@@ -161,10 +161,6 @@ private:
 
     LogicalResult emitAscGlobalTensorType(Location loc, Type type, bool emitAsUnsigned);
 
-    LogicalResult emitAscBaseGlobalTensorType(Location loc, Type type, bool emitAsUnsigned);
-
-    LogicalResult emitAscBaseLocalTensorType(Location loc, Type type, bool emitAsUnsigned);
-
     LogicalResult emitAscDataCopyPadExtParamsType(Location loc, Type type, bool emitAsUnsigned);
 
     LogicalResult emitAscLocalTensorType(Location loc, Type type, bool emitAsUnsigned);
@@ -187,17 +183,11 @@ private:
 
     LogicalResult emitIntegerAttr(Location loc, Attribute attr);
 
-    LogicalResult emitDenseFPElementsAttr(Location loc, Attribute attr);
-
-    LogicalResult emitDenseIntElementsAttr(Location loc, Attribute attr);
-
     LogicalResult emitEmitcOpaqueAttr(Location loc, Attribute attr);
 
     LogicalResult emitSymbolRefAttr(Location loc, Attribute attr);
 
     LogicalResult emitTypeAttr(Location loc, Attribute attr);
-
-    LogicalResult emitStringAttr(Location loc, Attribute attr);
 
     void printInt(const APInt& value, bool isUnsigned);
 
