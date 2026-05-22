@@ -256,9 +256,9 @@ pip install pyasc
 
       ```bash
       # 示例：下载ARM架构的LLVM预编译包
-      wget https://cann-ai.obs.cn-north-4.myhuaweicloud.com/llvm/LLVM-19.1.7-aarch64.tar.xz
-      tar -xJf LLVM-19.1.7-aarch64.tar.xz
-      export LLVM_INSTALL_PREFIX=$PWD/LLVM-19.1.7-aarch64
+      wget https://cann-ai.obs.cn-north-4.myhuaweicloud.com/llvm/llvm-19.1.7-aarch64.tar.xz
+      tar -xJf llvm-19.1.7-aarch64.tar.xz
+      export LLVM_INSTALL_PREFIX=$PWD/llvm-19.1.7-aarch64
       # 示例：下载X86架构的LLVM预编译包
       wget https://cann-ai.obs.cn-north-4.myhuaweicloud.com/llvm/llvm-19.1.7-x86_64.tar.xz
       tar -xJf llvm-19.1.7-x86_64.tar.xz
