@@ -151,24 +151,24 @@ print_summary() {
 }
 
 main() {
-    check_and_install_tools
-    setup_compile_flags
-    
     log "[INFO] Checking changed code between $BASE_BRANCH and HEAD"
-    
+
     local cpp_files=$(git diff --name-only "$BASE_BRANCH" HEAD | grep -E '\.cpp$|\.h$')
-    
+
     if [[ -z "$cpp_files" ]]; then
         log "[INFO] No C/C++ files changed"
         print_summary
         exit 0
     fi
-    
+
     log "[INFO] Changed C/C++ files: $cpp_files"
-    
+
+    check_and_install_tools
+    setup_compile_flags
+
     run_clang_format_diff_check
     run_clang_tidy_diff_check
-    
+
     print_summary
     exit $?
 }
