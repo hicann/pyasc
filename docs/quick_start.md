@@ -233,7 +233,7 @@ python3 -m pip install -r requirements-runtime.txt # run-time dependencies
 以下为本开源仓源码编译和样例运行的基础依赖条件：
 
 - python >= 3.9.0, python <= 3.12
-- GCC >= 9.4.0
+- gcc >= 9.4.0 / g++ >= 9.4.0（注意：要求gcc与g++版本一致）
 - GLIBC >= 2.31
 - cmake >= 3.20
 
