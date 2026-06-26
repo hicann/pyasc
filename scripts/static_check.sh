@@ -56,15 +56,15 @@ log() {
 
 check_and_install_tools() {
     log "[INFO] Installing clang tools..."
-    
+
     apt-get update -qq 2>&1 || true
     apt-get install -y clang clang-format clang-tidy clang-tools 2>&1
-    
+
     local tools="clang-format clang-tidy clang-format-diff clang-tidy-diff"
     for tool in $tools; do
         command -v "$tool" &> /dev/null || { log "[ERROR] $tool installation failed"; exit 1; }
     done
-    
+
     log "[INFO] clang tools installed successfully"
 }
 
@@ -74,9 +74,9 @@ check_and_install_tools() {
 
 run_clang_format_diff_check() {
     log "[INFO] Running clang-format-diff check (base: $BASE_BRANCH)..."
-    
+
     local format_output=$(git diff -U0 "$BASE_BRANCH" HEAD | clang-format-diff -p1 2>&1) || true
-    
+
     if [[ -n "$format_output" ]]; then
         FORMAT_WARNING_COUNT=$(echo "$format_output" | grep "^-" | grep -v "^---" | wc -l | xargs)
         log "[FORMAT ISSUE] Found formatting issues in changed lines"
@@ -84,14 +84,15 @@ run_clang_format_diff_check() {
         log "[WARNING] $FORMAT_WARNING_COUNT lines need formatting"
         log "[HINT] Fix: git diff -U0 $BASE_BRANCH HEAD | clang-format-diff -p1 -i"
     fi
+    return 0
 }
 
 run_clang_tidy_diff_check() {
     log "[INFO] Running clang-tidy-diff check (base: $BASE_BRANCH)..."
-    
+
     [[ -n "$COMPILE_DB" ]] && log "[INFO] Using compile_commands.json: $COMPILE_DB"
     [[ -z "$COMPILE_DB" ]] && log "[WARNING] compile_commands.json not found, using manual flags"
-    
+
     local tidy_output=""
     if [[ -n "$COMPILE_DB" ]]; then
         tidy_output=$(git diff -U0 "$BASE_BRANCH" HEAD | clang-tidy-diff -p1 -clang-tidy-binary clang-tidy -path "$(dirname $COMPILE_DB)" 2>&1) || true
@@ -102,7 +103,7 @@ run_clang_tidy_diff_check() {
         done
         tidy_output=$(git diff -U0 "$BASE_BRANCH" HEAD | clang-tidy-diff "${tidy_args[@]}" 2>&1) || true
     fi
-    
+
     if [[ -n "$tidy_output" ]]; then
         set +e
         local filtered_output=$(echo "$tidy_output" | awk '
@@ -114,20 +115,21 @@ run_clang_tidy_diff_check() {
         /^[[:space:]]/ && in_diagnostic { print; next }
         { in_diagnostic = 0 }')
         set -e
-        
+
         if [[ -n "$filtered_output" ]]; then
             TIDY_ERROR_COUNT=$(echo "$filtered_output" | grep -c "error:" | xargs || echo 0)
             TIDY_WARNING_COUNT=$(echo "$filtered_output" | grep -c "warning:" | xargs || echo 0)
-            
+
             log "[TIDY ISSUE] Found static analysis issues"
             echo "$filtered_output"
-            
+
             log "[HINT] Reproduce: git diff -U0 $BASE_BRANCH HEAD | clang-tidy-diff -p1 -clang-tidy-binary clang-tidy -extra-arg-before='-x' -extra-arg-before='c++' ${MANUAL_COMPILE_FLAGS//-I/-extra-arg-before=-I}"
         fi
     fi
-    
+
     [[ "$TIDY_ERROR_COUNT" -gt 0 ]] && log "[ERROR] $TIDY_ERROR_COUNT errors"
     [[ "$TIDY_WARNING_COUNT" -gt 0 ]] && log "[WARNING] $TIDY_WARNING_COUNT warnings"
+    return 0
 }
 
 # ============================================================================
@@ -142,7 +144,7 @@ print_summary() {
     echo "clang-format-diff: $FORMAT_WARNING_COUNT lines need formatting"
     echo "clang-tidy-diff:   $TIDY_ERROR_COUNT error(s), $TIDY_WARNING_COUNT warning(s)"
     echo "----------------------------------------------------------------"
-    
+
     if [[ $FORMAT_WARNING_COUNT -gt 0 || $TIDY_ERROR_COUNT -gt 0 || $TIDY_WARNING_COUNT -gt 0 ]]; then
         echo "Status: FAILED"
         return 1
