@@ -17,6 +17,15 @@ PROJECT_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 COMPILE_DB=$(find "./" -name "compile_commands.json" -type f 2>/dev/null | head -n 1)
 BASE_BRANCH="origin/master"
 
+# clang-tidy diagnostic ignore list.
+# Format: <path-suffix>|<symbol>|<check-name>
+# A diagnostic block is dropped when its source path ends with <path-suffix>,
+# the message references <symbol> (in single quotes), and the check name matches.
+TIDY_IGNORE_LIST=(
+    # extern "C" ABI entry, must keep PascalCase for the Python runtime to link.
+    "python/asc/lib/runtime/print_utils.cpp|PrintWorkSpace|readability-identifier-naming"
+)
+
 # Counters
 FORMAT_WARNING_COUNT=0
 TIDY_ERROR_COUNT=0
@@ -105,15 +114,77 @@ run_clang_tidy_diff_check() {
     fi
 
     if [[ -n "$tidy_output" ]]; then
+        local manual_flags_flag=0
+        [[ -z "$COMPILE_DB" ]] && manual_flags_flag=1
+        # Pass the ignore list to awk via NUL-separated -v? awk -v can't take arrays;
+        # serialize the list into one variable separated by RS-safe newlines.
+        local ignore_blob
+        ignore_blob=$(printf '%s\n' "${TIDY_IGNORE_LIST[@]}")
+
         set +e
-        local filtered_output=$(echo "$tidy_output" | awk '
-        BEGIN { in_diagnostic = 0 }
-        /^[^ ]+:[0-9]+:[0-9]+:.*(warning:|error:|note:)/ {
-            if ($0 ~ /mlir\// || $0 ~ /llvm\// || $0 ~ /\.inc/) { in_diagnostic = 0; next }
-            in_diagnostic = 1; print; next
+        local filtered_output=$(echo "$tidy_output" | awk -v manual_flags="$manual_flags_flag" -v ignore_list="$ignore_blob" '
+        function flush_block() {
+            if (!drop && block_len > 0) {
+                for (i = 0; i < block_len; i++) print block[i]
+            }
+            block_len = 0
+            drop = 0
+            check_name = ""
+            block_path = ""
+            block_symbol = ""
         }
-        /^[[:space:]]/ && in_diagnostic { print; next }
-        { in_diagnostic = 0 }')
+        function should_drop_path(p) {
+            return (p ~ /mlir\// || p ~ /llvm\// || p ~ /\.inc/)
+        }
+        function should_drop_clang_diagnostic(c) {
+            return (manual_flags == 1 && c ~ /^clang-diagnostic-/)
+        }
+        function should_drop_whitelisted(p, sym, c,    n, i, parts, suf, wsym, wcheck) {
+            if (ignore_list == "") return 0
+            n = split(ignore_list, lines, "\n")
+            for (i = 1; i <= n; i++) {
+                if (lines[i] == "") continue
+                split(lines[i], parts, "|")
+                suf = parts[1]
+                wsym = parts[2]
+                wcheck = parts[3]
+                if (suf == "" || wsym == "" || wcheck == "") continue
+                if (index(p, suf) == 0) continue
+                if (sym != wsym) continue
+                if (c != wcheck) continue
+                return 1
+            }
+            return 0
+        }
+        BEGIN { block_len = 0; drop = 0 }
+        /^[^ ]+:[0-9]+:[0-9]+:.*(warning:|error:|note:)/ {
+            flush_block()
+            block_path = $0
+            sub(/:[0-9]+:[0-9]+:.*/, "", block_path)
+            check_name = ""
+            block_symbol = ""
+            if (match($0, /\[[a-zA-Z0-9_.-]+\]$/)) {
+                check_name = substr($0, RSTART + 1, RLENGTH - 2)
+            }
+            if (match($0, /'\''[^'\'']+'\''/)) {
+                block_symbol = substr($0, RSTART + 1, RLENGTH - 2)
+            }
+            if (should_drop_path(block_path)) {
+                drop = 1
+            } else if (should_drop_clang_diagnostic(check_name)) {
+                drop = 1
+            } else if (should_drop_whitelisted(block_path, block_symbol, check_name)) {
+                drop = 1
+            }
+            block[block_len++] = $0
+            next
+        }
+        /^[[:space:]]/ {
+            if (block_len > 0) { block[block_len++] = $0; next }
+            next
+        }
+        { flush_block() }
+        END { flush_block() }')
         set -e
 
         if [[ -n "$filtered_output" ]]; then
